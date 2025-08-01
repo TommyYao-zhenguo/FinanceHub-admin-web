@@ -1,12 +1,8 @@
 // 用户信息接口
-export interface UserInfo {
+export interface AdminUserInfo {
   id: string;
-  userId: string;
+  userNo: string;
   username: string;
-  email: string;
-  mobile?: string;
-  companyId: string;
-  companyName: string;
   roleName: string;
   roleCode: string;
   status: "ACTIVE" | "INACTIVE";
@@ -30,8 +26,6 @@ export interface UserRoleOption {
 // 创建用户请求接口
 export interface CreateUserRequest {
   username: string;
-  email: string;
-  mobile?: string;
   password: string;
   roleCode: UserRole;
 }
@@ -47,14 +41,13 @@ export interface UserQueryParams {
   page?: number;
   size?: number;
   username?: string;
-  companyId?: string;
   roleCode?: UserRole;
   status?: "ACTIVE" | "INACTIVE";
 }
 
 // 用户列表响应接口
 export interface UserListResponse {
-  content: UserInfo[];
+  content: AdminUserInfo[];
   totalElements: number;
   totalPages: number;
   size: number;
@@ -62,9 +55,9 @@ export interface UserListResponse {
 }
 
 // 用户上下文类型
-export interface UserContextType {
-  userInfo: UserInfo | null;
-  setUserInfo: (userInfo: UserInfo | null) => void;
+export interface AdminUserContextType {
+  userInfo: AdminUserInfo | null;
+  setUserInfo: (userInfo: AdminUserInfo | null) => void;
   fetchUserInfo: () => Promise<void>;
   logout: () => Promise<void>;
 }

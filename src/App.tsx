@@ -24,7 +24,7 @@ import { SA_TOKEN_CONFIG } from "./config/api";
 const routeMap = {
   "/": "dashboard",
   "/dashboard": "dashboard",
-  "/users": "users-management",
+  "/users": "users",  // 修改为与侧边栏菜单项ID匹配
   "/customer-service": "customer-service",
   "/reports": "reports",
   "/client/company-management": "company-management",

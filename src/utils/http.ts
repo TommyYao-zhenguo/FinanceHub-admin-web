@@ -52,7 +52,6 @@ class HttpClient {
       mergedHeaders["token"] = `${SA_TOKEN_CONFIG.tokenPrefix} ${token}`;
     }
 
-    console.log("请求头:", mergedHeaders);
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeout);
 
@@ -65,9 +64,6 @@ class HttpClient {
       });
 
       clearTimeout(timeoutId);
-
-      console.log("HTTP响应状态:", response.status, response.statusText);
-      console.log("响应头:", Object.fromEntries(response.headers.entries()));
 
       if (response.ok) {
         // 检查响应是否有内容

@@ -1,32 +1,29 @@
 import React, { useState, useEffect } from "react";
 import { Users, Plus, Edit, Trash2, Search, Eye, EyeOff } from "lucide-react";
 import toast from "react-hot-toast";
-import { UserService } from "../utils/userService";
-import { CompanyService } from "../utils/companyService";
+import { AdminUserService } from "../utils/adminUserService";
 import {
-  UserInfo,
+  AdminUserInfo,
   CreateUserRequest,
   UpdateUserRequest,
   UserQueryParams,
   UserRole,
   UserRoleOption,
-} from "../types/user";
-import { Company } from "../types/company";
+} from "../types/adminUser";
 import { useUserContext } from "../contexts/UserContext"; // 添加用户上下文
 
 export default function AdminUserManagementView() {
   const { userInfo } = useUserContext(); // 获取当前用户信息
-  const [users, setUsers] = useState<UserInfo[]>([]);
-  const [companies, setCompanies] = useState<Company[]>([]);
+  const [users, setUsers] = useState<AdminUserInfo[]>([]);
   const [loading, setLoading] = useState(false);
   const [formLoading, setFormLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  const [editingUser, setEditingUser] = useState<UserInfo | null>(null);
+  const [editingUser, setEditingUser] = useState<AdminUserInfo | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<{
     show: boolean;
-    user: UserInfo | null;
+    user: AdminUserInfo | null;
   }>({ show: false, user: null });
 
   // 检查是否为超级管理员
@@ -37,7 +34,6 @@ export default function AdminUserManagementView() {
     page: 1,
     size: 10,
     username: "",
-    companyId: isSuperAdmin ? "" : userInfo?.companyId || "", // 非超级管理员默认使用自己的公司ID
     roleCode: undefined,
     status: undefined,
   });
@@ -49,10 +45,7 @@ export default function AdminUserManagementView() {
   // 表单数据
   const [formData, setFormData] = useState<CreateUserRequest>({
     username: "",
-    email: "",
-    mobile: "",
     password: "",
-    companyId: isSuperAdmin ? "" : userInfo?.companyId || "", // 非超级管理员默认使用自己的公司ID
     roleCode: UserRole.EMPLOYEE,
   });
 
@@ -76,7 +69,7 @@ export default function AdminUserManagementView() {
       if (resetPage) {
         setSearchParams(params);
       }
-      const response = await UserService.getUserList(params);
+      const response = await AdminUserService.getUserList(params);
       setUsers(response.records);
       setTotalElements(response.totalElements);
       setTotalPages(response.totalPages);
@@ -88,32 +81,13 @@ export default function AdminUserManagementView() {
     }
   };
 
-  // 加载公司列表 - 只有超级管理员才加载
-  const loadCompanies = async () => {
-    if (!isSuperAdmin) {
-      return; // 非超级管理员不加载企业列表
-    }
-    try {
-      const response = await CompanyService.getCompanyList({ size: 1000 });
-      console.log("加载公司列表成功:", response);
-      setCompanies(response.records);
-    } catch (error) {
-      console.error("加载公司列表失败:", error);
-      toast.error("加载公司列表失败");
-    }
-  };
-
   // 用户列表依赖搜索参数
   useEffect(() => {
     loadUsers();
   }, [searchParams]);
 
-  // 公司列表只在超级管理员时加载一次
-  useEffect(() => {
-    if (isSuperAdmin) {
-      loadCompanies();
-    }
-  }, [isSuperAdmin]);
+  //
+  useEffect(() => {}, [isSuperAdmin]);
 
   // 搜索处理
   const handleSearch = () => {
@@ -130,24 +104,18 @@ export default function AdminUserManagementView() {
     setEditingUser(null);
     setFormData({
       username: "",
-      email: "",
-      mobile: "",
       password: "",
-      companyId: isSuperAdmin ? "" : userInfo?.companyId || "", // 非超级管理员默认使用自己的公司ID
       roleCode: UserRole.EMPLOYEE,
     });
     setShowModal(true);
   };
 
   // 打开编辑用户模态框
-  const handleEdit = (user: UserInfo) => {
+  const handleEdit = (user: AdminUserInfo) => {
     setEditingUser(user);
     setFormData({
       username: user.username,
-      email: user.email,
-      mobile: user.mobile || "",
       password: "",
-      companyId: user.companyId,
       roleCode: user.roleCode as UserRole,
     });
     setShowModal(true);
@@ -162,18 +130,15 @@ export default function AdminUserManagementView() {
         const updateData: UpdateUserRequest = {
           id: editingUser.id,
           username: formData.username,
-          email: formData.email,
-          mobile: formData.mobile,
-          companyId: formData.companyId,
           roleCode: formData.roleCode,
         };
         if (formData.password) {
           updateData.password = formData.password;
         }
-        await UserService.updateUser(updateData);
+        await AdminUserService.updateUser(updateData);
         toast.success("用户更新成功");
       } else {
-        await UserService.createUser(formData);
+        await AdminUserService.createUser(formData);
         toast.success("用户创建成功");
       }
       setShowModal(false);
@@ -187,7 +152,7 @@ export default function AdminUserManagementView() {
   };
 
   // 删除用户
-  const handleDelete = (user: UserInfo) => {
+  const handleDelete = (user: AdminUserInfo) => {
     setDeleteConfirm({ show: true, user });
   };
 
@@ -195,7 +160,7 @@ export default function AdminUserManagementView() {
     if (!deleteConfirm.user) return;
     setDeleteLoading(true);
     try {
-      await UserService.deleteUser(deleteConfirm.user.userNo);
+      await AdminUserService.deleteUser(deleteConfirm.user.userNo);
       toast.success("用户删除成功");
       setDeleteConfirm({ show: false, user: null });
       loadUsers(true);
@@ -225,7 +190,11 @@ export default function AdminUserManagementView() {
       </div>
 
       {/* 搜索栏 */}
-      <div className={`grid grid-cols-1 md:grid-cols-${isSuperAdmin ? '4' : '3'} gap-4 mb-6`}>
+      <div
+        className={`grid grid-cols-1 md:grid-cols-${
+          isSuperAdmin ? "4" : "3"
+        } gap-4 mb-6`}
+      >
         <div>
           <input
             type="text"
@@ -237,25 +206,6 @@ export default function AdminUserManagementView() {
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
           />
         </div>
-        {/* 只有超级管理员才显示企业下拉框 */}
-        {isSuperAdmin && (
-          <div>
-            <select
-              value={searchParams.companyId}
-              onChange={(e) =>
-                setSearchParams({ ...searchParams, companyId: e.target.value })
-              }
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-            >
-              <option value="">所有公司</option>
-              {companies.map((company) => (
-                <option key={company.id} value={company.id}>
-                  {company.companyName}
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
         <div>
           <select
             value={searchParams.roleCode || ""}
@@ -302,9 +252,6 @@ export default function AdminUserManagementView() {
                     用户信息
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    所属公司
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     角色
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -326,19 +273,9 @@ export default function AdminUserManagementView() {
                         <div className="text-sm font-medium text-gray-900">
                           {user.username}
                         </div>
-                        <div className="text-sm text-gray-500">
-                          {user.email}
-                        </div>
-                        {user.mobile && (
-                          <div className="text-sm text-gray-500">
-                            {user.mobile}
-                          </div>
-                        )}
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {user.companyName}
-                    </td>
+
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span
                         className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
@@ -434,33 +371,7 @@ export default function AdminUserManagementView() {
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  邮箱 *
-                </label>
-                <input
-                  type="email"
-                  required
-                  value={formData.email}
-                  onChange={(e) =>
-                    setFormData({ ...formData, email: e.target.value })
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  手机号
-                </label>
-                <input
-                  type="tel"
-                  value={formData.mobile}
-                  onChange={(e) =>
-                    setFormData({ ...formData, mobile: e.target.value })
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                />
-              </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   密码 {editingUser ? "(留空则不修改)" : "*"}
@@ -488,46 +399,7 @@ export default function AdminUserManagementView() {
                   </button>
                 </div>
               </div>
-              
-              {/* 只有超级管理员才显示企业选择下拉框 */}
-              {isSuperAdmin && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    所属公司 *
-                  </label>
-                  <select
-                    required
-                    value={formData.companyId}
-                    onChange={(e) =>
-                      setFormData({ ...formData, companyId: e.target.value })
-                    }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  >
-                    <option value="">请选择公司</option>
-                    {companies.map((company) => (
-                      <option key={company.id} value={company.id}>
-                        {company.companyName}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
-              
-              {/* ADMIN和普通员工显示当前公司信息（只读） */}
-              {!isSuperAdmin && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    所属公司
-                  </label>
-                  <input
-                    type="text"
-                    value={userInfo?.companyName || ""}
-                    disabled
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-600"
-                  />
-                </div>
-              )}
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   用户角色 *
