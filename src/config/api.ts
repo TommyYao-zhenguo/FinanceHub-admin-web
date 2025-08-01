@@ -1,0 +1,80 @@
+// API配置文件
+interface ApiConfig {
+  baseUrl: string;
+  port?: number;
+  timeout: number;
+}
+
+// sa-token 配置
+export const SA_TOKEN_CONFIG = {
+  tokenName: "token",
+  tokenPrefix: "Bearer", // token前缀
+};
+
+// 根据环境变量配置API地址
+const getApiConfig = (): ApiConfig => {
+  const baseUrl = import.meta.env.VITE_API_BASE_URL;
+
+  const timeout = import.meta.env.VITE_API_TIMEOUT
+    ? parseInt(import.meta.env.VITE_API_TIMEOUT)
+    : 10000;
+
+  return {
+    baseUrl,
+    timeout,
+  };
+};
+
+const apiConfig = getApiConfig();
+
+// 构建完整的API基础URL
+export const API_BASE_URL = apiConfig.baseUrl;
+
+// API端点配置
+export const API_ENDPOINTS = {
+  // 用户相关接口
+  USER: {
+    LOGIN_EMAIL: "/api/v1/user/login/email",
+    LOGIN: "/api/v1/user/login/account",
+    LOGOUT: "/api/v1/user/logout",
+    INFO: "/api/v1/user/info",
+    LIST: "/api/v1/user/list",
+    CREATE: "/api/v1/user/create",
+    UPDATE: "/api/v1/user/update",
+    DELETE: "/api/v1/user/delete",
+    CHANGE_PASSWORD: "/api/v1/user/changePassword",
+  },
+
+  // 公司管理相关接口
+  COMPANY: {
+    LIST: "/api/v1/company/list",
+    CREATE: "/api/v1/company/create",
+    UPDATE: "/api/v1/company/update",
+    DELETE: "/api/v1/company/delete",
+    DETAIL: "/api/v1/company/detail",
+  },
+};
+
+// 请求配置
+export const REQUEST_CONFIG = {
+  timeout: apiConfig.timeout,
+  headers: {
+    "Content-Type": "application/json",
+  },
+};
+
+// 构建完整的API URL
+export const buildApiUrl = (endpoint: string): string => {
+  return `${API_BASE_URL}${endpoint}`;
+};
+
+// 导出配置信息（用于调试）
+export const getConfigInfo = () => {
+  return {
+    baseUrl: apiConfig.baseUrl,
+    port: apiConfig.port,
+    fullUrl: API_BASE_URL,
+    timeout: apiConfig.timeout,
+    isDev: import.meta.env.DEV,
+  };
+};

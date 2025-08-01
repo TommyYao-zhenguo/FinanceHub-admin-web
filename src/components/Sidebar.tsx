@@ -1,0 +1,229 @@
+import React, { useState } from "react";
+import {
+  Home,
+  Users,
+  Receipt,
+  FileText,
+  Settings,
+  HelpCircle,
+  ArrowUpRight,
+  ArrowDownLeft,
+  PieChart,
+  Calendar,
+  Shield,
+  Building,
+  CreditCard,
+  ExternalLink,
+  ChevronDown,
+  ChevronRight,
+  UserCog,
+  Building2,
+} from "lucide-react";
+import { useUserContext } from "../contexts/UserContext";
+
+interface SidebarProps {
+  isOpen: boolean;
+  activeTab: string;
+  onTabChange: (tab: string) => void;
+}
+
+const menuItems = [
+  { id: "dashboard", label: "总览", icon: Home },
+  { id: "accounts", label: "人员工资", icon: Users },
+  { id: "investments", label: "税费", icon: Receipt },
+  { id: "transactions", label: "社会保险费", icon: Shield },
+  { id: "documents", label: "住房公积金", icon: Building },
+  { id: "reports", label: "财务报表", icon: PieChart },
+  { id: "invoice", label: "开票", icon: CreditCard },
+  { id: "customer-service", label: "客服中心", icon: HelpCircle },
+  {
+    id: "settlement-treasure",
+    label: "结算宝",
+    icon: ExternalLink,
+    isExternal: true,
+    url: "https://tommy.wecheer-eco.com",
+  },
+];
+
+const bottomItems = [
+  { id: "settings", label: "设置", icon: Settings },
+  { id: "support", label: "帮助支持", icon: HelpCircle },
+];
+
+export default function Sidebar({
+  isOpen,
+  activeTab,
+  onTabChange,
+}: SidebarProps) {
+  const [isSystemMenuOpen, setIsSystemMenuOpen] = useState(false);
+  const { userInfo } = useUserContext();
+
+  const handleItemClick = (item: any) => {
+    if (item.isExternal && item.url) {
+      window.open(item.url, "_blank");
+    } else {
+      onTabChange(item.id);
+    }
+  };
+
+  // 检查用户是否有权限查看系统管理菜单
+  const hasSystemManagementAccess = () => {
+    if (!userInfo?.roleCode) return false;
+    return userInfo.roleCode === "SUPER_ADMIN" || userInfo.roleCode === "ADMIN";
+  };
+
+  // 检查用户是否有权限查看公司管理
+  const hasCompanyManagementAccess = () => {
+    if (!userInfo?.roleCode) return false;
+    return userInfo.roleCode === "SUPER_ADMIN";
+  };
+
+  // 系统管理子菜单项
+  const getSystemMenuItems = () => {
+    const items = [];
+
+    // SUPER_ADMIN 可以看到公司管理
+    if (hasCompanyManagementAccess()) {
+      items.push({
+        id: "company-management",
+        label: "公司管理",
+        icon: Building2,
+      });
+    }
+
+    // SUPER_ADMIN 和 ADMIN 都可以看到权限管理
+    if (hasSystemManagementAccess()) {
+      items.push({
+        id: "user-management",
+        label: "用户管理",
+        icon: UserCog,
+      });
+    }
+
+    return items;
+  };
+
+  const systemMenuItems = getSystemMenuItems();
+  const showSystemMenu = systemMenuItems.length > 0;
+
+  return (
+    <>
+      {/* Mobile overlay */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-20 lg:hidden"
+          onClick={() => onTabChange(activeTab)}
+        />
+      )}
+
+      {/* Sidebar */}
+      <aside
+        className={`
+        fixed lg:static inset-y-0 left-0 z-20
+        w-64 bg-gradient-to-b from-gray-800 to-gray-900 text-white transform transition-transform duration-300 ease-in-out flex-shrink-0
+        ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
+      `}
+      >
+        <div className="h-full px-4 py-6 overflow-y-auto">
+          <div className="space-y-2">
+            {/* 常规菜单项 */}
+            {menuItems.map((item) => {
+              const Icon = item.icon;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => handleItemClick(item)}
+                  className={`
+                    w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-colors
+                    ${
+                      activeTab === item.id
+                        ? "bg-orange-600 text-white shadow-lg"
+                        : "text-gray-300 hover:text-white hover:bg-gray-700"
+                    }
+                  `}
+                >
+                  <Icon className="h-5 w-5 flex-shrink-0" />
+                  <span className="font-medium">{item.label}</span>
+                </button>
+              );
+            })}
+
+            {/* 系统管理菜单 */}
+            {showSystemMenu && (
+              <div className="space-y-1">
+                {/* 系统管理主菜单 */}
+                <button
+                  onClick={() => setIsSystemMenuOpen(!isSystemMenuOpen)}
+                  className="w-full flex items-center justify-between px-4 py-3 rounded-lg text-left transition-colors text-gray-300 hover:text-white hover:bg-gray-700"
+                >
+                  <div className="flex items-center space-x-3">
+                    <Settings className="h-5 w-5 flex-shrink-0" />
+                    <span className="font-medium">系统管理</span>
+                  </div>
+                  {isSystemMenuOpen ? (
+                    <ChevronDown className="h-4 w-4" />
+                  ) : (
+                    <ChevronRight className="h-4 w-4" />
+                  )}
+                </button>
+
+                {/* 系统管理子菜单 */}
+                {isSystemMenuOpen && (
+                  <div className="ml-4 space-y-1">
+                    {systemMenuItems.map((item) => {
+                      const Icon = item.icon;
+                      return (
+                        <button
+                          key={item.id}
+                          onClick={() => handleItemClick(item)}
+                          className={`
+                            w-full flex items-center space-x-3 px-4 py-2 rounded-lg text-left transition-colors
+                            ${
+                              activeTab === item.id
+                                ? "bg-orange-600 text-white shadow-lg"
+                                : "text-gray-400 hover:text-white hover:bg-gray-700"
+                            }
+                          `}
+                        >
+                          <Icon className="h-4 w-4 flex-shrink-0" />
+                          <span className="text-sm font-medium">
+                            {item.label}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* 分隔线 */}
+            <div className="border-t border-gray-700 my-4"></div>
+
+            {/* 底部菜单项：设置、帮助支持 */}
+            {bottomItems.map((item) => {
+              const Icon = item.icon;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => onTabChange(item.id)}
+                  className={`
+                    w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-colors
+                    ${
+                      activeTab === item.id
+                        ? "bg-orange-600 text-white shadow-lg"
+                        : "text-gray-300 hover:text-white hover:bg-gray-700"
+                    }
+                  `}
+                >
+                  <Icon className="h-5 w-5 flex-shrink-0" />
+                  <span className="font-medium">{item.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </aside>
+    </>
+  );
+}
