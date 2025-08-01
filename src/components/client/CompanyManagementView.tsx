@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Building2, Plus, Edit, Trash2, Search, X } from "lucide-react";
-import { CompanyService } from "../utils/companyService";
-import { Company, CompanyQueryParams } from "../types/company";
-import { useAlert } from "../hooks/useAlert";
+import { CompanyService } from "../../utils/companyService";
+import { Company, CompanyQueryParams } from "../../types/company";
+import { useAlert } from "../../hooks/useAlert";
 
 import toast from "react-hot-toast";
 

@@ -35,14 +35,14 @@ export const API_ENDPOINTS = {
   // 用户相关接口
   USER: {
     LOGIN_EMAIL: "/api/v1/user/login/email",
-    LOGIN: "/api/v1/user/login/account",
-    LOGOUT: "/api/v1/user/logout",
-    INFO: "/api/v1/user/info",
-    LIST: "/api/v1/user/list",
-    CREATE: "/api/v1/user/create",
-    UPDATE: "/api/v1/user/update",
-    DELETE: "/api/v1/user/delete",
-    CHANGE_PASSWORD: "/api/v1/user/changePassword",
+    LOGIN: "/api/v1/admin/user/login/account",
+    LOGOUT: "/api/v1/admin/user/logout",
+    INFO: "/api/v1/admin/user/info",
+    LIST: "/api/v1/admin/user/list",
+    CREATE: "/api/v1/admin/user/create",
+    UPDATE: "/api/v1/admin/user/update",
+    DELETE: "/api/v1/admin/user/delete",
+    CHANGE_PASSWORD: "/api/v1/admin/user/changePassword",
   },
 
   // 公司管理相关接口

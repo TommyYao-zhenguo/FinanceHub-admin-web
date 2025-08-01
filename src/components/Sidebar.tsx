@@ -1,18 +1,8 @@
 import React, { useState } from "react";
 import {
-  Home,
-  Users,
-  Receipt,
-  FileText,
   Settings,
   HelpCircle,
-  ArrowUpRight,
-  ArrowDownLeft,
-  PieChart,
-  Calendar,
-  Shield,
-  Building,
-  CreditCard,
+  Users,
   ExternalLink,
   ChevronDown,
   ChevronRight,
@@ -28,13 +18,7 @@ interface SidebarProps {
 }
 
 const menuItems = [
-  { id: "dashboard", label: "总览", icon: Home },
-  { id: "accounts", label: "人员工资", icon: Users },
-  { id: "investments", label: "税费", icon: Receipt },
-  { id: "transactions", label: "社会保险费", icon: Shield },
-  { id: "documents", label: "住房公积金", icon: Building },
-  { id: "reports", label: "财务报表", icon: PieChart },
-  { id: "invoice", label: "开票", icon: CreditCard },
+  { id: "users", label: "用户管理", icon: Users },
   { id: "customer-service", label: "客服中心", icon: HelpCircle },
   {
     id: "settlement-treasure",
@@ -158,7 +142,7 @@ export default function Sidebar({
                 >
                   <div className="flex items-center space-x-3">
                     <Settings className="h-5 w-5 flex-shrink-0" />
-                    <span className="font-medium">系统管理</span>
+                    <span className="font-medium">客户管理</span>
                   </div>
                   {isSystemMenuOpen ? (
                     <ChevronDown className="h-4 w-4" />

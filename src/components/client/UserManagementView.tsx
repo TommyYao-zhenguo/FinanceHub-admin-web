@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Users, Plus, Edit, Trash2, Search, Eye, EyeOff } from "lucide-react";
 import toast from "react-hot-toast";
-import { UserService } from "../utils/userService";
-import { CompanyService } from "../utils/companyService";
+import { UserService } from "../../utils/userService";
+import { CompanyService } from "../../utils/companyService";
 import {
   UserInfo,
   CreateUserRequest,
@@ -10,9 +10,9 @@ import {
   UserQueryParams,
   UserRole,
   UserRoleOption,
-} from "../types/user";
-import { Company } from "../types/company";
-import { useUserContext } from "../contexts/UserContext"; // 添加用户上下文
+} from "../../types/user";
+import { Company } from "../../types/company";
+import { useUserContext } from "../../contexts/UserContext"; // 添加用户上下文
 
 export default function UserManagementView() {
   const { userInfo } = useUserContext(); // 获取当前用户信息

@@ -12,8 +12,11 @@ import Header from "./components/Header";
 import Sidebar from "./components/Sidebar";
 import LoginPage from "./components/LoginPage";
 
-import CompanyManagementView from "./components/CompanyManagementView";
-import UserManagementView from "./components/UserManagementView";
+import CompanyManagementView from "./components/client/CompanyManagementView";
+import UserManagementView from "./components/client/UserManagementView";
+import AdminUserManagementView from "./components/AdminUserManagementView";
+import CustomerServiceView from "./components/CustomerServiceView";
+
 import { UserProvider, useUserContext } from "./contexts/UserContext";
 import { SA_TOKEN_CONFIG } from "./config/api";
 
@@ -21,24 +24,24 @@ import { SA_TOKEN_CONFIG } from "./config/api";
 const routeMap = {
   "/": "dashboard",
   "/dashboard": "dashboard",
-  "/accounts": "accounts",
-  "/investments": "investments",
-  "/transactions": "transactions",
-  "/documents": "documents",
+  "/users": "users-management",
+  "/customer-service": "customer-service",
   "/reports": "reports",
-  "/company-management": "company-management",
-  "/user-management": "user-management",
+  "/client/company-management": "company-management",
+  "/client/user-management": "user-management",
   "/settings": "settings",
   "/support": "support",
 };
 
 // tab到路由的映射
 const tabToRouteMap = {
-  transactions: "/transactions",
+  users: "/users", // 添加这一行
+  "users-management": "/users-management",
+  "customer-service": "/customer-service",
   documents: "/documents",
   reports: "/reports",
-  "company-management": "/company-management",
-  "user-management": "/user-management",
+  "company-management": "/client/company-management",
+  "user-management": "/client/user-management",
   settings: "/settings",
   support: "/support",
 };
@@ -175,11 +178,17 @@ function AppContent() {
         <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-4 lg:p-6">
           <Routes>
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/users" element={<AdminUserManagementView />} />
+            <Route path="/customer-service" element={<CustomerServiceView />} />
+
             <Route
-              path="/company-management"
+              path="/client/company-management"
               element={<CompanyManagementView />}
             />
-            <Route path="/user-management" element={<UserManagementView />} />
+            <Route
+              path="/client/user-management"
+              element={<UserManagementView />}
+            />
             <Route
               path="/settings"
               element={
