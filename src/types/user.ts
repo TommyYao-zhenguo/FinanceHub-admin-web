@@ -3,7 +3,6 @@ export interface UserInfo {
   id: string;
   userId: string;
   username: string;
-  email: string;
   mobile?: string;
   companyId: string;
   companyName: string;
@@ -30,7 +29,6 @@ export interface UserRoleOption {
 // 创建用户请求接口
 export interface CreateUserRequest {
   username: string;
-  email: string;
   mobile?: string;
   password: string;
   roleCode: UserRole;

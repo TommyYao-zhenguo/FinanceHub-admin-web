@@ -32,12 +32,20 @@ export const API_BASE_URL = apiConfig.baseUrl;
 
 // API端点配置
 export const API_ENDPOINTS = {
-  // 用户相关接口
+  // 系统用户相关接口
+  SYS_USER: {
+    LOGIN: "/api/v1/admin/sys/user/login/account",
+    LOGOUT: "/api/v1/admin/sys/user/logout",
+    INFO: "/api/v1/admin/sys/user/info",
+    LIST: "/api/v1/admin/sys/user/list",
+    CREATE: "/api/v1/admin/sys/user/create",
+    UPDATE: "/api/v1/admin/sys/user/update",
+    DELETE: "/api/v1/admin/sys/user/delete",
+    CHANGE_PASSWORD: "/api/v1/admin/sys/user/changePassword",
+  },
+
+  // 客户用户相关接口
   USER: {
-    LOGIN_EMAIL: "/api/v1/user/login/email",
-    LOGIN: "/api/v1/admin/user/login/account",
-    LOGOUT: "/api/v1/admin/user/logout",
-    INFO: "/api/v1/admin/user/info",
     LIST: "/api/v1/admin/user/list",
     CREATE: "/api/v1/admin/user/create",
     UPDATE: "/api/v1/admin/user/update",

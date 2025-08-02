@@ -9,7 +9,7 @@ import {
   UserCog,
   Building2,
 } from "lucide-react";
-import { useUserContext } from "../contexts/UserContext";
+import { useAdminUserContext } from "../contexts/AdminUserContext";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -40,7 +40,7 @@ export default function Sidebar({
   onTabChange,
 }: SidebarProps) {
   const [isSystemMenuOpen, setIsSystemMenuOpen] = useState(false);
-  const { userInfo } = useUserContext();
+  const { userInfo } = useAdminUserContext();
 
   const handleItemClick = (item: any) => {
     if (item.isExternal && item.url) {

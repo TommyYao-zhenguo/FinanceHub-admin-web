@@ -12,10 +12,10 @@ import {
   UserRoleOption,
 } from "../../types/user";
 import { Company } from "../../types/company";
-import { useUserContext } from "../../contexts/UserContext"; // 添加用户上下文
+import { useAdminUserContext } from "../../contexts/AdminUserContext"; // 添加用户上下文
 
 export default function UserManagementView() {
-  const { userInfo } = useUserContext(); // 获取当前用户信息
+  const { userInfo } = useAdminUserContext(); // 获取当前用户信息
   const [users, setUsers] = useState<UserInfo[]>([]);
   const [companies, setCompanies] = useState<Company[]>([]);
   const [loading, setLoading] = useState(false);
@@ -49,7 +49,6 @@ export default function UserManagementView() {
   // 表单数据
   const [formData, setFormData] = useState<CreateUserRequest>({
     username: "",
-    email: "",
     mobile: "",
     password: "",
     companyId: isSuperAdmin ? "" : userInfo?.companyId || "", // 非超级管理员默认使用自己的公司ID
@@ -130,7 +129,6 @@ export default function UserManagementView() {
     setEditingUser(null);
     setFormData({
       username: "",
-      email: "",
       mobile: "",
       password: "",
       companyId: isSuperAdmin ? "" : userInfo?.companyId || "", // 非超级管理员默认使用自己的公司ID
@@ -144,7 +142,6 @@ export default function UserManagementView() {
     setEditingUser(user);
     setFormData({
       username: user.username,
-      email: user.email,
       mobile: user.mobile || "",
       password: "",
       companyId: user.companyId,
@@ -162,7 +159,6 @@ export default function UserManagementView() {
         const updateData: UpdateUserRequest = {
           id: editingUser.id,
           username: formData.username,
-          email: formData.email,
           mobile: formData.mobile,
           companyId: formData.companyId,
           roleCode: formData.roleCode,
@@ -326,9 +322,7 @@ export default function UserManagementView() {
                         <div className="text-sm font-medium text-gray-900">
                           {user.username}
                         </div>
-                        <div className="text-sm text-gray-500">
-                          {user.email}
-                        </div>
+                       
                         {user.mobile && (
                           <div className="text-sm text-gray-500">
                             {user.mobile}
@@ -434,20 +428,7 @@ export default function UserManagementView() {
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  邮箱 *
-                </label>
-                <input
-                  type="email"
-                  required
-                  value={formData.email}
-                  onChange={(e) =>
-                    setFormData({ ...formData, email: e.target.value })
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                />
-              </div>
+              
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   手机号

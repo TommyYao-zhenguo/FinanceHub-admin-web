@@ -18,7 +18,7 @@ import {
 import { Tooltip } from "react-tooltip";
 import { httpClient } from "../utils/http";
 import { API_ENDPOINTS, SA_TOKEN_CONFIG } from "../config/api";
-import { useUserContext } from "../contexts/UserContext";
+import { useAdminUserContext } from "../contexts/AdminUserContext";
 import toast, { Toaster } from "react-hot-toast";
 
 interface LoginPageProps {
@@ -40,7 +40,7 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
     Array<{ id: number; x: number; y: number; size: number; opacity: number }>
   >([]);
 
-  const { fetchUserInfo } = useUserContext();
+  const { fetchUserInfo } = useAdminUserContext();
 
   // 生成动态粒子效果
   useEffect(() => {
@@ -123,14 +123,14 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
 
     setIsLoading(true);
     try {
-      console.log("发送登录请求到:", API_ENDPOINTS.USER.LOGIN);
+      console.log("发送登录请求到:", API_ENDPOINTS.SYS_USER.LOGIN);
       console.log("请求数据:", {
         username: username.trim(),
         password: password ? "***" : "empty",
       });
 
       const response = await httpClient.post<LoginResponse>(
-        API_ENDPOINTS.USER.LOGIN,
+        API_ENDPOINTS.SYS_USER.LOGIN,
         { username: username.trim(), password: password.trim() },
         {
           "Content-Type": "application/json",

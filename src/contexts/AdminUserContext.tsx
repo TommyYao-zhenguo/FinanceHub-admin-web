@@ -15,17 +15,17 @@ export const useAdminUserContext = () => {
   return context;
 };
 
-interface UserProviderProps {
+interface AdminUserProviderProps {
   children: React.ReactNode;
 }
 
-export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
+export const AdminUserProvider: React.FC<AdminUserProviderProps> = ({ children }) => {
   const [userInfo, setUserInfo] = useState<AdminUserInfo | null>(null);
 
 
   const fetchUserInfo = useCallback(async () => {
     try {
-      const response = await httpClient.get<AdminUserInfo>(API_ENDPOINTS.USER.INFO);
+      const response = await httpClient.get<AdminUserInfo>(API_ENDPOINTS.SYS_USER.INFO);
       console.log('获取用户信息成功:', response);
       setUserInfo(response);
     } catch (error) {
@@ -36,7 +36,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
 
   const logout = useCallback(async () => {
     try {
-      await httpClient.post(API_ENDPOINTS.USER.LOGOUT, {});
+      await httpClient.post(API_ENDPOINTS.SYS_USER.LOGOUT, {});
     } catch (error) {
       console.error('退出登录请求失败:', error);
     } finally {

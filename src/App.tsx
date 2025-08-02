@@ -17,14 +17,19 @@ import UserManagementView from "./components/client/UserManagementView";
 import AdminUserManagementView from "./components/AdminUserManagementView";
 import CustomerServiceView from "./components/CustomerServiceView";
 
+import {
+  AdminUserProvider,
+  useAdminUserContext,
+} from "./contexts/AdminUserContext";
 import { UserProvider, useUserContext } from "./contexts/UserContext";
+
 import { SA_TOKEN_CONFIG } from "./config/api";
 
 // 路由映射配置
 const routeMap = {
   "/": "dashboard",
   "/dashboard": "dashboard",
-  "/users": "users",  // 修改为与侧边栏菜单项ID匹配
+  "/users": "users", // 修改为与侧边栏菜单项ID匹配
   "/customer-service": "customer-service",
   "/reports": "reports",
   "/client/company-management": "company-management",
@@ -53,7 +58,7 @@ function AppContent() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
-  const { userInfo, fetchUserInfo } = useUserContext();
+  const { userInfo, fetchUserInfo } = useAdminUserContext();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -237,9 +242,11 @@ function AppContent() {
 function App() {
   return (
     <UserProvider>
-      <Router>
-        <AppContent />
-      </Router>
+      <AdminUserProvider>
+        <Router>
+          <AppContent />
+        </Router>
+      </AdminUserProvider>
     </UserProvider>
   );
 }
