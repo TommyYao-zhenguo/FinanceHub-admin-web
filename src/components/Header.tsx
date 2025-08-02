@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Bell, Settings, LogOut, Menu, User, ChevronDown } from "lucide-react";
-import { useUserContext } from "../contexts/UserContext";
+import { useAdminUserContext } from "../contexts/AdminUserContext";
 
 interface HeaderProps {
   onMenuToggle: () => void;
@@ -11,7 +11,7 @@ export default function Header({
   onMenuToggle,
   isMobileMenuOpen,
 }: HeaderProps) {
-  const { userInfo, logout } = useUserContext();
+  const { userInfo, logout } = useAdminUserContext();
   const [showUserMenu, setShowUserMenu] = useState(false);
 
   const handleLogout = () => {
@@ -26,7 +26,7 @@ export default function Header({
 
   const getCompanyName = () => {
     if (!userInfo) return "公司";
-    return userInfo.companyName || "默认公司"; // 修改这里的默认值
+    return userInfo.companyName || "启苑" ; // 修改这里的默认值
   };
 
   const getRoleDisplay = () => {

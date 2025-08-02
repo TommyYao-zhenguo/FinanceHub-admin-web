@@ -17,8 +17,8 @@ interface SidebarProps {
   onTabChange: (tab: string) => void;
 }
 
+// 将用户管理菜单项移除，改为动态生成
 const menuItems = [
-  { id: "users", label: "用户管理", icon: Users },
   { id: "customer-service", label: "客服中心", icon: HelpCircle }
 ];
 
@@ -43,7 +43,11 @@ export default function Sidebar({
     }
   };
 
-  // 检查用户是否有权限查看系统管理菜单
+  // 检查用户是否有权限查看用户管理菜单
+  const hasAdminUserManagementAccess = () => {
+    if (!userInfo?.roleCode) return false;
+    return userInfo.roleCode === "SUPER_ADMIN" || userInfo.roleCode === "ADMIN";
+  };
   const hasSystemManagementAccess = () => {
     if (!userInfo?.roleCode) return false;
     return userInfo.roleCode === "SUPER_ADMIN" || userInfo.roleCode === "ADMIN";
@@ -53,6 +57,18 @@ export default function Sidebar({
   const hasCompanyManagementAccess = () => {
     if (!userInfo?.roleCode) return false;
     return userInfo.roleCode === "SUPER_ADMIN";
+  };
+
+  // 获取顶部菜单项，根据权限动态生成
+  const getTopMenuItems = () => {
+    const items = [...menuItems]; // 复制基本菜单项
+    
+    // 只有 SUPER_ADMIN 或 ADMIN 才能看到用户管理
+    if (hasAdminUserManagementAccess()) {
+      items.unshift({ id: "users", label: "用户管理", icon: Users });
+    }
+    
+    return items;
   };
 
   // 系统管理子菜单项
@@ -80,6 +96,7 @@ export default function Sidebar({
     return items;
   };
 
+  const topMenuItems = getTopMenuItems(); // 获取动态生成的顶部菜单项
   const systemMenuItems = getSystemMenuItems();
   const showSystemMenu = systemMenuItems.length > 0;
 
@@ -103,8 +120,8 @@ export default function Sidebar({
       >
         <div className="h-full px-4 py-6 overflow-y-auto">
           <div className="space-y-2">
-            {/* 常规菜单项 */}
-            {menuItems.map((item) => {
+            {/* 常规菜单项 - 使用动态生成的菜单项 */}
+            {topMenuItems.map((item) => {
               const Icon = item.icon;
               return (
                 <button
