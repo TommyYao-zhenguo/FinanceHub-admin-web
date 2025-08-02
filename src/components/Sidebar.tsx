@@ -19,14 +19,7 @@ interface SidebarProps {
 
 const menuItems = [
   { id: "users", label: "用户管理", icon: Users },
-  { id: "customer-service", label: "客服中心", icon: HelpCircle },
-  {
-    id: "settlement-treasure",
-    label: "结算宝",
-    icon: ExternalLink,
-    isExternal: true,
-    url: "https://tommy.wecheer-eco.com",
-  },
+  { id: "customer-service", label: "客服中心", icon: HelpCircle }
 ];
 
 const bottomItems = [
