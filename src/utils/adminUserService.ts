@@ -21,26 +21,38 @@ export class AdminUserService {
       queryParams.append("size", params.size.toString());
     if (params.username) queryParams.append("username", params.username);
     if (params.roleCode) queryParams.append("roleCode", params.roleCode);
+
     if (params.status) queryParams.append("status", params.status);
 
-    const url = `${API_ENDPOINTS.SYS_USER.LIST}?${queryParams.toString()}`;
+    const url = `${
+      API_ENDPOINTS.CUSTOMER_SERVICE_USER.LIST
+    }?${queryParams.toString()}`;
     const response = await httpClient.get<UserListResponse>(url);
     return response.data || response;
   }
 
   // 创建用户
   static async createUser(data: CreateUserRequest): Promise<AdminUserInfo> {
-    await httpClient.post<AdminUserInfo>(API_ENDPOINTS.SYS_USER.CREATE, data);
+    const response = await httpClient.post<AdminUserInfo>(
+      API_ENDPOINTS.CUSTOMER_SERVICE_USER.CREATE,
+      data
+    );
+    return response.data || response;
   }
 
   // 更新用户
   static async updateUser(data: UpdateUserRequest): Promise<AdminUserInfo> {
-    await httpClient.put<AdminUserInfo>(API_ENDPOINTS.SYS_USER.UPDATE, data);
+    await httpClient.put<AdminUserInfo>(
+      API_ENDPOINTS.CUSTOMER_SERVICE_USER.UPDATE,
+      data
+    );
   }
 
   // 删除用户
   static async deleteUser(userNo: string): Promise<void> {
-    await httpClient.post(`${API_ENDPOINTS.SYS_USER.DELETE}/${userNo}`);
+    await httpClient.post(
+      `${API_ENDPOINTS.CUSTOMER_SERVICE_USER.DELETE}/${userNo}`
+    );
   }
 
   // 修改密码
@@ -48,7 +60,7 @@ export class AdminUserService {
     userId: string,
     newPassword: string
   ): Promise<void> {
-    await httpClient.post(API_ENDPOINTS.SYS_USER.CHANGE_PASSWORD, {
+    await httpClient.post(API_ENDPOINTS.CUSTOMER_SERVICE_USER.CHANGE_PASSWORD, {
       userId,
       newPassword,
     });

@@ -9,6 +9,7 @@ import toast from "react-hot-toast";
 // 简化的创建公司请求接口
 interface SimpleCreateCompanyRequest {
   companyName: string;
+  isFranchise: boolean; // 是否是加盟商
 }
 
 // 简化的更新公司请求接口
@@ -39,6 +40,7 @@ export default function CompanyManagementView() {
   // 简化的表单数据状态
   const [formData, setFormData] = useState<SimpleCreateCompanyRequest>({
     companyName: "",
+    isFranchise: false, // 默认不是加盟商
   });
 
   // 表单验证错误
@@ -113,6 +115,7 @@ export default function CompanyManagementView() {
   const handleOpenCreateModal = () => {
     setFormData({
       companyName: "",
+      isFranchise: false,
     });
     setFormErrors({});
     setShowCreateModal(true);
@@ -122,6 +125,7 @@ export default function CompanyManagementView() {
   const handleOpenEditModal = (company: Company) => {
     setFormData({
       companyName: company.companyName,
+      isFranchise: company.isFranchise || false,
     });
     setFormErrors({});
     setEditingCompany(company);
@@ -133,6 +137,7 @@ export default function CompanyManagementView() {
     setEditingCompany(null);
     setFormData({
       companyName: "",
+      isFranchise: false,
     });
     setFormErrors({});
   };
@@ -178,12 +183,7 @@ export default function CompanyManagementView() {
           companyId: editingCompany.companyId,
           companyName: formData.companyName,
           companyCode: editingCompany.companyCode,
-          legalPerson: editingCompany.legalPerson,
-          registrationNumber: editingCompany.registrationNumber,
-          taxNumber: editingCompany.taxNumber,
-          address: editingCompany.address,
-          phone: editingCompany.phone,
-          email: editingCompany.email,
+          franchise: formData.isFranchise, // 添加加盟商属性
         };
         await CompanyService.updateCompany(updateData);
         showAlert("公司信息更新成功", "success");
@@ -191,13 +191,7 @@ export default function CompanyManagementView() {
         // 创建公司 - 使用默认值填充其他必需字段
         const createData = {
           companyName: formData.companyName,
-          companyCode: `COMP${Date.now()}`, // 自动生成公司代码
-          legalPerson: "待完善",
-          registrationNumber: "待完善",
-          taxNumber: "待完善",
-          address: "待完善",
-          phone: "待完善",
-          email: "pending@company.com",
+          franchise: formData.isFranchise, // 添加加盟商属性
         };
         await CompanyService.createCompany(createData);
         toast.success("公司创建成功");
@@ -308,6 +302,9 @@ export default function CompanyManagementView() {
                     公司名称
                   </th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-gray-900">
+                    类型
+                  </th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-900">
                     状态
                   </th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-gray-900">
@@ -323,6 +320,17 @@ export default function CompanyManagementView() {
                   <tr key={company.id} className="hover:bg-gray-50">
                     <td className="px-4 py-3 text-sm text-gray-900">
                       {company.companyName}
+                    </td>
+                    <td className="px-4 py-3">
+                      <span
+                        className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
+                          company.isFranchise
+                            ? "bg-purple-100 text-purple-800"
+                            : "bg-blue-100 text-blue-800"
+                        }`}
+                      >
+                        {company.franchise ? "加盟商" : "用户"}
+                      </span>
                     </td>
                     <td className="px-4 py-3">
                       <span
@@ -426,11 +434,35 @@ export default function CompanyManagementView() {
                   placeholder="请输入公司名称"
                   autoFocus
                 />
+
                 {formErrors.companyName && (
                   <p className="mt-1 text-sm text-red-600">
                     {formErrors.companyName}
                   </p>
                 )}
+              </div>
+
+              {/* 是否是加盟商 */}
+              <div>
+                <label className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    checked={formData.isFranchise}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        isFranchise: e.target.checked,
+                      })
+                    }
+                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  />
+                  <span className="text-sm font-medium text-gray-700">
+                    是否是加盟商
+                  </span>
+                </label>
+                <p className="mt-1 text-xs text-gray-500">
+                  勾选此项表示该公司为加盟商，否则为直营公司
+                </p>
               </div>
 
               {/* 提示信息 */}

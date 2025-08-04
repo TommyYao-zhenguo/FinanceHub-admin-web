@@ -3,6 +3,8 @@ export interface AdminUserInfo {
   id: string;
   userNo: string;
   username: string;
+  companyId: string;
+  companyName: string;
   roleName: string;
   roleCode: string;
   status: "ACTIVE" | "INACTIVE";
@@ -14,6 +16,7 @@ export interface AdminUserInfo {
 export enum UserRole {
   ADMIN = "ADMIN",
   EMPLOYEE = "COMMON",
+  CUSTOMER_SERVICE= "CUSTOMER_SERVICE",
   SUPER_ADMIN = "SUPER_ADMIN", // 添加超级管理员角色
 }
 
@@ -27,6 +30,7 @@ export interface UserRoleOption {
 export interface CreateUserRequest {
   username: string;
   password: string;
+  companyId?: string;
   roleCode: UserRole;
 }
 
@@ -41,6 +45,7 @@ export interface UserQueryParams {
   page?: number;
   size?: number;
   username?: string;
+  companyId?: string;
   roleCode?: UserRole;
   status?: "ACTIVE" | "INACTIVE";
 }

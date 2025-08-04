@@ -14,7 +14,7 @@ import LoginPage from "./components/LoginPage";
 
 import CompanyManagementView from "./components/client/CompanyManagementView";
 import UserManagementView from "./components/client/UserManagementView";
-import AdminUserManagementView from "./components/AdminUserManagementView";
+import AdminUserManagementView from "./components/CustomerServiceManagementView";
 import CustomerServiceView from "./components/CustomerServiceView";
 
 import {

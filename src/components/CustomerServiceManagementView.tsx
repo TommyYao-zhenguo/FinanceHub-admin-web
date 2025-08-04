@@ -34,7 +34,7 @@ export default function AdminUserManagementView() {
     page: 1,
     size: 10,
     username: "",
-    roleCode: undefined,
+    roleCode: UserRole.CUSTOMER_SERVICE,
     status: undefined,
   });
 
@@ -46,20 +46,8 @@ export default function AdminUserManagementView() {
   const [formData, setFormData] = useState<CreateUserRequest>({
     username: "",
     password: "",
-    roleCode: UserRole.EMPLOYEE,
+    roleCode: UserRole.CUSTOMER_SERVICE,
   });
-
-  // 用户角色选项 - 根据当前用户角色过滤
-  const roleOptions: UserRoleOption[] = isSuperAdmin
-    ? [
-        { value: UserRole.SUPER_ADMIN, label: "超级管理员" },
-        { value: UserRole.ADMIN, label: "管理员" },
-        { value: UserRole.EMPLOYEE, label: "普通员工" },
-      ]
-    : [
-        { value: UserRole.ADMIN, label: "管理员" },
-        { value: UserRole.EMPLOYEE, label: "普通员工" },
-      ];
 
   // 加载用户列表
   const loadUsers = async (resetPage = false) => {
@@ -74,8 +62,8 @@ export default function AdminUserManagementView() {
       setTotalElements(response.totalElements);
       setTotalPages(response.totalPages);
     } catch (error) {
-      console.error("加载用户列表失败:", error);
-      toast.error("加载用户列表失败");
+      console.error("加载客服列表失败:", error);
+      toast.error("加载客服列表失败");
     } finally {
       setLoading(false);
     }
@@ -105,7 +93,7 @@ export default function AdminUserManagementView() {
     setFormData({
       username: "",
       password: "",
-      roleCode: UserRole.EMPLOYEE,
+      roleCode: UserRole.CUSTOMER_SERVICE,
     });
     setShowModal(true);
   };
@@ -136,16 +124,16 @@ export default function AdminUserManagementView() {
           updateData.password = formData.password;
         }
         await AdminUserService.updateUser(updateData);
-        toast.success("用户更新成功");
+        toast.success("客服更新成功");
       } else {
         await AdminUserService.createUser(formData);
-        toast.success("用户创建成功");
+        toast.success("客服创建成功");
       }
       setShowModal(false);
       loadUsers(true);
     } catch (error) {
-      console.error("保存用户失败:", error);
-      toast.error(editingUser ? "用户更新失败" : "用户创建失败");
+      console.error("保存客服失败:", error);
+      toast.error(editingUser ? "客服更新失败" : "客服创建失败");
     } finally {
       setFormLoading(false);
     }
@@ -161,12 +149,12 @@ export default function AdminUserManagementView() {
     setDeleteLoading(true);
     try {
       await AdminUserService.deleteUser(deleteConfirm.user.userNo);
-      toast.success("用户删除成功");
+      toast.success("客服删除成功");
       setDeleteConfirm({ show: false, user: null });
       loadUsers(true);
     } catch (error) {
-      console.error("删除用户失败:", error);
-      toast.error("用户删除失败");
+      console.error("删除客服失败:", error);
+      toast.error("客服删除失败");
     } finally {
       setDeleteLoading(false);
     }
@@ -178,14 +166,14 @@ export default function AdminUserManagementView() {
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center space-x-3">
           <Users className="w-6 h-6 text-green-600" />
-          <h2 className="text-2xl font-bold text-gray-900">用户管理</h2>
+          <h2 className="text-2xl font-bold text-gray-900">客服管理</h2>
         </div>
         <button
           onClick={handleAdd}
           className="flex items-center space-x-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
         >
           <Plus className="w-4 h-4" />
-          <span>添加用户</span>
+          <span>添加客服</span>
         </button>
       </div>
 
@@ -198,32 +186,13 @@ export default function AdminUserManagementView() {
         <div>
           <input
             type="text"
-            placeholder="搜索用户名"
+            placeholder="搜索客服名称"
             value={searchParams.username}
             onChange={(e) =>
               setSearchParams({ ...searchParams, username: e.target.value })
             }
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
           />
-        </div>
-        <div>
-          <select
-            value={searchParams.roleCode || ""}
-            onChange={(e) =>
-              setSearchParams({
-                ...searchParams,
-                roleCode: e.target.value as UserRole | undefined,
-              })
-            }
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-          >
-            <option value="">所有角色</option>
-            {roleOptions.map((role) => (
-              <option key={role.value} value={role.value}>
-                {role.label}
-              </option>
-            ))}
-          </select>
         </div>
         <div>
           <button
@@ -249,10 +218,7 @@ export default function AdminUserManagementView() {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    用户信息
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    角色
+                    客服信息
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     状态
@@ -274,18 +240,6 @@ export default function AdminUserManagementView() {
                           {user.username}
                         </div>
                       </div>
-                    </td>
-
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span
-                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                          user.roleCode === "ADMIN"
-                            ? "bg-purple-100 text-purple-800"
-                            : "bg-blue-100 text-blue-800"
-                        }`}
-                      >
-                        {user.roleName}
-                      </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span
@@ -354,12 +308,12 @@ export default function AdminUserManagementView() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-md">
             <h3 className="text-lg font-semibold mb-4">
-              {editingUser ? "编辑用户" : "添加用户"}
+              {editingUser ? "编辑客服" : "添加客服"}
             </h3>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  用户名 *
+                  客服账号名称 *
                 </label>
                 <input
                   type="text"
@@ -374,7 +328,7 @@ export default function AdminUserManagementView() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  密码 {editingUser ? "(留空则不修改)" : "*"}
+                  客服账号密码 {editingUser ? "(留空则不修改)" : "*"}
                 </label>
                 <div className="relative">
                   <input
@@ -398,31 +352,6 @@ export default function AdminUserManagementView() {
                     )}
                   </button>
                 </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  用户角色 *
-                </label>
-                <select
-                  required
-                  value={formData.roleCode}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      roleCode: e.target.value as UserRole,
-                    })
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                >
-                  {roleOptions.map((role) => (
-                    <option key={role.value} value={role.value}>
-                      {" "}
-                      {/* 添加 key 属性 */}
-                      {role.label}
-                    </option>
-                  ))}
-                </select>
               </div>
               <div className="flex justify-end space-x-3 pt-4">
                 <button
@@ -454,7 +383,7 @@ export default function AdminUserManagementView() {
           <div className="bg-white rounded-lg p-6 w-full max-w-md">
             <h3 className="text-lg font-semibold mb-4">确认删除</h3>
             <p className="text-gray-600 mb-6">
-              确定要删除用户 "{deleteConfirm.user?.username}"
+              确定要删除客服 "{deleteConfirm.user?.username}"
               吗？此操作不可撤销。
             </p>
             <div className="flex justify-end space-x-3">

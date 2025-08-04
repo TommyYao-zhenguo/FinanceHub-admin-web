@@ -19,7 +19,7 @@ interface SidebarProps {
 
 // 将用户管理菜单项移除，改为动态生成
 const menuItems = [
-  { id: "customer-service", label: "客服中心", icon: HelpCircle }
+  { id: "customer-service", label: "客服中心", icon: HelpCircle },
 ];
 
 const bottomItems = [
@@ -62,12 +62,12 @@ export default function Sidebar({
   // 获取顶部菜单项，根据权限动态生成
   const getTopMenuItems = () => {
     const items = [...menuItems]; // 复制基本菜单项
-    
+
     // 只有 SUPER_ADMIN 或 ADMIN 才能看到用户管理
     if (hasAdminUserManagementAccess()) {
-      items.unshift({ id: "users", label: "用户管理", icon: Users });
+      items.unshift({ id: "users", label: "客服管理", icon: Users });
     }
-    
+
     return items;
   };
 

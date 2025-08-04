@@ -1,32 +1,32 @@
 import React, { useState, useEffect } from "react";
 import { Users, Plus, Edit, Trash2, Search, Eye, EyeOff } from "lucide-react";
 import toast from "react-hot-toast";
-import { UserService } from "../../utils/userService";
+import { AdminUserService } from "../../utils/adminUserService";
 import { CompanyService } from "../../utils/companyService";
 import {
-  UserInfo,
+  AdminUserInfo,
   CreateUserRequest,
   UpdateUserRequest,
   UserQueryParams,
   UserRole,
   UserRoleOption,
-} from "../../types/user";
+} from "../../types/adminUser";
 import { Company } from "../../types/company";
 import { useAdminUserContext } from "../../contexts/AdminUserContext"; // 添加用户上下文
 
 export default function UserManagementView() {
   const { userInfo } = useAdminUserContext(); // 获取当前用户信息
-  const [users, setUsers] = useState<UserInfo[]>([]);
+  const [users, setUsers] = useState<AdminUserInfo[]>([]);
   const [companies, setCompanies] = useState<Company[]>([]);
   const [loading, setLoading] = useState(false);
   const [formLoading, setFormLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  const [editingUser, setEditingUser] = useState<UserInfo | null>(null);
+  const [editingUser, setEditingUser] = useState<AdminUserInfo | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<{
     show: boolean;
-    user: UserInfo | null;
+    user: AdminUserInfo | null;
   }>({ show: false, user: null });
 
   // 检查是否为超级管理员
@@ -37,8 +37,8 @@ export default function UserManagementView() {
     page: 1,
     size: 10,
     username: "",
-    companyId: isSuperAdmin ? "" : userInfo?.companyId || "", // 非超级管理员默认使用自己的公司ID
-    roleCode: undefined,
+    companyId: isSuperAdmin ? undefined : userInfo?.companyId || undefined, // 非超级管理员默认使用自己的公司ID
+    roleCode: isSuperAdmin ? UserRole.ADMIN : UserRole.EMPLOYEE,
     status: undefined,
   });
 
@@ -49,23 +49,15 @@ export default function UserManagementView() {
   // 表单数据
   const [formData, setFormData] = useState<CreateUserRequest>({
     username: "",
-    mobile: "",
     password: "",
     companyId: isSuperAdmin ? "" : userInfo?.companyId || "", // 非超级管理员默认使用自己的公司ID
-    roleCode: UserRole.EMPLOYEE,
+    roleCode: isSuperAdmin ? UserRole.ADMIN : UserRole.EMPLOYEE,
   });
 
   // 用户角色选项 - 根据当前用户角色过滤
   const roleOptions: UserRoleOption[] = isSuperAdmin
-    ? [
-        { value: UserRole.SUPER_ADMIN, label: "超级管理员" },
-        { value: UserRole.ADMIN, label: "管理员" },
-        { value: UserRole.EMPLOYEE, label: "普通员工" },
-      ]
-    : [
-        { value: UserRole.ADMIN, label: "管理员" },
-        { value: UserRole.EMPLOYEE, label: "普通员工" },
-      ];
+    ? [{ value: UserRole.ADMIN, label: "管理员" }]
+    : [{ value: UserRole.EMPLOYEE, label: "普通员工" }];
 
   // 加载用户列表
   const loadUsers = async (resetPage = false) => {
@@ -75,7 +67,7 @@ export default function UserManagementView() {
       if (resetPage) {
         setSearchParams(params);
       }
-      const response = await UserService.getUserList(params);
+      const response = await AdminUserService.getUserList(params);
       setUsers(response.records);
       setTotalElements(response.totalElements);
       setTotalPages(response.totalPages);
@@ -129,20 +121,18 @@ export default function UserManagementView() {
     setEditingUser(null);
     setFormData({
       username: "",
-      mobile: "",
       password: "",
       companyId: isSuperAdmin ? "" : userInfo?.companyId || "", // 非超级管理员默认使用自己的公司ID
-      roleCode: UserRole.EMPLOYEE,
+      roleCode: isSuperAdmin ? UserRole.ADMIN : UserRole.EMPLOYEE,
     });
     setShowModal(true);
   };
 
   // 打开编辑用户模态框
-  const handleEdit = (user: UserInfo) => {
+  const handleEdit = (user: AdminUserInfo) => {
     setEditingUser(user);
     setFormData({
       username: user.username,
-      mobile: user.mobile || "",
       password: "",
       companyId: user.companyId,
       roleCode: user.roleCode as UserRole,
@@ -159,17 +149,16 @@ export default function UserManagementView() {
         const updateData: UpdateUserRequest = {
           id: editingUser.id,
           username: formData.username,
-          mobile: formData.mobile,
           companyId: formData.companyId,
           roleCode: formData.roleCode,
         };
         if (formData.password) {
           updateData.password = formData.password;
         }
-        await UserService.updateUser(updateData);
+        await AdminUserService.updateUser(updateData);
         toast.success("用户更新成功");
       } else {
-        await UserService.createUser(formData);
+        await AdminUserService.createUser(formData);
         toast.success("用户创建成功");
       }
       setShowModal(false);
@@ -183,7 +172,7 @@ export default function UserManagementView() {
   };
 
   // 删除用户
-  const handleDelete = (user: UserInfo) => {
+  const handleDelete = (user: AdminUserInfo) => {
     setDeleteConfirm({ show: true, user });
   };
 
@@ -191,7 +180,7 @@ export default function UserManagementView() {
     if (!deleteConfirm.user) return;
     setDeleteLoading(true);
     try {
-      await UserService.deleteUser(deleteConfirm.user.userNo);
+      await AdminUserService.deleteUser(deleteConfirm.user.userNo);
       toast.success("用户删除成功");
       setDeleteConfirm({ show: false, user: null });
       loadUsers(true);
@@ -221,7 +210,11 @@ export default function UserManagementView() {
       </div>
 
       {/* 搜索栏 */}
-      <div className={`grid grid-cols-1 md:grid-cols-${isSuperAdmin ? '4' : '3'} gap-4 mb-6`}>
+      <div
+        className={`grid grid-cols-1 md:grid-cols-${
+          isSuperAdmin ? "4" : "3"
+        } gap-4 mb-6`}
+      >
         <div>
           <input
             type="text"
@@ -237,7 +230,7 @@ export default function UserManagementView() {
         {isSuperAdmin && (
           <div>
             <select
-              value={searchParams.companyId}
+              value={searchParams.companyId || ""}
               onChange={(e) =>
                 setSearchParams({ ...searchParams, companyId: e.target.value })
               }
@@ -322,12 +315,6 @@ export default function UserManagementView() {
                         <div className="text-sm font-medium text-gray-900">
                           {user.username}
                         </div>
-                       
-                        {user.mobile && (
-                          <div className="text-sm text-gray-500">
-                            {user.mobile}
-                          </div>
-                        )}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -428,20 +415,7 @@ export default function UserManagementView() {
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                 />
               </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  手机号
-                </label>
-                <input
-                  type="tel"
-                  value={formData.mobile}
-                  onChange={(e) =>
-                    setFormData({ ...formData, mobile: e.target.value })
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                />
-              </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   密码 {editingUser ? "(留空则不修改)" : "*"}
@@ -469,7 +443,7 @@ export default function UserManagementView() {
                   </button>
                 </div>
               </div>
-              
+
               {/* 只有超级管理员才显示企业选择下拉框 */}
               {isSuperAdmin && (
                 <div>
@@ -493,7 +467,7 @@ export default function UserManagementView() {
                   </select>
                 </div>
               )}
-              
+
               {/* ADMIN和普通员工显示当前公司信息（只读） */}
               {!isSuperAdmin && (
                 <div>
@@ -508,7 +482,7 @@ export default function UserManagementView() {
                   />
                 </div>
               )}
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   用户角色 *

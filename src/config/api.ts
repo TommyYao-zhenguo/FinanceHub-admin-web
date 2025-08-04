@@ -45,12 +45,12 @@ export const API_ENDPOINTS = {
   },
 
   // 客户用户相关接口
-  USER: {
-    LIST: "/api/v1/admin/user/list",
-    CREATE: "/api/v1/admin/user/create",
-    UPDATE: "/api/v1/admin/user/update",
-    DELETE: "/api/v1/admin/user/delete",
-    CHANGE_PASSWORD: "/api/v1/admin/user/changePassword",
+  CUSTOMER_SERVICE_USER: {
+    LIST: "/api/v1/admin/customerServiceUser/list",
+    CREATE: "/api/v1/admin/customerServiceUser/create",
+    UPDATE: "/api/v1/admin/customerServiceUser/update",
+    DELETE: "/api/v1/admin/customerServiceUser/delete",
+    CHANGE_PASSWORD: "/api/v1/admin/customerServiceUser/changePassword",
   },
 
   // 公司管理相关接口

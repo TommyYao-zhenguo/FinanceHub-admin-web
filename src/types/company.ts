@@ -11,6 +11,7 @@ export interface Company {
   phone: string;
   email: string;
   status: "ACTIVE" | "INACTIVE";
+  isFranchise: boolean; // 是否是加盟商
   createTime: string;
   updateTime: string;
 }
@@ -25,6 +26,7 @@ export interface CreateCompanyRequest {
   address: string;
   phone: string;
   email: string;
+  franchise: boolean; // 是否是加盟商
 }
 
 // 更新公司请求接口
