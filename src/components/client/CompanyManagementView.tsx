@@ -5,6 +5,7 @@ import { Company, CompanyQueryParams } from "../../types/company";
 import { useAlert } from "../../hooks/useAlert";
 
 import toast from "react-hot-toast";
+import { useAdminUserContext } from "../../contexts/AdminUserContext"; // 添加用户上下文
 
 // 简化的创建公司请求接口
 interface SimpleCreateCompanyRequest {
@@ -19,6 +20,10 @@ interface SimpleUpdateCompanyRequest extends SimpleCreateCompanyRequest {
 
 export default function CompanyManagementView() {
   const [companies, setCompanies] = useState<Company[]>([]);
+  const { userInfo } = useAdminUserContext(); // 获取当前用户信息
+  const isSuperAdmin = userInfo?.roleCode === "SUPER_ADMIN";
+
+
   const [loading, setLoading] = useState(false);
   // 初始化时页码为1
   const [searchParams, setSearchParams] = useState<CompanyQueryParams>({
@@ -329,7 +334,7 @@ export default function CompanyManagementView() {
                             : "bg-blue-100 text-blue-800"
                         }`}
                       >
-                        {company.franchise ? "加盟商" : "用户"}
+                        {company.franchise ? "加盟商" : "非加盟商"}
                       </span>
                     </td>
                     <td className="px-4 py-3">
@@ -443,6 +448,7 @@ export default function CompanyManagementView() {
               </div>
 
               {/* 是否是加盟商 */}
+              {isSuperAdmin && (
               <div>
                 <label className="flex items-center space-x-2">
                   <input
@@ -463,7 +469,7 @@ export default function CompanyManagementView() {
                 <p className="mt-1 text-xs text-gray-500">
                   勾选此项表示该公司为加盟商，否则为直营公司
                 </p>
-              </div>
+              </div>)}
 
               {/* 提示信息 */}
               {!editingCompany && (

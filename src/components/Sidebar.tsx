@@ -56,7 +56,7 @@ export default function Sidebar({
   // 检查用户是否有权限查看公司管理
   const hasCompanyManagementAccess = () => {
     if (!userInfo?.roleCode) return false;
-    return userInfo.roleCode === "SUPER_ADMIN";
+    return userInfo.roleCode === "SUPER_ADMIN" || userInfo.roleCode === "ADMIN";
   };
 
   // 获取顶部菜单项，根据权限动态生成

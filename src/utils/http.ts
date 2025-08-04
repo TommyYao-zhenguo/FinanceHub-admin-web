@@ -83,7 +83,6 @@ class HttpClient {
 
         // 尝试获取响应文本
         const text = await response.text();
-        console.log("响应文本:", text);
 
         if (!text.trim()) {
           console.log("响应文本为空，返回空对象");

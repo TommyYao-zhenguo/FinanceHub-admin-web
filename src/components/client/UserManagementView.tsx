@@ -31,6 +31,7 @@ export default function UserManagementView() {
 
   // 检查是否为超级管理员
   const isSuperAdmin = userInfo?.roleCode === "SUPER_ADMIN";
+  const isAdmin = userInfo?.roleCode === "ADMIN";
 
   // 搜索参数
   const [searchParams, setSearchParams] = useState<UserQueryParams>({
@@ -50,7 +51,7 @@ export default function UserManagementView() {
   const [formData, setFormData] = useState<CreateUserRequest>({
     username: "",
     password: "",
-    companyId: isSuperAdmin ? "" : userInfo?.companyId || "", // 非超级管理员默认使用自己的公司ID
+    companyId: userInfo?.companyId || "", // 非超级管理员默认使用自己的公司ID
     roleCode: isSuperAdmin ? UserRole.ADMIN : UserRole.EMPLOYEE,
   });
 
@@ -81,8 +82,8 @@ export default function UserManagementView() {
 
   // 加载公司列表 - 只有超级管理员才加载
   const loadCompanies = async () => {
-    if (!isSuperAdmin) {
-      return; // 非超级管理员不加载企业列表
+    if (!isSuperAdmin && !isAdmin) {
+      return;
     }
     try {
       const response = await CompanyService.getCompanyList({ size: 1000 });
@@ -96,15 +97,18 @@ export default function UserManagementView() {
 
   // 用户列表依赖搜索参数
   useEffect(() => {
+    if (!isSuperAdmin || !isAdmin) {
+      return;
+    }
     loadUsers();
   }, [searchParams]);
 
   // 公司列表只在超级管理员时加载一次
   useEffect(() => {
-    if (isSuperAdmin) {
+    if (isSuperAdmin || isAdmin) {
       loadCompanies();
     }
-  }, [isSuperAdmin]);
+  }, [isSuperAdmin, isAdmin]);
 
   // 搜索处理
   const handleSearch = () => {
@@ -245,25 +249,6 @@ export default function UserManagementView() {
             </select>
           </div>
         )}
-        <div>
-          <select
-            value={searchParams.roleCode || ""}
-            onChange={(e) =>
-              setSearchParams({
-                ...searchParams,
-                roleCode: e.target.value as UserRole | undefined,
-              })
-            }
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-          >
-            <option value="">所有角色</option>
-            {roleOptions.map((role) => (
-              <option key={role.value} value={role.value}>
-                {role.label}
-              </option>
-            ))}
-          </select>
-        </div>
         <div>
           <button
             onClick={handleSearch}
@@ -445,7 +430,7 @@ export default function UserManagementView() {
               </div>
 
               {/* 只有超级管理员才显示企业选择下拉框 */}
-              {isSuperAdmin && (
+              {(isSuperAdmin || isAdmin) && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     所属公司 *
@@ -465,21 +450,6 @@ export default function UserManagementView() {
                       </option>
                     ))}
                   </select>
-                </div>
-              )}
-
-              {/* ADMIN和普通员工显示当前公司信息（只读） */}
-              {!isSuperAdmin && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    所属公司
-                  </label>
-                  <input
-                    type="text"
-                    value={userInfo?.companyName || ""}
-                    disabled
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-600"
-                  />
                 </div>
               )}
 
