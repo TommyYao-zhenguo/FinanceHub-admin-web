@@ -126,7 +126,7 @@ export default function AdminUserManagementView() {
         await AdminUserService.updateUser(updateData);
         toast.success("客服更新成功");
       } else {
-        await AdminUserService.createUser(formData);
+        await AdminUserService.createCustomerServiceUser(formData);
         toast.success("客服创建成功");
       }
       setShowModal(false);

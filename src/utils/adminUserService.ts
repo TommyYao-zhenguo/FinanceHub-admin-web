@@ -53,6 +53,14 @@ export class AdminUserService {
   // 创建用户
   static async createUser(data: CreateUserRequest): Promise<AdminUserInfo> {
     const response = await httpClient.post<AdminUserInfo>(
+      API_ENDPOINTS.SYS_USER.CREATE,
+      data
+    );
+    return response.data || response;
+  }
+
+  static async createCustomerServiceUser(data: CreateUserRequest): Promise<AdminUserInfo> {
+    const response = await httpClient.post<AdminUserInfo>(
       API_ENDPOINTS.CUSTOMER_SERVICE_USER.CREATE,
       data
     );

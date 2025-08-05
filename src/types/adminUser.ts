@@ -10,6 +10,7 @@ export interface AdminUserInfo {
   status: "ACTIVE" | "INACTIVE";
   createTime: string;
   updateTime: string;
+  franchise : boolean;
 }
 
 // 用户角色枚举

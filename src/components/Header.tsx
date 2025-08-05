@@ -7,10 +7,7 @@ interface HeaderProps {
   isMobileMenuOpen: boolean;
 }
 
-export default function Header({
-  onMenuToggle,
-  isMobileMenuOpen,
-}: HeaderProps) {
+export default function Header({ onMenuToggle }: HeaderProps) {
   const { userInfo, logout } = useAdminUserContext();
   const [showUserMenu, setShowUserMenu] = useState(false);
 
@@ -21,12 +18,12 @@ export default function Header({
 
   const getUserDisplayName = () => {
     if (!userInfo) return "用户";
-    return userInfo.username || userInfo.loginName || "用户";
+    return userInfo.username || "用户";
   };
 
   const getCompanyName = () => {
     if (!userInfo) return "公司";
-    return userInfo.companyName || "启苑" ; // 修改这里的默认值
+    return userInfo.companyName || "启苑"; // 修改这里的默认值
   };
 
   const getRoleDisplay = () => {

@@ -44,7 +44,7 @@ export const API_ENDPOINTS = {
     CHANGE_PASSWORD: "/api/v1/admin/sys/user/changePassword",
   },
 
-  // 客户用户相关接口
+  // 客服用户相关接口
   CUSTOMER_SERVICE_USER: {
     LIST: "/api/v1/admin/customerServiceUser/list",
     CREATE: "/api/v1/admin/customerServiceUser/create",
