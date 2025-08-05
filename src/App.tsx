@@ -14,7 +14,7 @@ import LoginPage from "./components/LoginPage";
 
 import CompanyManagementView from "./components/client/CompanyManagementView";
 import UserManagementView from "./components/client/UserManagementView";
-import AdminUserManagementView from "./components/CustomerServiceManagementView";
+import CustomerServiceManagementView from "./components/CustomerServiceManagementView";
 import CustomerServiceView from "./components/CustomerServiceView";
 
 import {
@@ -27,11 +27,9 @@ import { SA_TOKEN_CONFIG } from "./config/api";
 
 // 路由映射配置
 const routeMap = {
-  "/": "dashboard",
-  "/dashboard": "dashboard",
-  "/users": "users", // 修改为与侧边栏菜单项ID匹配
+  "/": "customer-service-users", // 修改为与侧边栏菜单项ID匹配
+  "/customer-service-users": "customer-service-users", // 修改为与侧边栏菜单项ID匹配
   "/customer-service": "customer-service",
-  "/reports": "reports",
   "/client/company-management": "company-management",
   "/client/user-management": "user-management",
   "/settings": "settings",
@@ -40,11 +38,9 @@ const routeMap = {
 
 // tab到路由的映射
 const tabToRouteMap = {
-  users: "/users", // 添加这一行
+  "customer-service-users": "/customer-service-users", // 添加这一行
   "users-management": "/users-management",
   "customer-service": "/customer-service",
-  documents: "/documents",
-  reports: "/reports",
   "company-management": "/client/company-management",
   "user-management": "/client/user-management",
   settings: "/settings",
@@ -54,7 +50,6 @@ const tabToRouteMap = {
 // 创建一个内部组件来使用UserContext和Router hooks
 function AppContent() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [showBalances, setShowBalances] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
@@ -63,7 +58,7 @@ function AppContent() {
   const navigate = useNavigate();
 
   // 根据当前路由获取activeTab
-  const activeTab = routeMap[location.pathname] || "dashboard";
+  const activeTab = routeMap[location.pathname] || "customer-service-users";
 
   // 检查认证状态
   useEffect(() => {
@@ -120,7 +115,7 @@ function AppContent() {
     try {
       await fetchUserInfo();
       setIsLoggedIn(true);
-      navigate("/dashboard"); // 登录成功后跳转到仪表板
+      navigate("/customer-service-users"); // 登录成功后跳转到仪表板
       console.log("登录成功，已获取用户信息");
     } catch (error) {
       console.error("登录后获取用户信息失败:", error);
@@ -183,7 +178,10 @@ function AppContent() {
         <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-4 lg:p-6">
           <Routes>
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
-            <Route path="/users" element={<AdminUserManagementView />} />
+            <Route
+              path="/customer-service-users"
+              element={<CustomerServiceManagementView />}
+            />
             <Route path="/customer-service" element={<CustomerServiceView />} />
 
             <Route

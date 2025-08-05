@@ -12,7 +12,7 @@ import {
 } from "../types/adminUser";
 import { useUserContext } from "../contexts/UserContext"; // 添加用户上下文
 
-export default function AdminUserManagementView() {
+export default function CustomerServiceManagementView() {
   const { userInfo } = useUserContext(); // 获取当前用户信息
   const [users, setUsers] = useState<AdminUserInfo[]>([]);
   const [loading, setLoading] = useState(false);

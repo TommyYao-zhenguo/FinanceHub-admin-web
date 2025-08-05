@@ -68,7 +68,11 @@ export default function Sidebar({
 
     // 只有 SUPER_ADMIN 或 ADMIN 才能看到用户管理
     if (hasAdminUserManagementAccess()) {
-      items.unshift({ id: "users", label: "客服管理", icon: Users });
+      items.unshift({
+        id: "customer-service-users",
+        label: "客服管理",
+        icon: Users,
+      });
     }
 
     return items;
