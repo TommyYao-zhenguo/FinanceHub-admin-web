@@ -23,11 +23,10 @@ export default function CompanyManagementView() {
   const { userInfo } = useAdminUserContext(); // 获取当前用户信息
   const isSuperAdmin = userInfo?.roleCode === "SUPER_ADMIN";
 
-
   const [loading, setLoading] = useState(false);
   // 初始化时页码为1
   const [searchParams, setSearchParams] = useState<CompanyQueryParams>({
-    page: 1,
+    current: 1,
     size: 10,
   });
   const [totalPages, setTotalPages] = useState(0);
@@ -61,7 +60,7 @@ export default function CompanyManagementView() {
 
       // 如果需要重置到第一页，先更新 searchParams
       const params = resetToFirstPage
-        ? { ...searchParams, page: 1 }
+        ? { ...searchParams, current: 1 }
         : searchParams;
 
       const response = await CompanyService.getCompanyList(params);
@@ -71,7 +70,7 @@ export default function CompanyManagementView() {
       setTotalElements(response?.total || 0);
 
       // 如果重置到第一页，同时更新状态
-      if (resetToFirstPage && searchParams.page !== 1) {
+      if (resetToFirstPage && searchParams.current !== 1) {
         setSearchParams(params);
       }
     } catch (error) {
@@ -90,7 +89,7 @@ export default function CompanyManagementView() {
   const handleSearch = () => {
     setSearchParams({
       ...searchParams,
-      page: 1,
+      current: 1,
       companyName: searchName || undefined,
     });
   };
@@ -113,7 +112,7 @@ export default function CompanyManagementView() {
 
   // 分页处理
   const handlePageChange = (page: number) => {
-    setSearchParams({ ...searchParams, page });
+    setSearchParams({ ...searchParams, current: page });
   };
 
   // 打开创建模态框
@@ -187,7 +186,6 @@ export default function CompanyManagementView() {
         const updateData = {
           companyId: editingCompany.companyId,
           companyName: formData.companyName,
-          companyCode: editingCompany.companyCode,
           franchise: formData.isFranchise, // 添加加盟商属性
         };
         await CompanyService.updateCompany(updateData);
@@ -380,20 +378,20 @@ export default function CompanyManagementView() {
           {totalPages > 1 && (
             <div className="flex items-center justify-between mt-6">
               <div className="text-sm text-gray-600">
-                共 {totalElements} 条记录，第 {searchParams.page} / {totalPages}{" "}
-                页
+                共 {totalElements} 条记录，第 {searchParams.current} /{" "}
+                {totalPages} 页
               </div>
               <div className="flex space-x-2">
                 <button
-                  onClick={() => handlePageChange(searchParams.page - 1)}
-                  disabled={searchParams.page === 1}
+                  onClick={() => handlePageChange(searchParams.current - 1)}
+                  disabled={searchParams.current === 1}
                   className="px-3 py-1 text-sm border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
                 >
                   上一页
                 </button>
                 <button
-                  onClick={() => handlePageChange(searchParams.page + 1)}
-                  disabled={searchParams.page >= totalPages}
+                  onClick={() => handlePageChange(searchParams.current + 1)}
+                  disabled={searchParams.current >= totalPages}
                   className="px-3 py-1 text-sm border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
                 >
                   下一页
@@ -449,27 +447,28 @@ export default function CompanyManagementView() {
 
               {/* 是否是加盟商 */}
               {isSuperAdmin && (
-              <div>
-                <label className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    checked={formData.isFranchise}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        isFranchise: e.target.checked,
-                      })
-                    }
-                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                  />
-                  <span className="text-sm font-medium text-gray-700">
-                    是否是加盟商
-                  </span>
-                </label>
-                <p className="mt-1 text-xs text-gray-500">
-                  勾选此项表示该公司为加盟商，否则为直营公司
-                </p>
-              </div>)}
+                <div>
+                  <label className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      checked={formData.isFranchise}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          isFranchise: e.target.checked,
+                        })
+                      }
+                      className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                    />
+                    <span className="text-sm font-medium text-gray-700">
+                      是否是加盟商
+                    </span>
+                  </label>
+                  <p className="mt-1 text-xs text-gray-500">
+                    勾选此项表示该公司为加盟商，否则为直营公司
+                  </p>
+                </div>
+              )}
 
               {/* 提示信息 */}
               {!editingCompany && (
