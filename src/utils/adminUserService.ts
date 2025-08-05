@@ -24,6 +24,25 @@ export class AdminUserService {
 
     if (params.status) queryParams.append("status", params.status);
 
+    const url = `${API_ENDPOINTS.SYS_USER.LIST}?${queryParams.toString()}`;
+    const response = await httpClient.get<UserListResponse>(url);
+    return response.data || response;
+  }
+
+  static async getCustomerServiceList(
+    params: UserQueryParams = {}
+  ): Promise<UserListResponse> {
+    const queryParams = new URLSearchParams();
+
+    if (params.page !== undefined)
+      queryParams.append("page", params.page.toString());
+    if (params.size !== undefined)
+      queryParams.append("size", params.size.toString());
+    if (params.username) queryParams.append("username", params.username);
+    if (params.roleCode) queryParams.append("roleCode", params.roleCode);
+
+    if (params.status) queryParams.append("status", params.status);
+
     const url = `${
       API_ENDPOINTS.CUSTOMER_SERVICE_USER.LIST
     }?${queryParams.toString()}`;

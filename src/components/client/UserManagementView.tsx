@@ -97,7 +97,7 @@ export default function UserManagementView() {
 
   // 用户列表依赖搜索参数
   useEffect(() => {
-    if (!isSuperAdmin || !isAdmin) {
+    if (!isSuperAdmin && !isAdmin) {
       return;
     }
     loadUsers();

@@ -57,7 +57,7 @@ export default function AdminUserManagementView() {
       if (resetPage) {
         setSearchParams(params);
       }
-      const response = await AdminUserService.getUserList(params);
+      const response = await AdminUserService.getCustomerServiceList(params);
       setUsers(response.records);
       setTotalElements(response.totalElements);
       setTotalPages(response.totalPages);
