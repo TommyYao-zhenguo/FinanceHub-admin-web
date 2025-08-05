@@ -13,11 +13,6 @@ interface SimpleCreateCompanyRequest {
   isFranchise: boolean; // 是否是加盟商
 }
 
-// 简化的更新公司请求接口
-interface SimpleUpdateCompanyRequest extends SimpleCreateCompanyRequest {
-  id: string;
-}
-
 export default function CompanyManagementView() {
   const [companies, setCompanies] = useState<Company[]>([]);
   const { userInfo } = useAdminUserContext(); // 获取当前用户信息
@@ -66,15 +61,17 @@ export default function CompanyManagementView() {
       const response = await CompanyService.getCompanyList(params);
       console.log("Companies:", response);
       setCompanies(response?.records || []);
+      setCompanies(response?.records || []);
       setTotalPages(response?.pages || 0);
       setTotalElements(response?.total || 0);
 
+      setSearchParams(params);
       // 如果重置到第一页，同时更新状态
       if (resetToFirstPage && searchParams.current !== 1) {
         setSearchParams(params);
       }
     } catch (error) {
-      showAlert("加载公司列表失败", "error");
+      showAlert({ message: "加载公司列表失败" });
       console.error("Failed to load companies:", error);
       setCompanies([]);
       setTotalPages(0);
@@ -93,22 +90,6 @@ export default function CompanyManagementView() {
       companyName: searchName || undefined,
     });
   };
-
-  // // 删除公司
-  // const handleDelete = async (id: string, companyName: string) => {
-  //   if (!confirm(`确定要删除公司 "${companyName}" 吗？`)) {
-  //     return;
-  //   }
-
-  //   try {
-  //     await CompanyService.deleteCompany(id);
-  //     toast.success("删除成功");
-  //     loadCompanies();
-  //   } catch (error) {
-  //     toast.error("删除失败");
-  //     console.error("Failed to delete company:", error);
-  //   }
-  // };
 
   // 分页处理
   const handlePageChange = (page: number) => {
@@ -129,7 +110,7 @@ export default function CompanyManagementView() {
   const handleOpenEditModal = (company: Company) => {
     setFormData({
       companyName: company.companyName,
-      isFranchise: company.isFranchise || false,
+      isFranchise: company.franchise || false,
     });
     setFormErrors({});
     setEditingCompany(company);
@@ -183,13 +164,12 @@ export default function CompanyManagementView() {
 
       if (editingCompany) {
         // 编辑公司 - 构建完整的更新数据，保留原有字段
-        const updateData = {
-          companyId: editingCompany.companyId,
+        await CompanyService.updateCompany({
+          id: editingCompany.companyId,
           companyName: formData.companyName,
-          franchise: formData.isFranchise, // 添加加盟商属性
-        };
-        await CompanyService.updateCompany(updateData);
-        showAlert("公司信息更新成功", "success");
+          franchise: formData.isFranchise,
+        });
+        toast.success("公司信息更新成功");
       } else {
         // 创建公司 - 使用默认值填充其他必需字段
         const createData = {
@@ -327,7 +307,7 @@ export default function CompanyManagementView() {
                     <td className="px-4 py-3">
                       <span
                         className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
-                          company.isFranchise
+                          company.franchise
                             ? "bg-purple-100 text-purple-800"
                             : "bg-blue-100 text-blue-800"
                         }`}
@@ -383,15 +363,19 @@ export default function CompanyManagementView() {
               </div>
               <div className="flex space-x-2">
                 <button
-                  onClick={() => handlePageChange(searchParams.current - 1)}
+                  onClick={() =>
+                    handlePageChange((searchParams.current ?? 1) - 1)
+                  }
                   disabled={searchParams.current === 1}
                   className="px-3 py-1 text-sm border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
                 >
                   上一页
                 </button>
                 <button
-                  onClick={() => handlePageChange(searchParams.current + 1)}
-                  disabled={searchParams.current >= totalPages}
+                  onClick={() =>
+                    handlePageChange((searchParams.current ?? 1) + 1)
+                  }
+                  disabled={(searchParams.current ?? 1) >= totalPages}
                   className="px-3 py-1 text-sm border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
                 >
                   下一页

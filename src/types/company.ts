@@ -11,7 +11,7 @@ export interface Company {
   phone: string;
   email: string;
   status: "ACTIVE" | "INACTIVE";
-  isFranchise: boolean; // 是否是加盟商
+  franchise: boolean; // 是否是加盟商
   createTime: string;
   updateTime: string;
 }
@@ -38,8 +38,8 @@ export interface CompanyQueryParams {
 // 公司列表响应接口
 export interface CompanyListResponse {
   records: Company[];
-  totalElements: number;
-  totalPages: number;
+  total: number;
+  pages: number;
   size: number;
-  number: number;
+  current: number;
 }

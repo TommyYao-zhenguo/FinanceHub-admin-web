@@ -8,13 +8,13 @@ import {
   UpdateUserRequest,
   UserQueryParams,
   UserRole,
-  UserRoleOption,
 } from "../types/adminUser";
-import { useUserContext } from "../contexts/UserContext"; // 添加用户上下文
+
+import { useAdminUserContext } from "../contexts/AdminUserContext";
 
 export default function CustomerServiceManagementView() {
-  const { userInfo } = useUserContext(); // 获取当前用户信息
   const [users, setUsers] = useState<AdminUserInfo[]>([]);
+  const { userInfo } = useAdminUserContext();
   const [loading, setLoading] = useState(false);
   const [formLoading, setFormLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);

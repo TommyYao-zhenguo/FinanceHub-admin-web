@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Bell,
   User,
@@ -19,11 +19,6 @@ import {
   Square,
 } from "lucide-react";
 
-interface CustomerServiceViewProps {
-  showBalances: boolean;
-  onToggleBalances: () => void;
-}
-
 interface NotificationMessage {
   id: string;
   customerId: string;
@@ -43,13 +38,10 @@ interface NotificationMessage {
   status: "unread" | "read" | "processing" | "completed";
   priority: "low" | "medium" | "high" | "urgent";
   actionRequired: boolean;
-  relatedData?: any;
+  relatedData?: Record<string, unknown>; // 推荐方式：使用 Record<string, unknown>
 }
 
-export default function CustomerServiceView({
-  showBalances,
-  onToggleBalances,
-}: CustomerServiceViewProps) {
+export default function CustomerServiceView() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [selectedMessage, setSelectedMessage] =

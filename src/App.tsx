@@ -21,12 +21,11 @@ import {
   AdminUserProvider,
   useAdminUserContext,
 } from "./contexts/AdminUserContext";
-import { UserProvider, useUserContext } from "./contexts/UserContext";
 
 import { SA_TOKEN_CONFIG } from "./config/api";
 
 // 路由映射配置
-const routeMap = {
+const routeMap: Record<string, string> = {
   "/": "customer-service-users", // 修改为与侧边栏菜单项ID匹配
   "/customer-service-users": "customer-service-users", // 修改为与侧边栏菜单项ID匹配
   "/customer-service": "customer-service",
@@ -37,7 +36,7 @@ const routeMap = {
 };
 
 // tab到路由的映射
-const tabToRouteMap = {
+const tabToRouteMap: Record<string, string> = {
   "customer-service-users": "/customer-service-users", // 添加这一行
   "users-management": "/users-management",
   "customer-service": "/customer-service",
@@ -239,13 +238,11 @@ function AppContent() {
 
 function App() {
   return (
-    <UserProvider>
-      <AdminUserProvider>
-        <Router>
-          <AppContent />
-        </Router>
-      </AdminUserProvider>
-    </UserProvider>
+    <AdminUserProvider>
+      <Router>
+        <AppContent />
+      </Router>
+    </AdminUserProvider>
   );
 }
 

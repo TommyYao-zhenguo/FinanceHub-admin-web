@@ -545,7 +545,7 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
         }}
       />
       {/* CSS动画 */}
-      <style jsx>{`
+      <style>{`
         @keyframes float {
           0%,
           100% {

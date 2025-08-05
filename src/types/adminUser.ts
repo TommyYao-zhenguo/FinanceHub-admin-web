@@ -53,7 +53,7 @@ export interface UserQueryParams {
 
 // 用户列表响应接口
 export interface UserListResponse {
-  content: AdminUserInfo[];
+  records: AdminUserInfo[];
   totalElements: number;
   totalPages: number;
   size: number;

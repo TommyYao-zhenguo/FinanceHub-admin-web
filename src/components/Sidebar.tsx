@@ -3,7 +3,6 @@ import {
   Settings,
   HelpCircle,
   Users,
-  ExternalLink,
   ChevronDown,
   ChevronRight,
   UserCog,
@@ -35,12 +34,8 @@ export default function Sidebar({
   const [isSystemMenuOpen, setIsSystemMenuOpen] = useState(false);
   const { userInfo } = useAdminUserContext();
 
-  const handleItemClick = (item: any) => {
-    if (item.isExternal && item.url) {
-      window.open(item.url, "_blank");
-    } else {
+  const handleItemClick = (item: { id: string;  }) => {
       onTabChange(item.id);
-    }
   };
 
   // 检查用户是否有权限查看用户管理菜单

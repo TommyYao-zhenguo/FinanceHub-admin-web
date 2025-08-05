@@ -15,8 +15,8 @@ export class CompanyService {
   ): Promise<CompanyListResponse> {
     const queryParams = new URLSearchParams();
 
-    if (params.page !== undefined)
-      queryParams.append("page", params.page.toString());
+    if (params.current !== undefined)
+      queryParams.append("page", params.current.toString());
     if (params.size !== undefined)
       queryParams.append("size", params.size.toString());
     if (params.companyName)
@@ -26,17 +26,17 @@ export class CompanyService {
     const url = `${API_ENDPOINTS.COMPANY.LIST}?${queryParams.toString()}`;
     const response = await httpClient.get<CompanyListResponse>(url);
     // Check if response has data property, otherwise return response directly
-    return response.data || response;
+    return response;
   }
 
   // 创建公司
-  static async createCompany(data: CreateCompanyRequest): Promise<Company> {
-    await httpClient.post<Company>(API_ENDPOINTS.COMPANY.CREATE, data);
+  static async createCompany(data: CreateCompanyRequest): Promise<void> {
+    await httpClient.post(API_ENDPOINTS.COMPANY.CREATE, data);
   }
 
   // 更新公司
-  static async updateCompany(data: UpdateCompanyRequest): Promise<Company> {
-    await httpClient.put<Company>(API_ENDPOINTS.COMPANY.UPDATE, data);
+  static async updateCompany(data: UpdateCompanyRequest): Promise<void> {
+    await httpClient.put(API_ENDPOINTS.COMPANY.UPDATE, data);
   }
 
   // 删除公司
@@ -50,6 +50,6 @@ export class CompanyService {
       `${API_ENDPOINTS.COMPANY.DETAIL}/${id}`
     );
     // Check if response has data property, otherwise return response directly
-    return response.data || response;
+    return response;
   }
 }
