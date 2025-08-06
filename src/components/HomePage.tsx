@@ -144,7 +144,7 @@ export default function HomePage({ onLoginClick }: HomePageProps) {
               width: `${particle.size}px`,
               height: `${particle.size}px`,
               opacity: particle.opacity,
-              animation: `float ${4 + Math.random() * 4}s ease-in-out infinite`
+              animation: `float ${4 + Math.random() * 4}s ease-in-out infinite`,
             }}
           />
         ))}
@@ -152,20 +152,29 @@ export default function HomePage({ onLoginClick }: HomePageProps) {
 
       {/* 科技网格线 */}
       <div className="absolute inset-0">
-        <div className="absolute inset-0" style={{
-          backgroundImage: `
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: `
             linear-gradient(rgba(0, 255, 255, 0.05) 1px, transparent 1px),
             linear-gradient(90deg, rgba(0, 255, 255, 0.05) 1px, transparent 1px)
           `,
-          backgroundSize: '50px 50px'
-        }}></div>
+            backgroundSize: "50px 50px",
+          }}
+        ></div>
       </div>
 
       {/* 动态光束效果 */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-cyan-500 rounded-full mix-blend-multiply filter blur-xl opacity-10 animate-pulse"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-emerald-500 rounded-full mix-blend-multiply filter blur-xl opacity-10 animate-pulse" style={{ animationDelay: '2s' }}></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-5 animate-pulse" style={{ animationDelay: '4s' }}></div>
+        <div
+          className="absolute -bottom-40 -left-40 w-80 h-80 bg-emerald-500 rounded-full mix-blend-multiply filter blur-xl opacity-10 animate-pulse"
+          style={{ animationDelay: "2s" }}
+        ></div>
+        <div
+          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-5 animate-pulse"
+          style={{ animationDelay: "4s" }}
+        ></div>
       </div>
 
       {/* 导航栏 */}
@@ -180,10 +189,30 @@ export default function HomePage({ onLoginClick }: HomePageProps) {
             </span>
           </div>
           <div className="flex items-center space-x-6">
-            <a href="#services" className="text-cyan-200 hover:text-cyan-400 transition-colors">服务介绍</a>
-            <a href="#advantages" className="text-cyan-200 hover:text-cyan-400 transition-colors">产品优势</a>
-            <a href="#testimonials" className="text-cyan-200 hover:text-cyan-400 transition-colors">客户评价</a>
-            <a href="#contact" className="text-cyan-200 hover:text-cyan-400 transition-colors">联系我们</a>
+            <a
+              href="#services"
+              className="text-cyan-200 hover:text-cyan-400 transition-colors"
+            >
+              服务介绍
+            </a>
+            <a
+              href="#advantages"
+              className="text-cyan-200 hover:text-cyan-400 transition-colors"
+            >
+              产品优势
+            </a>
+            <a
+              href="#testimonials"
+              className="text-cyan-200 hover:text-cyan-400 transition-colors"
+            >
+              客户评价
+            </a>
+            <a
+              href="#contact"
+              className="text-cyan-200 hover:text-cyan-400 transition-colors"
+            >
+              联系我们
+            </a>
             <button
               onClick={onLoginClick}
               className="bg-gradient-to-r from-cyan-500 to-emerald-500 text-white px-6 py-2 rounded-lg font-semibold hover:from-cyan-600 hover:to-emerald-600 transition-all duration-200 shadow-lg shadow-cyan-500/25"
@@ -228,19 +257,27 @@ export default function HomePage({ onLoginClick }: HomePageProps) {
             {/* 数据统计 */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-16">
               <div className="text-center">
-                <div className="text-3xl md:text-4xl font-bold text-cyan-400 mb-2">10000+</div>
+                <div className="text-3xl md:text-4xl font-bold text-cyan-400 mb-2">
+                  10000+
+                </div>
                 <div className="text-cyan-200">企业用户</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl md:text-4xl font-bold text-emerald-400 mb-2">99.9%</div>
+                <div className="text-3xl md:text-4xl font-bold text-emerald-400 mb-2">
+                  99.9%
+                </div>
                 <div className="text-cyan-200">系统可用性</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl md:text-4xl font-bold text-purple-400 mb-2">24/7</div>
+                <div className="text-3xl md:text-4xl font-bold text-purple-400 mb-2">
+                  24/7
+                </div>
                 <div className="text-cyan-200">技术支持</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl md:text-4xl font-bold text-orange-400 mb-2">5年+</div>
+                <div className="text-3xl md:text-4xl font-bold text-orange-400 mb-2">
+                  5年+
+                </div>
                 <div className="text-cyan-200">行业经验</div>
               </div>
             </div>
@@ -248,7 +285,10 @@ export default function HomePage({ onLoginClick }: HomePageProps) {
         </section>
 
         {/* 服务介绍 */}
-        <section id="services" className="px-6 py-20 bg-gray-900/30 backdrop-blur-sm">
+        <section
+          id="services"
+          className="px-6 py-20 bg-gray-900/30 backdrop-blur-sm"
+        >
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-16">
               <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-cyan-400 to-emerald-400 bg-clip-text text-transparent">
@@ -269,13 +309,17 @@ export default function HomePage({ onLoginClick }: HomePageProps) {
                     <div className="w-16 h-16 bg-gradient-to-r from-cyan-500 to-emerald-500 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                       <Icon className="w-8 h-8 text-white" />
                     </div>
-                    <h3 className="text-xl font-bold text-white mb-4">{service.title}</h3>
+                    <h3 className="text-xl font-bold text-white mb-4">
+                      {service.title}
+                    </h3>
                     <p className="text-cyan-200 mb-6">{service.description}</p>
                     <div className="space-y-2">
                       {service.features.map((feature, idx) => (
                         <div key={idx} className="flex items-center space-x-2">
                           <CheckCircle className="w-4 h-4 text-emerald-400" />
-                          <span className="text-sm text-cyan-300">{feature}</span>
+                          <span className="text-sm text-cyan-300">
+                            {feature}
+                          </span>
                         </div>
                       ))}
                     </div>
@@ -301,14 +345,13 @@ export default function HomePage({ onLoginClick }: HomePageProps) {
               {advantages.map((advantage, index) => {
                 const Icon = advantage.icon;
                 return (
-                  <div
-                    key={index}
-                    className="text-center group"
-                  >
+                  <div key={index} className="text-center group">
                     <div className="w-20 h-20 bg-gradient-to-r from-cyan-500 to-emerald-500 rounded-3xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform shadow-lg shadow-cyan-500/25">
                       <Icon className="w-10 h-10 text-white" />
                     </div>
-                    <h3 className="text-xl font-bold text-white mb-4">{advantage.title}</h3>
+                    <h3 className="text-xl font-bold text-white mb-4">
+                      {advantage.title}
+                    </h3>
                     <p className="text-cyan-200">{advantage.description}</p>
                   </div>
                 );
@@ -318,7 +361,10 @@ export default function HomePage({ onLoginClick }: HomePageProps) {
         </section>
 
         {/* 客户评价 */}
-        <section id="testimonials" className="px-6 py-20 bg-gray-900/30 backdrop-blur-sm">
+        <section
+          id="testimonials"
+          className="px-6 py-20 bg-gray-900/30 backdrop-blur-sm"
+        >
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-16">
               <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-cyan-400 to-emerald-400 bg-clip-text text-transparent">
@@ -336,13 +382,22 @@ export default function HomePage({ onLoginClick }: HomePageProps) {
                 >
                   <div className="flex items-center mb-4">
                     {[...Array(testimonial.rating)].map((_, i) => (
-                      <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
+                      <Star
+                        key={i}
+                        className="w-5 h-5 text-yellow-400 fill-current"
+                      />
                     ))}
                   </div>
-                  <p className="text-cyan-200 mb-6 italic">"{testimonial.content}"</p>
+                  <p className="text-cyan-200 mb-6 italic">
+                    "{testimonial.content}"
+                  </p>
                   <div>
-                    <div className="font-semibold text-white">{testimonial.name}</div>
-                    <div className="text-sm text-cyan-300">{testimonial.company}</div>
+                    <div className="font-semibold text-white">
+                      {testimonial.name}
+                    </div>
+                    <div className="text-sm text-cyan-300">
+                      {testimonial.company}
+                    </div>
                   </div>
                 </div>
               ))}
@@ -369,7 +424,7 @@ export default function HomePage({ onLoginClick }: HomePageProps) {
                   </div>
                   <div>
                     <div className="font-semibold text-white">客服热线</div>
-                    <div className="text-cyan-200">400-888-9999</div>
+                    <div className="text-cyan-200">13331818028</div>
                   </div>
                 </div>
                 <div className="flex items-center space-x-4">
@@ -378,7 +433,9 @@ export default function HomePage({ onLoginClick }: HomePageProps) {
                   </div>
                   <div>
                     <div className="font-semibold text-white">邮箱地址</div>
-                    <div className="text-cyan-200">service@qiyuan-finance.com</div>
+                    <div className="text-cyan-200">
+                      yaozhenguo5800@hotmail.com
+                    </div>
                   </div>
                 </div>
                 <div className="flex items-center space-x-4">
@@ -387,7 +444,9 @@ export default function HomePage({ onLoginClick }: HomePageProps) {
                   </div>
                   <div>
                     <div className="font-semibold text-white">公司地址</div>
-                    <div className="text-cyan-200">北京市朝阳区xxx路xxx号</div>
+                    <div className="text-cyan-200">
+                      上海市闵行区虹梅南路4999号18幢
+                    </div>
                   </div>
                 </div>
                 <div className="flex items-center space-x-4">
@@ -431,9 +490,7 @@ export default function HomePage({ onLoginClick }: HomePageProps) {
             <p className="text-cyan-300 mb-4">
               © 2024 启苑数字化财务中心. 保留所有权利.
             </p>
-            <p className="text-sm text-cyan-400">
-              专业 • 安全 • 高效 • 智能
-            </p>
+            <p className="text-sm text-cyan-400">专业 • 安全 • 高效 • 智能</p>
           </div>
         </footer>
       </div>
