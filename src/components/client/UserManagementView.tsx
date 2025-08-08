@@ -28,6 +28,7 @@ export default function UserManagementView() {
     show: boolean;
     user: AdminUserInfo | null;
   }>({ show: false, user: null });
+  const [customerServices, setCustomerServices] = useState<AdminUserInfo[]>([]); // 添加客服列表状态
 
   // 检查是否为超级管理员
   const isSuperAdmin = userInfo?.roleCode === "SUPER_ADMIN";
@@ -196,6 +197,25 @@ export default function UserManagementView() {
     }
   };
 
+  // 加载客服列表
+  const loadCustomerServices = async () => {
+    try {
+      const response = await AdminUserService.getCustomerServiceList({
+        page: 1,
+        size: 100, // 获取所有客服
+        roleCode: UserRole.CUSTOMER_SERVICE,
+      });
+      setCustomerServices(response.records);
+    } catch (error) {
+      console.error("加载客服列表失败:", error);
+    }
+  };
+
+  // 组件加载时获取客服列表
+  useEffect(() => {
+    loadCustomerServices();
+  }, []);
+
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
       {/* 头部 */}
@@ -285,6 +305,9 @@ export default function UserManagementView() {
                     状态
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    专属客服
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     创建时间
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -316,6 +339,7 @@ export default function UserManagementView() {
                         {user.roleName}
                       </span>
                     </td>
+
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span
                         className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
@@ -326,6 +350,9 @@ export default function UserManagementView() {
                       >
                         {user.status === "ACTIVE" ? "正常" : "停用"}
                       </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {user.customerServiceName}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {new Date(user.createTime).toLocaleDateString()}
@@ -476,6 +503,33 @@ export default function UserManagementView() {
                     </option>
                   ))}
                 </select>
+              </div>
+
+              {/* 添加客服绑定选择 */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  绑定客服
+                </label>
+                <select
+                  value={formData.customerServiceId || ""}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      customerServiceId: e.target.value || undefined,
+                    })
+                  }
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                >
+                  <option value="">请选择客服（可选）</option>
+                  {customerServices.map((cs) => (
+                    <option key={cs.id} value={cs.userNo}>
+                      {cs.username}
+                    </option>
+                  ))}
+                </select>
+                <p className="text-xs text-gray-500 mt-1">
+                  为该用户指定专属客服，用户可通过此客服获得服务支持
+                </p>
               </div>
               <div className="flex justify-end space-x-3 pt-4">
                 <button

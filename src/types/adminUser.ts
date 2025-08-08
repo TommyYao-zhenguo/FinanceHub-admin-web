@@ -11,6 +11,8 @@ export interface AdminUserInfo {
   createTime: string;
   updateTime: string;
   franchise : boolean;
+  customerServiceId?: string; // 绑定的客服ID
+  customerServiceName?: string; // 绑定的客服姓名
 }
 
 // 用户角色枚举
@@ -33,6 +35,7 @@ export interface CreateUserRequest {
   password: string;
   companyId?: string;
   roleCode: UserRole;
+  customerServiceId?: string; // 绑定的客服ID
 }
 
 // 更新用户请求接口
