@@ -33,10 +33,6 @@ class HttpClient {
     } = options;
 
     const url = `${this.baseUrl}${endpoint}`;
-    console.log("HTTP请求:", method, url);
-    if (body) {
-      console.log("请求体:", body);
-    }
 
     // 合并默认headers和自定义headers
     const mergedHeaders = {
@@ -70,14 +66,11 @@ class HttpClient {
         const contentType = response.headers.get("content-type");
         const contentLength = response.headers.get("content-length");
 
-        console.log("响应内容类型:", contentType, "内容长度:", contentLength);
-
         // 如果没有内容或内容长度为0，返回空对象
         if (
           contentLength === "0" ||
           !contentType?.includes("application/json")
         ) {
-          console.log("响应无内容，返回空对象");
           return {} as T;
         }
 
@@ -85,13 +78,11 @@ class HttpClient {
         const text = await response.text();
 
         if (!text.trim()) {
-          console.log("响应文本为空，返回空对象");
           return {} as T;
         }
 
         try {
           const parsed = JSON.parse(text) as T;
-          console.log("解析后的响应:", parsed);
           return parsed;
         } catch (parseError) {
           console.warn("Failed to parse JSON response:", text);
