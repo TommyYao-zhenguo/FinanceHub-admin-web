@@ -3,7 +3,6 @@ export interface Company {
   id: string;
   companyId: string;
   companyName: string;
-  companyCode: string;
   legalPerson: string;
   registrationNumber: string;
   taxNumber: string;
@@ -19,6 +18,7 @@ export interface Company {
 // 创建公司请求接口
 export interface CreateCompanyRequest {
   companyName: string;
+  taxNumber: string;
   franchise: boolean; // 是否是加盟商
 }
 

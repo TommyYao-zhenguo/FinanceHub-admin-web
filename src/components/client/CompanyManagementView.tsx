@@ -10,6 +10,7 @@ import { useAdminUserContext } from "../../contexts/AdminUserContext"; // 添加
 // 简化的创建公司请求接口
 interface SimpleCreateCompanyRequest {
   companyName: string;
+  taxNumber: string;
   isFranchise: boolean; // 是否是加盟商
 }
 
@@ -39,6 +40,7 @@ export default function CompanyManagementView() {
   // 简化的表单数据状态
   const [formData, setFormData] = useState<SimpleCreateCompanyRequest>({
     companyName: "",
+    taxNumber: "",
     isFranchise: false, // 默认不是加盟商
   });
 
@@ -100,6 +102,7 @@ export default function CompanyManagementView() {
   const handleOpenCreateModal = () => {
     setFormData({
       companyName: "",
+      taxNumber: "",
       isFranchise: false,
     });
     setFormErrors({});
@@ -110,6 +113,7 @@ export default function CompanyManagementView() {
   const handleOpenEditModal = (company: Company) => {
     setFormData({
       companyName: company.companyName,
+      taxNumber: company.taxNumber,
       isFranchise: company.franchise || false,
     });
     setFormErrors({});
@@ -122,6 +126,7 @@ export default function CompanyManagementView() {
     setEditingCompany(null);
     setFormData({
       companyName: "",
+      taxNumber: "",
       isFranchise: false,
     });
     setFormErrors({});
@@ -147,6 +152,10 @@ export default function CompanyManagementView() {
       errors.companyName = "公司名称不能为空";
     }
 
+    if (!formData.taxNumber.trim()) {
+      errors.taxNumber = "公司税号不能为空";
+    }
+
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -167,6 +176,7 @@ export default function CompanyManagementView() {
         await CompanyService.updateCompany({
           id: editingCompany.companyId,
           companyName: formData.companyName,
+          taxNumber: formData.taxNumber,
           franchise: formData.isFranchise,
         });
         toast.success("公司信息更新成功");
@@ -174,6 +184,7 @@ export default function CompanyManagementView() {
         // 创建公司 - 使用默认值填充其他必需字段
         const createData = {
           companyName: formData.companyName,
+          taxNumber: formData.taxNumber,
           franchise: formData.isFranchise, // 添加加盟商属性
         };
         await CompanyService.createCompany(createData);
@@ -250,7 +261,7 @@ export default function CompanyManagementView() {
             value={searchName}
             onChange={(e) => setSearchName(e.target.value)}
             onKeyPress={(e) => e.key === "Enter" && handleSearch()}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
           />
         </div>
         <button
@@ -285,6 +296,9 @@ export default function CompanyManagementView() {
                     公司名称
                   </th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-gray-900">
+                    公司税号
+                  </th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-900">
                     类型
                   </th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-gray-900">
@@ -303,6 +317,9 @@ export default function CompanyManagementView() {
                   <tr key={company.id} className="hover:bg-gray-50">
                     <td className="px-4 py-3 text-sm text-gray-900">
                       {company.companyName}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-gray-900">
+                      {company.taxNumber}
                     </td>
                     <td className="px-4 py-3">
                       <span
@@ -413,7 +430,7 @@ export default function CompanyManagementView() {
                   onChange={(e) =>
                     handleInputChange("companyName", e.target.value)
                   }
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none ${
                     formErrors.companyName
                       ? "border-red-500"
                       : "border-gray-300"
@@ -425,6 +442,30 @@ export default function CompanyManagementView() {
                 {formErrors.companyName && (
                   <p className="mt-1 text-sm text-red-600">
                     {formErrors.companyName}
+                  </p>
+                )}
+              </div>
+
+              <div className="col-span-6 sm:col-span-3">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  公司税号 <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={formData.taxNumber}
+                  onChange={(e) =>
+                    handleInputChange("taxNumber", e.target.value)
+                  }
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none ${
+                    formErrors.taxNumber ? "border-red-500" : "border-gray-300"
+                  }`}
+                  placeholder="请输入公司税号"
+                  autoFocus
+                />
+
+                {formErrors.taxNumber && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {formErrors.taxNumber}
                   </p>
                 )}
               </div>
