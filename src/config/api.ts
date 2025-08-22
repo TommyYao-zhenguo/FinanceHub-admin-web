@@ -61,6 +61,22 @@ export const API_ENDPOINTS = {
     DELETE: "/api/v1/company/delete",
     DETAIL: "/api/v1/company/detail",
   },
+
+  // 社保配置相关接口
+  SOCIAL_INSURANCE_CONFIG: {
+    LIST: "/api/v1/admin/social-insurance/configs/page",
+    CREATE: "/api/v1/admin/social-insurance/configs",
+    UPDATE: "/api/v1/admin/social-insurance/configs",
+    DELETE: "/api/v1/admin/social-insurance/configs",
+  },
+
+  // 公积金配置相关接口
+  HOUSING_FUND_CONFIG: {
+    LIST: "/api/v1/admin/housing-fund/configs/page",
+    CREATE: "/api/v1/admin/housing-fund/configs",
+    UPDATE: "/api/v1/admin/housing-fund/configs",
+    DELETE: "/api/v1/admin/housing-fund/configs",
+  },
 };
 
 // 请求配置

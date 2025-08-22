@@ -7,6 +7,9 @@ import {
   ChevronRight,
   UserCog,
   Building2,
+  Shield,
+  Home,
+  Upload,
 } from "lucide-react";
 import { useAdminUserContext } from "../contexts/AdminUserContext";
 
@@ -92,6 +95,25 @@ export default function Sidebar({
         id: "user-management",
         label: "用户管理",
         icon: UserCog,
+      });
+    }
+
+    // 添加新的子菜单项
+    if (hasSystemManagementAccess()) {
+      items.push({
+        id: "social-insurance-config",
+        label: "社保比例配置",
+        icon: Shield,
+      });
+      items.push({
+        id: "housing-fund-config",
+        label: "公积金比例配置",
+        icon: Home,
+      });
+      items.push({
+        id: "tax-upload",
+        label: "税费上传",
+        icon: Upload,
       });
     }
 
