@@ -48,7 +48,7 @@ export default function Sidebar({
   };
   const hasSystemManagementAccess = () => {
     if (!userInfo?.roleCode) return false;
-    return userInfo.roleCode === "SUPER_ADMIN" || userInfo.roleCode === "ADMIN";
+    return userInfo.roleCode === "SUPER_ADMIN" || userInfo.roleCode === "ADMIN" || userInfo.roleCode === "CUSTOMER_SERVICE";
   };
 
   // 检查用户是否有权限查看公司管理

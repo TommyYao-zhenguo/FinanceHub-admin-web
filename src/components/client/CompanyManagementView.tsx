@@ -3,6 +3,8 @@ import { Building2, Plus, Edit, Trash2, Search, X } from "lucide-react";
 import { CompanyService } from "../../utils/companyService";
 import { Company, CompanyQueryParams } from "../../types/company";
 import { useAlert } from "../../hooks/useAlert";
+import { AdminUserService } from "../../utils/adminUserService";
+import { AdminUserInfo, UserRole } from "../../types/adminUser";
 
 import toast from "react-hot-toast";
 import { useAdminUserContext } from "../../contexts/AdminUserContext"; // 添加用户上下文
@@ -12,6 +14,7 @@ interface SimpleCreateCompanyRequest {
   companyName: string;
   taxNumber: string;
   isFranchise: boolean; // 是否是加盟商
+  customerServiceId?: string; // 绑定的客服ID
 }
 
 export default function CompanyManagementView() {
@@ -35,6 +38,9 @@ export default function CompanyManagementView() {
   // 添加删除加载状态
   const [deleteLoading, setDeleteLoading] = useState(false);
 
+  // 客服列表状态
+  const [customerServices, setCustomerServices] = useState<AdminUserInfo[]>([]);
+
   const { showAlert } = useAlert();
 
   // 简化的表单数据状态
@@ -42,12 +48,27 @@ export default function CompanyManagementView() {
     companyName: "",
     taxNumber: "",
     isFranchise: false, // 默认不是加盟商
+    customerServiceId: "",
   });
 
   // 表单验证错误
   const [formErrors, setFormErrors] = useState<
     Partial<SimpleCreateCompanyRequest>
   >({});
+
+  // 加载客服列表
+  const loadCustomerServices = async () => {
+    try {
+      const response = await AdminUserService.getCustomerServiceList({
+        page: 1,
+        size: 100, // 获取所有客服
+        roleCode: UserRole.CUSTOMER_SERVICE,
+      });
+      setCustomerServices(response.records);
+    } catch (error) {
+      console.error("加载客服列表失败:", error);
+    }
+  };
 
   // 加载公司列表
   // 修改 loadCompanies 函数，添加重置页码的选项
@@ -104,6 +125,7 @@ export default function CompanyManagementView() {
       companyName: "",
       taxNumber: "",
       isFranchise: false,
+      customerServiceId: "",
     });
     setFormErrors({});
     setShowCreateModal(true);
@@ -115,6 +137,7 @@ export default function CompanyManagementView() {
       companyName: company.companyName,
       taxNumber: company.taxNumber,
       isFranchise: company.franchise || false,
+      customerServiceId: company.customerServiceId || "",
     });
     setFormErrors({});
     setEditingCompany(company);
@@ -128,6 +151,7 @@ export default function CompanyManagementView() {
       companyName: "",
       taxNumber: "",
       isFranchise: false,
+      customerServiceId: "",
     });
     setFormErrors({});
   };
@@ -135,7 +159,7 @@ export default function CompanyManagementView() {
   // 表单输入处理
   const handleInputChange = (
     field: keyof SimpleCreateCompanyRequest,
-    value: string
+    value: string | boolean
   ) => {
     setFormData({ ...formData, [field]: value });
     // 清除对应字段的错误
@@ -174,10 +198,11 @@ export default function CompanyManagementView() {
       if (editingCompany) {
         // 编辑公司 - 构建完整的更新数据，保留原有字段
         await CompanyService.updateCompany({
-          id: editingCompany.companyId,
+          companyId: editingCompany.companyId,
           companyName: formData.companyName,
           taxNumber: formData.taxNumber,
           franchise: formData.isFranchise,
+          customerServiceId: formData.customerServiceId,
         });
         toast.success("公司信息更新成功");
       } else {
@@ -186,6 +211,7 @@ export default function CompanyManagementView() {
           companyName: formData.companyName,
           taxNumber: formData.taxNumber,
           franchise: formData.isFranchise, // 添加加盟商属性
+          customerServiceId: formData.customerServiceId,
         };
         await CompanyService.createCompany(createData);
         toast.success("公司创建成功");
@@ -203,6 +229,7 @@ export default function CompanyManagementView() {
 
   useEffect(() => {
     loadCompanies();
+    loadCustomerServices();
   }, [searchParams]);
 
   // 在组件状态中添加
@@ -302,6 +329,9 @@ export default function CompanyManagementView() {
                     类型
                   </th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-gray-900">
+                    专属客服
+                  </th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-900">
                     状态
                   </th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-gray-900">
@@ -331,6 +361,9 @@ export default function CompanyManagementView() {
                       >
                         {company.franchise ? "加盟商" : "非加盟商"}
                       </span>
+                    </td>
+                    <td className="px-4 py-3 text-sm text-gray-900">
+                      {company.customerServiceName || "未绑定"}
                     </td>
                     <td className="px-4 py-3">
                       <span
@@ -494,6 +527,30 @@ export default function CompanyManagementView() {
                   </p>
                 </div>
               )}
+
+              {/* 绑定客服 */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  绑定客服
+                </label>
+                <select
+                  value={formData.customerServiceId || ""}
+                  onChange={(e) =>
+                    handleInputChange("customerServiceId", e.target.value)
+                  }
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                >
+                  <option value="">请选择客服</option>
+                  {customerServices.map((service) => (
+                    <option key={service.userNo} value={service.userNo}>
+                      {service.username}
+                    </option>
+                  ))}
+                </select>
+                <p className="mt-1 text-xs text-gray-500">
+                  选择负责该公司的客服人员
+                </p>
+              </div>
 
               {/* 提示信息 */}
               {!editingCompany && (

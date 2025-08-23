@@ -123,7 +123,7 @@ function AppContent() {
     try {
       await fetchUserInfo();
       setIsLoggedIn(true);
-      navigate("/customer-service-users"); // 登录成功后跳转到仪表板
+      navigate("/customer-service"); // 登录成功后跳转到仪表板
       console.log("登录成功，已获取用户信息");
     } catch (error) {
       console.error("登录后获取用户信息失败:", error);
@@ -208,10 +208,7 @@ function AppContent() {
               path="/housing-fund-config"
               element={<HousingFundConfigView />}
             />
-            <Route
-              path="/tax-upload"
-              element={<TaxUploadView />}
-            />
+            <Route path="/tax-upload" element={<TaxUploadView />} />
             <Route
               path="/settings"
               element={

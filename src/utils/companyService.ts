@@ -29,6 +29,25 @@ export class CompanyService {
     return response;
   }
 
+  // 获取客服绑定的公司列表
+  static async getCustomerServiceCompanyList(
+    params: CompanyQueryParams = {}
+  ): Promise<CompanyListResponse> {
+    const queryParams = new URLSearchParams();
+
+    if (params.current !== undefined)
+      queryParams.append("page", params.current.toString());
+    if (params.size !== undefined)
+      queryParams.append("size", params.size.toString());
+    if (params.companyName)
+      queryParams.append("companyName", params.companyName);
+    if (params.status) queryParams.append("status", params.status);
+
+    const url = `${API_ENDPOINTS.COMPANY.CUSTOMER_SERVICE_LIST}?${queryParams.toString()}`;
+    const response = await httpClient.get<CompanyListResponse>(url);
+    return response;
+  }
+
   // 创建公司
   static async createCompany(data: CreateCompanyRequest): Promise<void> {
     await httpClient.post(API_ENDPOINTS.COMPANY.CREATE, data);

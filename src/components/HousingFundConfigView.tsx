@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Home, Save, Plus, Edit, Trash2 } from "lucide-react";
+import { Home, Save, Plus, Edit, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
 import toast from "react-hot-toast";
 import { HousingFundConfigService } from "../utils/housingFundConfigService";
 import { HousingFundConfig } from "../types/housingFundConfig";
@@ -18,18 +18,36 @@ export default function HousingFundConfigView() {
     personalRate: "",
     companyId: undefined as number | undefined,
   });
+  
+  // 分页状态
+  const [pagination, setPagination] = useState({
+    current: 1,
+    size: 10,
+    total: 0,
+    pages: 0
+  });
 
   useEffect(() => {
     loadConfigs();
-  }, []);
+  }, [pagination.current, pagination.size]);
 
-  const loadConfigs = async (companyName?: string) => {
+  const loadConfigs = async (companyName?: string, page?: number) => {
     try {
       setLoading(true);
-      const params = companyName ? { companyName } : {};
+      const params = {
+        current: page || pagination.current,
+        size: pagination.size,
+        ...(companyName && { companyName })
+      };
       const data = await HousingFundConfigService.getConfigList(params);
       console.log("configs: ", data);
       setConfigs(data.records);
+      setPagination(prev => ({
+        ...prev,
+        total: data.total,
+        pages: data.pages,
+        current: data.current
+      }));
     } catch {
       toast.error("加载公积金配置失败");
     } finally {
@@ -122,7 +140,8 @@ export default function HousingFundConfigView() {
               value={searchCompanyName}
               onChange={(e) => {
                 setSearchCompanyName(e.target.value);
-                loadConfigs(e.target.value || undefined);
+                setPagination(prev => ({ ...prev, current: 1 }));
+                loadConfigs(e.target.value || undefined, 1);
               }}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none"
             />
@@ -249,6 +268,78 @@ export default function HousingFundConfigView() {
             </tbody>
           </table>
         </div>
+        
+        {/* 分页组件 */}
+        {pagination.total > 0 && (
+          <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
+            <div className="flex items-center justify-between">
+              <div className="text-sm text-gray-700">
+                显示第 {(pagination.current - 1) * pagination.size + 1} 到{' '}
+                {Math.min(pagination.current * pagination.size, pagination.total)} 条，
+                共 {pagination.total} 条记录
+              </div>
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={() => {
+                    const newPage = pagination.current - 1;
+                    setPagination(prev => ({ ...prev, current: newPage }));
+                    loadConfigs(searchCompanyName || undefined, newPage);
+                  }}
+                  disabled={pagination.current <= 1}
+                  className="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-1"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                  <span>上一页</span>
+                </button>
+                
+                <div className="flex items-center space-x-1">
+                  {Array.from({ length: Math.min(5, pagination.pages) }, (_, i) => {
+                    let pageNum;
+                    if (pagination.pages <= 5) {
+                      pageNum = i + 1;
+                    } else if (pagination.current <= 3) {
+                      pageNum = i + 1;
+                    } else if (pagination.current >= pagination.pages - 2) {
+                      pageNum = pagination.pages - 4 + i;
+                    } else {
+                      pageNum = pagination.current - 2 + i;
+                    }
+                    
+                    return (
+                      <button
+                        key={pageNum}
+                        onClick={() => {
+                          setPagination(prev => ({ ...prev, current: pageNum }));
+                          loadConfigs(searchCompanyName || undefined, pageNum);
+                        }}
+                        className={`px-3 py-1 text-sm border rounded-md ${
+                          pageNum === pagination.current
+                            ? 'bg-green-600 text-white border-green-600'
+                            : 'border-gray-300 hover:bg-gray-100'
+                        }`}
+                      >
+                        {pageNum}
+                      </button>
+                    );
+                  })}
+                </div>
+                
+                <button
+                  onClick={() => {
+                    const newPage = pagination.current + 1;
+                    setPagination(prev => ({ ...prev, current: newPage }));
+                    loadConfigs(searchCompanyName || undefined, newPage);
+                  }}
+                  disabled={pagination.current >= pagination.pages}
+                  className="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-1"
+                >
+                  <span>下一页</span>
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* 配置表单弹窗 */}

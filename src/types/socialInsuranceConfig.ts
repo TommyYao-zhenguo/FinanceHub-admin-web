@@ -11,6 +11,22 @@ export interface SocialInsuranceConfig {
   companyId?: string; // 公司ID
   companyName?: string; // 公司名称
   taxNumber?: string; // 税号
+
+  configs: SocialInsuranceDetailConfig[];
+}
+
+export interface SocialInsuranceDetailConfig {
+  id?: string;
+  insuranceType: string; // 保险类型：pension, medical, unemployment, injury, maternity
+  insuranceName: string; // 保险名称
+  companyRate: number; // 公司缴费比例
+  personalRate: number; // 个人缴费比例
+  isActive: boolean; // 是否启用
+  createTime?: string;
+  updateTime?: string;
+  companyId?: string; // 公司ID
+  companyName?: string; // 公司名称
+  taxNumber?: string; // 税号
 }
 
 // 单个险种配置

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Building2, ChevronDown } from 'lucide-react';
 import { CompanyService } from '../utils/companyService';
 import { Company } from '../types/company';
+import { useAdminUserContext } from '../contexts/AdminUserContext';
 
 interface CompanySelectorProps {
   value?: string;
@@ -18,6 +19,7 @@ export default function CompanySelector({
   disabled = false,
   className = ''
 }: CompanySelectorProps) {
+  const { userInfo } = useAdminUserContext();
   const [companies, setCompanies] = useState<Company[]>([]);
   const [loading, setLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -27,11 +29,23 @@ export default function CompanySelector({
   const loadCompanies = async () => {
     try {
       setLoading(true);
-      const response = await CompanyService.getCompanyList({
-        current: 1,
-        size: 100, // 获取所有公司
-        status: 'ACTIVE'
-      });
+      let response;
+      
+      // 根据用户角色调用不同的API
+      if (userInfo?.roleCode === 'CUSTOMER_SERVICE') {
+        response = await CompanyService.getCustomerServiceCompanyList({
+          current: 1,
+          size: 100, // 获取所有公司
+          status: 'ACTIVE'
+        });
+      } else {
+        response = await CompanyService.getCompanyList({
+          current: 1,
+          size: 100, // 获取所有公司
+          status: 'ACTIVE'
+        });
+      }
+      
       setCompanies(response.records || []);
     } catch (error) {
       console.error('加载公司列表失败:', error);

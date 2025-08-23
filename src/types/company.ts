@@ -11,6 +11,8 @@ export interface Company {
   email: string;
   status: "ACTIVE" | "INACTIVE";
   franchise: boolean; // 是否是加盟商
+  customerServiceId?: string; // 绑定的客服ID
+  customerServiceName?: string; // 绑定的客服姓名
   createTime: string;
   updateTime: string;
 }
@@ -20,11 +22,12 @@ export interface CreateCompanyRequest {
   companyName: string;
   taxNumber: string;
   franchise: boolean; // 是否是加盟商
+  customerServiceId?: string; // 绑定的客服ID
 }
 
 // 更新公司请求接口
 export interface UpdateCompanyRequest extends CreateCompanyRequest {
-  id: string;
+  companyId: string;
 }
 
 // 公司列表查询参数
