@@ -1,143 +1,200 @@
-import React, { useState, useEffect } from "react";
-import { Shield, Save, Plus, Edit, Trash2 } from "lucide-react";
-import toast from "react-hot-toast";
-import { SocialInsuranceConfigService } from "../utils/socialInsuranceConfigService";
-import { SocialInsuranceConfig } from "../types/socialInsuranceConfig";
-import CompanySelector from "./CompanySelector";
+import React, { useState, useEffect } from 'react';
+import { Shield, Save, Plus, Edit, Trash2 } from 'lucide-react';
+import toast from 'react-hot-toast';
+import { SocialInsuranceConfigService } from '../utils/socialInsuranceConfigService';
+import { SocialInsuranceConfig } from '../types/socialInsuranceConfig';
+import CompanySelector from './CompanySelector';
+
+// 保险类型配置
+const INSURANCE_TYPES = [
+  { value: 'pension', label: '养老保险', color: 'bg-blue-500' },
+  { value: 'medical', label: '医疗保险', color: 'bg-green-500' },
+  { value: 'unemployment', label: '失业保险', color: 'bg-yellow-500' },
+  { value: 'injury', label: '工伤保险', color: 'bg-red-500' },
+  { value: 'maternity', label: '生育保险', color: 'bg-purple-500' },
+];
 
 export default function SocialInsuranceConfigView() {
   const [configs, setConfigs] = useState<SocialInsuranceConfig[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [selectedCompanyId, setSelectedCompanyId] = useState<string>('');
+  const [loading, setLoading] = useState(true);
+  const [searchCompanyName, setSearchCompanyName] = useState<string>('');
+  const [showForm, setShowForm] = useState(false);
+  const [editingConfig, setEditingConfig] = useState<SocialInsuranceConfig | null>(null);
 
-  // 加载配置数据
-  const loadConfigs = async () => {
-    try {
-      setLoading(true);
-      const data = await SocialInsuranceConfigService.getConfigList();
-      setConfigs(data.records);
-    } catch (error) {
-      console.error('加载社保配置失败:', error);
-      toast.error('加载配置失败，请重试');
-    } finally {
-      setLoading(false);
+
+  // 新的批量配置表单数据
+  const [batchFormData, setBatchFormData] = useState({
+    companyId: '',
+    configs: {
+      pension: { personalRate: 8, companyRate: 16 },
+      medical: { personalRate: 2, companyRate: 8 },
+      unemployment: { personalRate: 0.5, companyRate: 0.5 },
+      injury: { personalRate: 0, companyRate: 0.2 },
+      maternity: { personalRate: 0, companyRate: 0.8 },
     }
-  };
+  });
 
   useEffect(() => {
     loadConfigs();
   }, []);
-  const [showForm, setShowForm] = useState(false);
-  const [editingConfig, setEditingConfig] = useState<SocialInsuranceConfig | null>(null);
-  const [formData, setFormData] = useState({
-    companyId: '',
-    pensionCompanyRate: '',
-    pensionPersonalRate: '',
-    medicalCompanyRate: '',
-    medicalPersonalRate: '',
-    unemploymentCompanyRate: '',
-    unemploymentPersonalRate: '',
-    workInjuryCompanyRate: '',
-    maternityCompanyRate: '',
-  });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    
+  const fetchCompanyConfigs = async (companyId: string) => {
     try {
-      // 创建多个配置项
-      const configsToSave = [
-        {
-          insuranceType: 'pension',
-          insuranceName: '养老保险',
-          companyRate: parseFloat(formData.pensionCompanyRate),
-          personalRate: parseFloat(formData.pensionPersonalRate),
-          isActive: true
-        },
-        {
-          insuranceType: 'medical',
-          insuranceName: '医疗保险',
-          companyRate: parseFloat(formData.medicalCompanyRate),
-          personalRate: parseFloat(formData.medicalPersonalRate),
-          isActive: true
-        },
-        {
-          insuranceType: 'unemployment',
-          insuranceName: '失业保险',
-          companyRate: parseFloat(formData.unemploymentCompanyRate),
-          personalRate: parseFloat(formData.unemploymentPersonalRate),
-          isActive: true
-        },
-        {
-          insuranceType: 'injury',
-          insuranceName: '工伤保险',
-          companyRate: parseFloat(formData.workInjuryCompanyRate),
-          personalRate: 0,
-          isActive: true
-        },
-        {
-          insuranceType: 'maternity',
-          insuranceName: '生育保险',
-          companyRate: parseFloat(formData.maternityCompanyRate),
-          personalRate: 0,
-          isActive: true
+      const configs = await SocialInsuranceConfigService.getCompanyConfigs(companyId);
+      // 将现有配置填充到表单中
+      const updatedBatchFormData = { ...batchFormData };
+      configs.forEach((config: SocialInsuranceConfig) => {
+        const insuranceType = config.insuranceType;
+        if (updatedBatchFormData.configs[insuranceType as keyof typeof updatedBatchFormData.configs]) {
+          updatedBatchFormData.configs[insuranceType as keyof typeof updatedBatchFormData.configs].personalRate = config.personalRate * 100; // 转换为百分比
+          updatedBatchFormData.configs[insuranceType as keyof typeof updatedBatchFormData.configs].companyRate = config.companyRate * 100; // 转换为百分比
         }
-      ];
-
-      // 保存所有配置
-      for (const config of configsToSave) {
-        await SocialInsuranceConfigService.createConfig(config);
-      }
-      
-      await loadConfigs();
-      toast.success(editingConfig ? "更新成功" : "创建成功");
-      setShowForm(false);
-      setEditingConfig(null);
-      resetForm();
+      });
+      setBatchFormData(updatedBatchFormData);
     } catch (error) {
-      console.error("操作失败:", error);
-      toast.error("操作失败，请重试");
+      console.error('获取公司配置失败:', error);
+    }
+  };
+
+  const loadConfigs = async (companyName?: string) => {
+    try {
+      setLoading(true);
+      const params = companyName ? { companyName } : {};
+      const data = await SocialInsuranceConfigService.getConfigList(params);
+      console.log('social insurance configs: ', data);
+      setConfigs(data.records);
+    } catch {
+      toast.error('加载社保配置失败');
     } finally {
       setLoading(false);
     }
   };
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!batchFormData.companyId) {
+      toast.error('请选择公司');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      
+      // 构建批量配置数据
+      const configs = Object.entries(batchFormData.configs).map(([type, rates]) => ({
+        insuranceType: type,
+        insuranceName: getInsuranceNameByType(type),
+        companyRate: rates.companyRate,
+        personalRate: rates.personalRate,
+        isActive: true,
+      }));
+
+      const batchRequest = {
+        companyId: batchFormData.companyId,
+        configs,
+      };
+
+      await SocialInsuranceConfigService.batchConfigRates(batchRequest);
+      toast.success('配置保存成功');
+
+      setShowForm(false);
+      setEditingConfig(null);
+      resetForm();
+      loadConfigs();
+    } catch {
+      toast.error('配置保存失败');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 根据险种类型获取险种名称
+  const getInsuranceNameByType = (type: string): string => {
+    const typeMap: Record<string, string> = {
+      pension: '养老保险',
+      medical: '医疗保险',
+      unemployment: '失业保险',
+      injury: '工伤保险',
+      maternity: '生育保险',
+    };
+    return typeMap[type] || type;
+  };
+
+  // 计算合计比例
+  const calculateTotal = (personalRate: number, companyRate: number): string => {
+    return (personalRate + companyRate).toFixed(1);
+  };
+
+  // 更新险种比例
+  const updateInsuranceRate = (insuranceType: string, field: 'personalRate' | 'companyRate', value: number) => {
+    setBatchFormData(prev => ({
+      ...prev,
+      configs: {
+        ...prev.configs,
+        [insuranceType]: {
+          ...prev.configs[insuranceType as keyof typeof prev.configs],
+          [field]: value,
+        },
+      },
+    }));
+  };
+
   const resetForm = () => {
-    setFormData({
+    setBatchFormData({
       companyId: '',
-      pensionCompanyRate: '',
-      pensionPersonalRate: '',
-      medicalCompanyRate: '',
-      medicalPersonalRate: '',
-      unemploymentCompanyRate: '',
-      unemploymentPersonalRate: '',
-      workInjuryCompanyRate: '',
-      maternityCompanyRate: '',
+      configs: {
+        pension: { personalRate: 8, companyRate: 16 },
+        medical: { personalRate: 2, companyRate: 8 },
+        unemployment: { personalRate: 0.5, companyRate: 0.5 },
+        injury: { personalRate: 0, companyRate: 0.2 },
+        maternity: { personalRate: 0, companyRate: 0.8 },
+      }
     });
   };
 
   const handleEdit = (config: SocialInsuranceConfig) => {
     setEditingConfig(config);
-    // 由于新的API结构，编辑功能需要重新设计
-    // 暂时禁用编辑功能
-    toast.error('编辑功能正在开发中');
+    // 编辑单个配置时，不需要设置批量表单数据
+    setShowForm(true);
   };
 
   const handleDelete = async (configId: string) => {
-    if (!confirm("确定要删除这个配置吗？")) return;
-    
+    if (!confirm('确定要删除这个配置吗？')) return;
+
     try {
-      setLoading(true);
       await SocialInsuranceConfigService.deleteConfig(configId);
+      toast.success('删除成功');
       await loadConfigs();
-      toast.success("删除成功");
     } catch (error) {
-      console.error("删除失败:", error);
-      toast.error("删除失败，请重试");
-    } finally {
-      setLoading(false);
+      console.error('删除失败:', error);
+      toast.error('删除失败，请重试');
     }
+  };
+
+  // 按公司分组配置
+  const groupedConfigs = configs.reduce((acc, config) => {
+    const key = config.companyId || 'unknown';
+    if (!acc[key]) {
+      acc[key] = {
+        companyInfo: {
+          companyId: config.companyId,
+          companyName: config.companyName,
+          taxNumber: config.taxNumber,
+        },
+        configs: [],
+      };
+    }
+    acc[key].configs.push(config);
+    return acc;
+  }, {} as Record<string, { companyInfo: { companyId?: string; companyName?: string; taxNumber?: string }; configs: SocialInsuranceConfig[] }>);
+
+  const getInsuranceTypeLabel = (type: string) => {
+    return INSURANCE_TYPES.find(t => t.value === type)?.label || type;
+  };
+
+  const getInsuranceTypeColor = (type: string) => {
+    return INSURANCE_TYPES.find(t => t.value === type)?.color || 'bg-gray-500';
   };
 
   return (
@@ -150,17 +207,22 @@ export default function SocialInsuranceConfigView() {
           </div>
           <div>
             <h1 className="text-2xl font-bold text-gray-900">社保比例配置</h1>
-            <p className="text-gray-600">管理各公司的社保缴费比例设置</p>
+            <p className="text-gray-600">管理各公司的社会保险缴费比例设置</p>
           </div>
         </div>
         <div className="flex items-center space-x-4">
-          <CompanySelector
-            value={selectedCompanyId}
-            onChange={(id) => {
-              setSelectedCompanyId(id);
-            }}
-            className="min-w-[200px]"
-          />
+          <div className="flex-1 max-w-md">
+            <input
+              type="text"
+              placeholder="搜索公司名称..."
+              value={searchCompanyName}
+              onChange={(e) => {
+                setSearchCompanyName(e.target.value);
+                loadConfigs(e.target.value || undefined);
+              }}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+            />
+          </div>
           <button
             onClick={() => {
               setEditingConfig(null);
@@ -176,117 +238,96 @@ export default function SocialInsuranceConfigView() {
       </div>
 
       {/* 配置列表 */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200">
-        <div className="p-6 border-b border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900">社保配置列表</h3>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  公司名称
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  养老保险
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  医疗保险
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  失业保险
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  工伤保险
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  生育保险
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  操作
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {configs.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="px-6 py-12 text-center text-gray-500">
-                    暂无配置数据
-                  </td>
-                </tr>
-              ) : (
-                configs.map((config) => (
-                  <tr key={config.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">
-                        {config.insuranceName}
+      <div className="space-y-6">
+        {loading ? (
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center text-gray-500">
+            加载中...
+          </div>
+        ) : Object.keys(groupedConfigs).length === 0 ? (
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center text-gray-500">
+            暂无配置数据
+          </div>
+        ) : (
+          Object.entries(groupedConfigs).map(([companyId, group]) => (
+            <div key={companyId} className="bg-white rounded-xl shadow-sm border border-gray-200">
+              {/* 公司信息头部 */}
+              <div className="p-6 border-b border-gray-200 bg-gray-50 rounded-t-xl">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      {group.companyInfo.companyName || '未知公司'}
+                    </h3>
+                    <p className="text-sm text-gray-600">
+                      税号: {group.companyInfo.taxNumber || '-'} | 公司ID: {group.companyInfo.companyId || '-'}
+                    </p>
+                  </div>
+                  <div className="text-sm text-gray-500">
+                    {group.configs.length} 个险种配置
+                  </div>
+                </div>
+              </div>
+
+              {/* 险种配置列表 */}
+              <div className="p-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {group.configs.map((config) => (
+                    <div key={config.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center space-x-2">
+                          <div className={`w-3 h-3 rounded-full ${getInsuranceTypeColor(config.insuranceType)}`}></div>
+                          <h4 className="font-medium text-gray-900">
+                            {getInsuranceTypeLabel(config.insuranceType)}
+                          </h4>
+                        </div>
+                        <div className="flex items-center space-x-1">
+                          <button
+                            onClick={() => handleEdit(config)}
+                            className="text-blue-600 hover:text-blue-900 p-1 rounded"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(config.id!)}
+                            className="text-red-600 hover:text-red-900 p-1 rounded"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
                       </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">
-                        公司: {config.insuranceType === 'pension' ? `${config.companyRate}%` : '-'}
+                      <div className="space-y-2 text-sm">
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">公司比例:</span>
+                          <span className="font-medium">{config.companyRate}%</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">个人比例:</span>
+                          <span className="font-medium">{config.personalRate}%</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">状态:</span>
+                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                            config.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                          }`}>
+                            {config.isActive ? '启用' : '禁用'}
+                          </span>
+                        </div>
                       </div>
-                      <div className="text-sm text-gray-500">
-                        个人: {config.insuranceType === 'pension' ? `${config.personalRate}%` : '-'}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">
-                        公司: {config.insuranceType === 'medical' ? `${config.companyRate}%` : '-'}
-                      </div>
-                      <div className="text-sm text-gray-500">
-                        个人: {config.insuranceType === 'medical' ? `${config.personalRate}%` : '-'}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">
-                        公司: {config.insuranceType === 'unemployment' ? `${config.companyRate}%` : '-'}
-                      </div>
-                      <div className="text-sm text-gray-500">
-                        个人: {config.insuranceType === 'unemployment' ? `${config.personalRate}%` : '-'}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">
-                        公司: {config.insuranceType === 'injury' ? `${config.companyRate}%` : '-'}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">
-                        公司: {config.insuranceType === 'maternity' ? `${config.companyRate}%` : '-'}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <div className="flex items-center space-x-2">
-                        <button
-                          onClick={() => handleEdit(config)}
-                          className="text-blue-600 hover:text-blue-900 p-1 rounded"
-                        >
-                          <Edit className="h-4 w-4" />
-                        </button>
-                        <button
-                          onClick={() => config.id && handleDelete(config.id)}
-                          className="text-red-600 hover:text-red-900 p-1 rounded"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ))
+        )}
       </div>
 
       {/* 配置表单弹窗 */}
       {showForm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between p-6 border-b border-gray-200">
               <h3 className="text-lg font-semibold text-gray-900">
-                {editingConfig ? "编辑社保配置" : "新增社保配置"}
+                {editingConfig ? '编辑社保配置' : '新增社保配置'}
               </h3>
               <button
                 onClick={() => {
@@ -301,130 +342,245 @@ export default function SocialInsuranceConfigView() {
             </div>
 
             <form onSubmit={handleSubmit} className="p-6 space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    公司ID <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="number"
-                    value={formData.companyId}
-                    onChange={(e) => setFormData({ ...formData, companyId: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                    required
-                  />
+              {!editingConfig && (
+                <div className="grid grid-cols-1 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      所属公司 <span className="text-red-500">*</span>
+                    </label>
+                    <CompanySelector
+                      value={batchFormData.companyId}
+                      onChange={(companyId: string) => {
+                        setBatchFormData({ 
+                          ...batchFormData, 
+                          companyId: companyId || '' 
+                        });
+                        if (companyId) {
+                          fetchCompanyConfigs(companyId);
+                        }
+                      }}
+                      className="w-full"
+                    />
+                  </div>
+                </div>
+              )}
+              
+              {editingConfig && (
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <div className="text-sm text-gray-600">
+                    <span className="font-medium">编辑配置：</span>
+                    {editingConfig.companyName ? `${editingConfig.companyName} (${editingConfig.taxNumber})` : `公司ID: ${editingConfig.companyId}`}
+                    <span className="ml-4 font-medium">险种：</span>
+                    {getInsuranceTypeLabel(editingConfig.insuranceType)}
+                  </div>
+                </div>
+              )}
+              
+              {/* 社保比例配置卡片 */}
+              <div className="space-y-4">
+                {/* 养老保险 */}
+                <div className="border border-gray-200 rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-4">
+                    <h4 className="text-lg font-medium text-gray-900">养老保险</h4>
+                    <span className="text-sm text-gray-500">固定比例</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        个人缴费比例 (%)
+                      </label>
+                      <input
+                        type="number"
+                        step="0.1"
+                        min="0"
+                        max="100"
+                        value={batchFormData.configs.pension.personalRate}
+                        onChange={(e) => updateInsuranceRate('pension', 'personalRate', parseFloat(e.target.value) || 0)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        公司缴费比例 (%)
+                      </label>
+                      <input
+                        type="number"
+                        step="0.1"
+                        min="0"
+                        max="100"
+                        value={batchFormData.configs.pension.companyRate}
+                        onChange={(e) => updateInsuranceRate('pension', 'companyRate', parseFloat(e.target.value) || 0)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                      />
+                    </div>
+                  </div>
+                  <div className="mt-3 text-sm text-gray-600">
+                    合计缴费比例: {calculateTotal(batchFormData.configs.pension.personalRate, batchFormData.configs.pension.companyRate)}%
+                  </div>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    养老保险-公司比例(%) <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={formData.pensionCompanyRate}
-                    onChange={(e) => setFormData({ ...formData, pensionCompanyRate: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                    required
-                  />
+                {/* 医疗保险 */}
+                <div className="border border-gray-200 rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-4">
+                    <h4 className="text-lg font-medium text-gray-900">医疗保险</h4>
+                    <span className="text-sm text-gray-500">固定比例</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        个人缴费比例 (%)
+                      </label>
+                      <input
+                         type="number"
+                         step="0.1"
+                         min="0"
+                         max="100"
+                         value={batchFormData.configs.medical.personalRate}
+                         onChange={(e) => updateInsuranceRate('medical', 'personalRate', parseFloat(e.target.value) || 0)}
+                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                       />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        公司缴费比例 (%)
+                      </label>
+                      <input
+                         type="number"
+                         step="0.1"
+                         min="0"
+                         max="100"
+                         value={batchFormData.configs.medical.companyRate}
+                         onChange={(e) => updateInsuranceRate('medical', 'companyRate', parseFloat(e.target.value) || 0)}
+                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                       />
+                    </div>
+                  </div>
+                  <div className="mt-3 text-sm text-gray-600">
+                     合计缴费比例: {calculateTotal(batchFormData.configs.medical.personalRate, batchFormData.configs.medical.companyRate)}%
+                   </div>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    养老保险-个人比例(%) <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={formData.pensionPersonalRate}
-                    onChange={(e) => setFormData({ ...formData, pensionPersonalRate: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                    required
-                  />
+                {/* 失业保险 */}
+                <div className="border border-gray-200 rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-4">
+                    <h4 className="text-lg font-medium text-gray-900">失业保险</h4>
+                    <span className="text-sm text-gray-500">固定比例</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        个人缴费比例 (%)
+                      </label>
+                      <input
+                         type="number"
+                         step="0.1"
+                         min="0"
+                         max="100"
+                         value={batchFormData.configs.unemployment.personalRate}
+                         onChange={(e) => updateInsuranceRate('unemployment', 'personalRate', parseFloat(e.target.value) || 0)}
+                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                       />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        公司缴费比例 (%)
+                      </label>
+                      <input
+                         type="number"
+                         step="0.1"
+                         min="0"
+                         max="100"
+                         value={batchFormData.configs.unemployment.companyRate}
+                         onChange={(e) => updateInsuranceRate('unemployment', 'companyRate', parseFloat(e.target.value) || 0)}
+                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                       />
+                    </div>
+                  </div>
+                  <div className="mt-3 text-sm text-gray-600">
+                     合计缴费比例: {calculateTotal(batchFormData.configs.unemployment.personalRate, batchFormData.configs.unemployment.companyRate)}%
+                   </div>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    医疗保险-公司比例(%) <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={formData.medicalCompanyRate}
-                    onChange={(e) => setFormData({ ...formData, medicalCompanyRate: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                    required
-                  />
+                {/* 工伤保险 */}
+                <div className="border border-gray-200 rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-4">
+                    <h4 className="text-lg font-medium text-gray-900">工伤保险</h4>
+                    <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded">固定比例</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        个人缴费比例 (%)
+                      </label>
+                      <input
+                         type="number"
+                         step="0.1"
+                         min="0"
+                         max="100"
+                         value={batchFormData.configs.injury.personalRate}
+                         onChange={(e) => updateInsuranceRate('injury', 'personalRate', parseFloat(e.target.value) || 0)}
+                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                       />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        公司缴费比例 (%)
+                      </label>
+                      <input
+                         type="number"
+                         step="0.1"
+                         min="0"
+                         max="100"
+                         value={batchFormData.configs.injury.companyRate}
+                         onChange={(e) => updateInsuranceRate('injury', 'companyRate', parseFloat(e.target.value) || 0)}
+                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                       />
+                    </div>
+                  </div>
+                  <div className="mt-3 text-sm text-gray-600">
+                     合计缴费比例: {calculateTotal(batchFormData.configs.injury.personalRate, batchFormData.configs.injury.companyRate)}%
+                   </div>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    医疗保险-个人比例(%) <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={formData.medicalPersonalRate}
-                    onChange={(e) => setFormData({ ...formData, medicalPersonalRate: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    失业保险-公司比例(%) <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={formData.unemploymentCompanyRate}
-                    onChange={(e) => setFormData({ ...formData, unemploymentCompanyRate: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    失业保险-个人比例(%) <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={formData.unemploymentPersonalRate}
-                    onChange={(e) => setFormData({ ...formData, unemploymentPersonalRate: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    工伤保险-公司比例(%) <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={formData.workInjuryCompanyRate}
-                    onChange={(e) => setFormData({ ...formData, workInjuryCompanyRate: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    生育保险-公司比例(%) <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={formData.maternityCompanyRate}
-                    onChange={(e) => setFormData({ ...formData, maternityCompanyRate: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                    required
-                  />
+                {/* 生育保险 */}
+                <div className="border border-gray-200 rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-4">
+                    <h4 className="text-lg font-medium text-gray-900">生育保险</h4>
+                    <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded">固定比例</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        个人缴费比例 (%)
+                      </label>
+                      <input
+                         type="number"
+                         step="0.1"
+                         min="0"
+                         max="100"
+                         value={batchFormData.configs.maternity.personalRate}
+                         onChange={(e) => updateInsuranceRate('maternity', 'personalRate', parseFloat(e.target.value) || 0)}
+                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                       />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        公司缴费比例 (%)
+                      </label>
+                      <input
+                         type="number"
+                         step="0.1"
+                         min="0"
+                         max="100"
+                         value={batchFormData.configs.maternity.companyRate}
+                         onChange={(e) => updateInsuranceRate('maternity', 'companyRate', parseFloat(e.target.value) || 0)}
+                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                       />
+                    </div>
+                  </div>
+                  <div className="mt-3 text-sm text-gray-600">
+                     合计缴费比例: {calculateTotal(batchFormData.configs.maternity.personalRate, batchFormData.configs.maternity.companyRate)}%
+                   </div>
                 </div>
               </div>
 
@@ -446,7 +602,7 @@ export default function SocialInsuranceConfigView() {
                   className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2 disabled:opacity-50"
                 >
                   <Save className="h-4 w-4" />
-                  <span>{loading ? "保存中..." : "保存"}</span>
+                  <span>{loading ? '保存中...' : '保存'}</span>
                 </button>
               </div>
             </form>

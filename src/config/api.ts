@@ -66,6 +66,7 @@ export const API_ENDPOINTS = {
   SOCIAL_INSURANCE_CONFIG: {
     LIST: "/api/v1/admin/social-insurance/configs/page",
     CREATE: "/api/v1/admin/social-insurance/configs",
+    BATCH: "/api/v1/admin/social-insurance/configs/batch",
     UPDATE: "/api/v1/admin/social-insurance/configs",
     DELETE: "/api/v1/admin/social-insurance/configs",
   },

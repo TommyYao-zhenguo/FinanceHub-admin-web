@@ -5,6 +5,7 @@ import {
   CreateSocialInsuranceConfigRequest,
   SocialInsuranceConfigQueryParams,
   SocialInsuranceConfigListResponse,
+  BatchSocialInsuranceConfigRequest,
 } from "../types/socialInsuranceConfig";
 
 export class SocialInsuranceConfigService {
@@ -15,13 +16,17 @@ export class SocialInsuranceConfigService {
     const queryParams = new URLSearchParams();
 
     if (params.current !== undefined)
-      queryParams.append("page", params.current.toString());
+      queryParams.append("current", params.current.toString());
     if (params.size !== undefined)
       queryParams.append("size", params.size.toString());
     if (params.insuranceType)
       queryParams.append("insuranceType", params.insuranceType);
     if (params.isActive !== undefined)
       queryParams.append("isActive", params.isActive.toString());
+    if (params.companyName)
+      queryParams.append("companyName", params.companyName);
+    if (params.companyId)
+      queryParams.append("companyId", params.companyId);
 
     const url = `${API_ENDPOINTS.SOCIAL_INSURANCE_CONFIG.LIST}?${queryParams.toString()}`;
     const response = await httpClient.get<SocialInsuranceConfigListResponse>(url);
@@ -47,6 +52,19 @@ export class SocialInsuranceConfigService {
   static async getConfigDetail(id: string): Promise<SocialInsuranceConfig> {
     const response = await httpClient.get<SocialInsuranceConfig>(
       `${API_ENDPOINTS.SOCIAL_INSURANCE_CONFIG.LIST}/${id}`
+    );
+    return response;
+  }
+
+  // 批量配置社保比例
+  static async batchConfigRates(request: BatchSocialInsuranceConfigRequest): Promise<void> {
+    await httpClient.post(`${API_ENDPOINTS.SOCIAL_INSURANCE_CONFIG.BATCH}`, request);
+  }
+
+  // 获取公司的所有社保配置
+  static async getCompanyConfigs(companyId: string): Promise<SocialInsuranceConfig[]> {
+    const response = await httpClient.get<SocialInsuranceConfig[]>(
+      `${API_ENDPOINTS.SOCIAL_INSURANCE_CONFIG.LIST}/company/${companyId}`
     );
     return response;
   }
