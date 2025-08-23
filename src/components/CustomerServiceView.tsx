@@ -68,7 +68,7 @@ export default function CustomerServiceView() {
         page: pagination.current,
         size: pagination.size,
         keyword: searchTerm || undefined,
-        requestType: selectedCategory !== 'all' ? selectedCategory : undefined
+        status: selectedCategory !== 'all' ? selectedCategory : undefined
       };
 
       // 并行加载请求列表和统计信息
@@ -259,7 +259,7 @@ export default function CustomerServiceView() {
               <RefreshCw className="h-4 w-4" />
             </button>
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-3 gap-3">
             <div className="bg-red-50 p-3 rounded-lg">
               <div className="text-2xl font-bold text-red-600">
                 {statistics.processingCount}
@@ -278,12 +278,7 @@ export default function CustomerServiceView() {
               </div>
               <div className="text-sm text-green-600">已完成</div>
             </div>
-            <div className="bg-purple-50 p-3 rounded-lg">
-              <div className="text-2xl font-bold text-purple-600">
-                {statistics.highPriorityRequests}
-              </div>
-              <div className="text-sm text-purple-600">重要优先级</div>
-            </div>
+             
           </div>
         </div>
 

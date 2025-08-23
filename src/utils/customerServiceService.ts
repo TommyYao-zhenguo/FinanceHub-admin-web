@@ -109,7 +109,6 @@ export class CustomerServiceService {
     if (params.keyword) queryParams.append("keyword", params.keyword);
     if (params.startTime) queryParams.append("startTime", params.startTime);
     if (params.endTime) queryParams.append("endTime", params.endTime);
-    if (params.assignedTo) queryParams.append("assignedTo", params.assignedTo.toString());
 
     const url = `/api/v1/admin/customer-service/requests?${queryParams.toString()}`;
     const response = await httpClient.get<CustomerServiceListResponse>(url);
