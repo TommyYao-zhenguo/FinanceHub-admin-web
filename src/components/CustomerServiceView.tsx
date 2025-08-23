@@ -8,6 +8,7 @@ import {
   FileText,
   MessageSquare,
   RefreshCw,
+  AlarmClock,
 } from "lucide-react";
 import { CustomerServiceService, CustomerServiceRequest, CustomerServiceStatistics } from "../utils/customerServiceService";
 import toast from "react-hot-toast";
@@ -584,8 +585,8 @@ export default function CustomerServiceView() {
               <div className="flex justify-between">
                 <div className="flex space-x-2">
                   <button className="flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
-                    <MessageSquare className="h-4 w-4" />
-                    <span>添加回复</span>
+                    <AlarmClock className="h-4 w-4" />
+                    <span>开始处理</span>
                   </button>
                   {selectedMessage.status === "PENDING" && (
                     <button
