@@ -21,13 +21,17 @@ export interface Company {
 export interface CreateCompanyRequest {
   companyName: string;
   taxNumber: string;
-  franchise: boolean; // 是否是加盟商
+  isFranchise: boolean; // 是否是加盟商
   customerServiceId?: string; // 绑定的客服ID
 }
 
 // 更新公司请求接口
-export interface UpdateCompanyRequest extends CreateCompanyRequest {
+export interface UpdateCompanyRequest {
   companyId: string;
+  companyName: string;
+  taxNumber: string;
+  isFranchise: boolean; // 是否是加盟商
+  customerServiceId?: string; // 绑定的客服ID
 }
 
 // 公司列表查询参数

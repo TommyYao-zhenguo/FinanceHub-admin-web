@@ -454,18 +454,19 @@ export default function SocialInsuranceConfigView() {
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="text-sm text-gray-900">
-                              {config.personalRate}%
+                              {config.personalRate * 100}%
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="text-sm text-gray-900">
-                              {config.companyRate}%
+                              {config.companyRate * 100}%
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="text-sm font-medium text-blue-600">
                               {(
-                                config.personalRate + config.companyRate
+                                config.personalRate * 100 +
+                                config.companyRate * 100
                               ).toFixed(1)}
                               %
                             </div>
