@@ -5,7 +5,6 @@ import {
   Clock,
   CheckCircle,
   Search,
-  FileText,
   MessageSquare,
   RefreshCw,
   AlarmClock,
@@ -189,12 +188,14 @@ export default function CustomerServiceView() {
     switch (requestType) {
       case "INVOICE_APPLICATION":
         return "bg-red-100 text-red-800";
-      case "PAYROLL":
+      case "EMPLOYEE_REMOVE":
         return "bg-yellow-100 text-yellow-800";
-      case "TAX":
+      case "EMPLOYEE_DELETE":
         return "bg-green-100 text-green-800";
-      case "SOCIAL_INSURANCE":
+      case "EMPLOYEE_ADD":
         return "bg-blue-100 text-blue-800";
+      case "EMPLOYEE_EDIT":
+        return "bg-purple-100 text-purple-800";
       default:
         return "bg-gray-100 text-gray-800";
     }
@@ -217,14 +218,14 @@ export default function CustomerServiceView() {
     switch (requestType) {
       case "INVOICE_APPLICATION":
         return "申请开票";
-      case "PAYROLL":
-        return " payroll";
-      case "TAX":
-        return "税";
-      case "SOCIAL_INSURANCE":
-        return "社保";
-      case "HOUSING_FUND":
-        return "公积金";
+      case "EMPLOYEE_REMOVE":
+        return "员工离职";
+      case "EMPLOYEE_DELETE":
+        return "删除员工";
+      case "EMPLOYEE_ADD":
+        return "添加员工";
+      case "EMPLOYEE_EDIT":
+        return "修改员工";
       case "REPORT":
         return "报告";
       default:
@@ -283,7 +284,7 @@ export default function CustomerServiceView() {
           <div className="grid grid-cols-3 gap-3">
             <div className="bg-red-50 p-3 rounded-lg">
               <div className="text-2xl font-bold text-red-600">
-                {statistics.processingCount}
+                {statistics.pendingCount}
               </div>
               <div className="text-sm text-red-600">待处理</div>
             </div>
