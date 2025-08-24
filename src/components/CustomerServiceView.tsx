@@ -163,11 +163,11 @@ export default function CustomerServiceView() {
       id: "all",
       label: "全部",
       count:
-        statistics.processingCount +
+        statistics.pendingCount +
         statistics.processingCount +
         statistics.completedCount,
     },
-    { id: "PENDING", label: "待处理", count: statistics.processingCount },
+    { id: "PENDING", label: "待处理", count: statistics.pendingCount },
     { id: "PROCESSING", label: "处理中", count: statistics.processingCount },
     { id: "COMPLETED", label: "已完成", count: statistics.completedCount },
   ];
@@ -594,25 +594,20 @@ export default function CustomerServiceView() {
             <div className="p-6 border-t border-gray-200">
               <div className="flex justify-between">
                 <div className="flex space-x-2">
-                  <button className="flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
-                    <AlarmClock className="h-4 w-4" />
-                    <span>开始处理</span>
-                  </button>
                   {selectedMessage.status === "PENDING" && (
                     <button
                       onClick={() =>
                         updateRequestStatus(selectedMessage.id, "PROCESSING")
                       }
-                      className="flex items-center space-x-2 px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg transition-colors"
+                      className="flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
                     >
-                      <Clock className="h-4 w-4" />
-                      <span>标记处理中</span>
+                      <AlarmClock className="h-4 w-4" />
+                      <span>开始处理</span>
                     </button>
                   )}
                 </div>
                 <div className="flex space-x-2">
-                  {(selectedMessage.status === "PENDING" ||
-                    selectedMessage.status === "PROCESSING") && (
+                  {selectedMessage.status === "PROCESSING" && (
                     <button
                       onClick={() =>
                         updateRequestStatus(selectedMessage.id, "COMPLETED")
