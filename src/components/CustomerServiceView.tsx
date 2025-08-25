@@ -222,7 +222,7 @@ export default function CustomerServiceView() {
       case "EMPLOYEE_DELETE":
         return "删除员工";
       case "EMPLOYEE_ADD":
-        return "添加员工";
+        return "新增员工";
       case "EMPLOYEE_EDIT":
         return "修改员工";
       case "REPORT":
@@ -256,7 +256,7 @@ export default function CustomerServiceView() {
   return (
     <div className="flex h-full bg-gray-50">
       {/* 左侧面板 */}
-      <div className="w-1/2 bg-white border-r border-gray-200 flex flex-col">
+      <div className="w-2/5 bg-white border-r border-gray-200 flex flex-col">
         {/* 统计卡片 */}
         <div className="p-4 border-b border-gray-200">
           <div className="flex items-center justify-between mb-4">
@@ -383,7 +383,6 @@ export default function CustomerServiceView() {
                       <span className="text-xs text-gray-500">
                         {new Date(request.createTime).toLocaleDateString()}
                       </span>
-                      
                     </div>
                   </div>
                 </div>
@@ -439,7 +438,7 @@ export default function CustomerServiceView() {
       </div>
 
       {/* 右侧详情面板 */}
-      <div className="w-1/2 bg-white flex flex-col">
+      <div className="w-3/5 bg-white flex flex-col">
         {selectedMessage ? (
           <>
             {/* 详情头部 */}
@@ -560,7 +559,7 @@ export default function CustomerServiceView() {
                   <div className="relative">
                     {/* 时间线连接线 */}
                     <div className="absolute left-4 top-4 bottom-4 w-0.5 bg-gray-200"></div>
-                    
+
                     <div className="space-y-6">
                       {/* 创建时间 */}
                       <div className="relative flex items-center space-x-3">
@@ -570,8 +569,12 @@ export default function CustomerServiceView() {
                           </div>
                         </div>
                         <div className="flex-1">
-                          <p className="text-sm font-medium text-gray-900">请求创建</p>
-                          <p className="text-sm text-gray-500">{selectedMessage.createTime}</p>
+                          <p className="text-sm font-medium text-gray-900">
+                            请求创建
+                          </p>
+                          <p className="text-sm text-gray-500">
+                            {selectedMessage.createTime}
+                          </p>
                         </div>
                       </div>
 
@@ -584,8 +587,12 @@ export default function CustomerServiceView() {
                             </div>
                           </div>
                           <div className="flex-1">
-                            <p className="text-sm font-medium text-gray-900">开始处理</p>
-                            <p className="text-sm text-gray-500">{selectedMessage.processingTime}</p>
+                            <p className="text-sm font-medium text-gray-900">
+                              开始处理
+                            </p>
+                            <p className="text-sm text-gray-500">
+                              {selectedMessage.processingTime}
+                            </p>
                           </div>
                         </div>
                       )}
@@ -599,8 +606,12 @@ export default function CustomerServiceView() {
                             </div>
                           </div>
                           <div className="flex-1">
-                            <p className="text-sm font-medium text-gray-900">处理完成</p>
-                            <p className="text-sm text-gray-500">{selectedMessage.completionTime}</p>
+                            <p className="text-sm font-medium text-gray-900">
+                              处理完成
+                            </p>
+                            <p className="text-sm text-gray-500">
+                              {selectedMessage.completionTime}
+                            </p>
                           </div>
                         </div>
                       )}
