@@ -27,9 +27,9 @@ interface DisplayRequest extends CustomerServiceRequest {
 export default function CustomerServiceView() {
   const [requests, setRequests] = useState<DisplayRequest[]>([]);
   const [statistics, setStatistics] = useState<CustomerServiceStatistics>({
-    completedCount: 0,
-    pendingCount: 0,
-    processingCount: 0,
+    COMPLETED: 0,
+    PENDING: 0,
+    PROCESSING: 0,
     urgentRequests: 0,
     highPriorityRequests: 0,
     requestsByType: {},
@@ -534,9 +534,10 @@ export default function CustomerServiceView() {
                     请求内容
                   </h3>
                   <div className="bg-gray-50 rounded-lg p-4">
-                    <p className="text-sm text-gray-900 whitespace-pre-wrap">
-                      {selectedMessage.requestContent}
-                    </p>
+                    <div 
+                      className="text-sm text-gray-900 whitespace-pre-wrap"
+                      dangerouslySetInnerHTML={{ __html: selectedMessage.requestContent }}
+                    />
                   </div>
                 </div>
 
