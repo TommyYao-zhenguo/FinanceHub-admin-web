@@ -7,12 +7,9 @@ export interface CustomerServiceRequest {
   companyId: number;
   companyName: string;
   customerName: string;
-  customerPhone?: string;
-  customerEmail?: string;
-  requestType: string;
+  taskType: string;
   requestTitle: string;
   requestContent: string;
-  priority: string;
   status: string;
   assignedTo?: number;
   assignedName?: string;

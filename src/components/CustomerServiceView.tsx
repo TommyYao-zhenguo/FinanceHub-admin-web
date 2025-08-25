@@ -52,7 +52,7 @@ export default function CustomerServiceView() {
   // 移除实例化，使用静态方法
 
   // 获取消息类型
-  const getMessageTypeFromRequestType = (requestType: string): string => {
+  const getMessageTypeFromTaskType = (taskType: string): string => {
     const typeMap: Record<string, string> = {
       INVOICE: "invoice",
       PAYROLL: "payroll",
@@ -61,7 +61,7 @@ export default function CustomerServiceView() {
       HOUSING_FUND: "housing_fund",
       REPORT: "report",
     };
-    return typeMap[requestType] || "other";
+    return typeMap[taskType] || "other";
   };
 
   // 加载数据
@@ -87,7 +87,7 @@ export default function CustomerServiceView() {
       const displayRequests: DisplayRequest[] = listResponse.records.map(
         (request: CustomerServiceRequest) => ({
           ...request,
-          messageType: getMessageTypeFromRequestType(request.requestType),
+          messageType: getMessageTypeFromTaskType(request.taskType),
           actionRequired: request.status === "PENDING",
         })
       );
@@ -184,8 +184,8 @@ export default function CustomerServiceView() {
     }
   };
 
-  const getRequestTypeColor = (requestType: string) => {
-    switch (requestType) {
+  const getTaskTypeColor = (taskType: string) => {
+    switch (taskType) {
       case "INVOICE_APPLICATION":
         return "bg-red-100 text-red-800";
       case "EMPLOYEE_REMOVE":
@@ -214,8 +214,8 @@ export default function CustomerServiceView() {
     }
   };
 
-  const getRequestTypeText = (requestType: string) => {
-    switch (requestType) {
+  const getTaskTypeText = (taskType: string) => {
+    switch (taskType) {
       case "INVOICE_APPLICATION":
         return "申请开票";
       case "EMPLOYEE_REMOVE":
@@ -229,7 +229,7 @@ export default function CustomerServiceView() {
       case "REPORT":
         return "报告";
       default:
-        return requestType;
+        return taskType;
     }
   };
 
@@ -239,16 +239,6 @@ export default function CustomerServiceView() {
       return request.status === selectedCategory;
     })
     .sort((a, b) => {
-      // 优先级排序：HIGH > MEDIUM > LOW
-      const priorityOrder = { HIGH: 3, MEDIUM: 2, LOW: 1 };
-      const aPriority =
-        priorityOrder[a.priority as keyof typeof priorityOrder] || 0;
-      const bPriority =
-        priorityOrder[b.priority as keyof typeof priorityOrder] || 0;
-
-      if (aPriority !== bPriority) {
-        return bPriority - aPriority;
-      }
 
       // 状态排序：PENDING > PROCESSING > COMPLETED
       const statusOrder = { PENDING: 3, PROCESSING: 2, COMPLETED: 1 };
@@ -383,11 +373,11 @@ export default function CustomerServiceView() {
                           {getStatusText(request.status)}
                         </span>
                         <span
-                          className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getRequestTypeColor(
-                            request.requestType
+                          className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getTaskTypeColor(
+                            request.taskType
                           )}`}
                         >
-                          {getRequestTypeText(request.requestType)}
+                          {getTaskTypeText(request.taskType)}
                         </span>
                       </div>
                     </div>
@@ -518,22 +508,6 @@ export default function CustomerServiceView() {
                           {selectedMessage.companyName}
                         </p>
                       </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-700">
-                          联系电话
-                        </label>
-                        <p className="text-sm text-gray-900">
-                          {selectedMessage.customerPhone || "未提供"}
-                        </p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-700">
-                          邮箱地址
-                        </label>
-                        <p className="text-sm text-gray-900">
-                          {selectedMessage.customerEmail || "未提供"}
-                        </p>
-                      </div>
                     </div>
                   </div>
                 </div>
@@ -545,11 +519,11 @@ export default function CustomerServiceView() {
                   </h3>
                   <div className="bg-gray-50 rounded-lg p-4">
                     <span
-                      className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getRequestTypeColor(
-                        selectedMessage.requestType
+                      className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getTaskTypeColor(
+                        selectedMessage.taskType
                       )}`}
                     >
-                      {getRequestTypeText(selectedMessage.requestType)}
+                      {getTaskTypeText(selectedMessage.taskType)}
                     </span>
                   </div>
                 </div>
