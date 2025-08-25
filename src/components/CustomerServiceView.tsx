@@ -162,13 +162,13 @@ export default function CustomerServiceView() {
       id: "all",
       label: "全部",
       count:
-        statistics.pendingCount +
-        statistics.processingCount +
-        statistics.completedCount,
+        statistics.PENDING +
+        statistics.PROCESSING +
+        statistics.COMPLETED,
     },
-    { id: "PENDING", label: "待处理", count: statistics.pendingCount },
-    { id: "PROCESSING", label: "处理中", count: statistics.processingCount },
-    { id: "COMPLETED", label: "已完成", count: statistics.completedCount },
+    { id: "PENDING", label: "待处理", count: statistics.PENDING },
+    { id: "PROCESSING", label: "处理中", count: statistics.PROCESSING },
+    { id: "COMPLETED", label: "已完成", count: statistics.COMPLETED },
   ];
 
   const getStatusColor = (status: string) => {
@@ -274,19 +274,19 @@ export default function CustomerServiceView() {
           <div className="grid grid-cols-3 gap-3">
             <div className="bg-red-50 p-3 rounded-lg">
               <div className="text-2xl font-bold text-red-600">
-                {statistics.pendingCount}
+                {statistics.PENDING}
               </div>
               <div className="text-sm text-red-600">待处理</div>
             </div>
             <div className="bg-yellow-50 p-3 rounded-lg">
               <div className="text-2xl font-bold text-yellow-600">
-                {statistics.processingCount}
+                {statistics.PROCESSING}
               </div>
               <div className="text-sm text-yellow-600">处理中</div>
             </div>
             <div className="bg-green-50 p-3 rounded-lg">
               <div className="text-2xl font-bold text-green-600">
-                {statistics.completedCount}
+                {statistics.COMPLETED}
               </div>
               <div className="text-sm text-green-600">已完成</div>
             </div>

@@ -90,7 +90,7 @@ export default function Sidebar({
     }
 
     // SUPER_ADMIN 和 ADMIN 都可以看到权限管理
-    if (hasSystemManagementAccess()) {
+    if (hasAdminUserManagementAccess()) {
       items.push({
         id: "user-management",
         label: "用户管理",

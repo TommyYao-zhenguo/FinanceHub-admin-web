@@ -18,45 +18,21 @@ export interface CustomerServiceRequest {
   processingTime?: string;
   createTime: string;
   updateTime: string;
-  attachments?: CustomerServiceAttachment[];
-  replies?: CustomerServiceReply[];
-}
-
-export interface CustomerServiceAttachment {
-  id: number;
-  requestId: number;
-  fileName: string;
-  fileUrl: string;
-  fileSize: number;
-  createTime: string;
-}
-
-export interface CustomerServiceReply {
-  id: number;
-  requestId: number;
-  replyContent: string;
-  replyType: string;
-  createTime: string;
-  createBy: string;
 }
 
 export interface CustomerServiceCreateRequest {
   companyId: number;
   companyName: string;
   customerName: string;
-  customerPhone?: string;
-  customerEmail?: string;
-  requestType: string;
+  taskType: string;
   requestTitle: string;
   requestContent: string;
-  priority?: string;
-  attachmentFileNames?: string[];
 }
 
 export interface CustomerServiceQueryParams {
   page?: number;
   size?: number;
-  requestType?: string;
+  taskType?: string;
   status?: string;
   keyword?: string;
   startTime?: string;
@@ -73,9 +49,9 @@ export interface CustomerServiceListResponse {
 }
 
 export interface CustomerServiceStatistics {
-  completedCount: number;
-  pendingCount: number;
-  processingCount: number;
+  COMPLETED: number;
+  PENDING: number;
+  PROCESSING: number;
   urgentRequests: number;
   highPriorityRequests: number;
   requestsByType: Record<string, number>;
