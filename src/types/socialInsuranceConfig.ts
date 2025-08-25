@@ -8,7 +8,7 @@ export interface SocialInsuranceConfig {
   isActive: boolean; // 是否启用
   createTime?: string;
   updateTime?: string;
-  companyId?: string; // 公司ID
+  companyNo?: string; // 公司ID
   companyName?: string; // 公司名称
   taxNumber?: string; // 税号
 
@@ -24,7 +24,7 @@ export interface SocialInsuranceDetailConfig {
   isActive: boolean; // 是否启用
   createTime?: string;
   updateTime?: string;
-  companyId?: string; // 公司ID
+  companyNo?: string; // 公司ID
   companyName?: string; // 公司名称
   taxNumber?: string; // 税号
 }
@@ -40,7 +40,7 @@ export interface InsuranceRateConfig {
 
 // 批量社保配置请求接口
 export interface BatchSocialInsuranceConfigRequest {
-  companyId: string;
+  companyNo: string;
   configs: InsuranceRateConfig[];
 }
 
@@ -51,7 +51,7 @@ export interface CreateSocialInsuranceConfigRequest {
   companyRate: number;
   personalRate: number;
   isActive: boolean;
-  companyId?: string;
+  companyNo?: string;
 }
 
 // 更新社保配置请求接口
@@ -66,7 +66,7 @@ export interface SocialInsuranceConfigQueryParams {
   insuranceType?: string;
   isActive?: boolean;
   companyName?: string;
-  companyId?: string;
+  companyNo?: string;
 }
 
 // 社保配置列表响应接口

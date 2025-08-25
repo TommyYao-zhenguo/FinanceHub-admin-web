@@ -1,7 +1,7 @@
 // 公积金配置信息接口
 export interface HousingFundConfig {
   id?: string;
-  companyId: number; // 公司ID
+  companyNo: string; // 公司编号
   companyName?: string; // 公司名称
   taxNumber?: string; // 税号
   companyRate: number; // 公司缴存比例
@@ -15,7 +15,7 @@ export interface HousingFundConfig {
 
 // 创建公积金配置请求接口
 export interface CreateHousingFundConfigRequest {
-  companyId: number;
+  companyNo: string; // 公司编号
   companyRate: number;
   personalRate: number;
   minBase: number;

@@ -25,8 +25,8 @@ export class SocialInsuranceConfigService {
       queryParams.append("isActive", params.isActive.toString());
     if (params.companyName)
       queryParams.append("companyName", params.companyName);
-    if (params.companyId)
-      queryParams.append("companyId", params.companyId);
+    if (params.companyNo)
+      queryParams.append("companyNo", params.companyNo);
 
     const url = `${API_ENDPOINTS.SOCIAL_INSURANCE_CONFIG.LIST}?${queryParams.toString()}`;
     const response = await httpClient.get<SocialInsuranceConfigListResponse>(url);
@@ -62,9 +62,9 @@ export class SocialInsuranceConfigService {
   }
 
   // 获取公司的所有社保配置
-  static async getCompanyConfigs(companyId: string): Promise<SocialInsuranceConfig[]> {
+  static async getCompanyConfigs(companyNo: string): Promise<SocialInsuranceConfig[]> {
     const response = await httpClient.get<SocialInsuranceConfig[]>(
-      `${API_ENDPOINTS.SOCIAL_INSURANCE_CONFIG.LIST}/company/${companyId}`
+      `${API_ENDPOINTS.SOCIAL_INSURANCE_CONFIG.LIST}/company/${companyNo}`
     );
     return response;
   }

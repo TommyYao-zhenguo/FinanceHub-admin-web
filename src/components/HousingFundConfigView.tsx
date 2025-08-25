@@ -16,7 +16,7 @@ export default function HousingFundConfigView() {
   const [formData, setFormData] = useState({
     companyRate: "",
     personalRate: "",
-    companyId: undefined as number | undefined,
+    companyNo: ""
   });
   
   // 分页状态
@@ -60,7 +60,7 @@ export default function HousingFundConfigView() {
 
     try {
       const configData = {
-        companyId: formData.companyId!,
+        companyNo: formData.companyNo!, 
         companyRate: parseFloat(formData.companyRate),
         personalRate: parseFloat(formData.personalRate),
         minBase: 0,
@@ -92,7 +92,7 @@ export default function HousingFundConfigView() {
     setFormData({
       companyRate: "",
       personalRate: "",
-      companyId: undefined,
+      companyNo: "",
     });
   };
 
@@ -101,7 +101,7 @@ export default function HousingFundConfigView() {
     setFormData({
       companyRate: config.companyRate.toString(),
       personalRate: config.personalRate.toString(),
-      companyId: config.companyId,
+      companyNo: config.companyNo,
     });
     setShowForm(true);
   };
@@ -370,11 +370,11 @@ export default function HousingFundConfigView() {
                       所属公司 <span className="text-red-500">*</span>
                     </label>
                     <CompanySelector
-                      value={formData.companyId?.toString()}
-                      onChange={(companyId: string) => {
+                      value={formData.companyNo}
+                      onChange={(companyNo: string) => {
                         setFormData({ 
                           ...formData, 
-                          companyId: companyId ? parseInt(companyId) : undefined 
+                          companyNo: companyNo 
                         });
                       }}
                       className="w-full"
@@ -387,7 +387,7 @@ export default function HousingFundConfigView() {
                 <div className="bg-gray-50 p-4 rounded-lg">
                   <div className="text-sm text-gray-600">
                     <span className="font-medium">编辑配置：</span>
-                    {editingConfig.companyName ? `${editingConfig.companyName} (${editingConfig.taxNumber})` : `公司ID: ${editingConfig.companyId}`}
+                    {editingConfig.companyName ? `${editingConfig.companyName} (${editingConfig.taxNumber ? editingConfig.taxNumber : editingConfig.companyNo})` : `公司编号: ${editingConfig.companyNo}`}
                   </div>
                 </div>
               )}

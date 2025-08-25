@@ -18,7 +18,7 @@ import CompanySelector from "./CompanySelector";
 
 // 定义公司配置数据类型
 interface CompanyConfigData {
-  companyId: string;
+  companyNo: string;
   companyName: string;
   taxNumber?: string;
   configs: SocialInsuranceDetailConfig[];
@@ -51,7 +51,7 @@ export default function SocialInsuranceConfigView() {
 
   // 新的批量配置表单数据
   const [batchFormData, setBatchFormData] = useState({
-    companyId: "",
+    companyNo: "",
     companyName: "",
     configs: {
       pension: { personalRate: 8, companyRate: 16 },
@@ -66,10 +66,10 @@ export default function SocialInsuranceConfigView() {
     loadConfigs();
   }, [pagination.current, pagination.size]);
 
-  const fetchCompanyConfigs = async (companyId: string) => {
+  const fetchCompanyConfigs = async (companyNo: string) => {
     try {
       const configs = await SocialInsuranceConfigService.getCompanyConfigs(
-        companyId
+        companyNo
       );
       // 将现有配置填充到表单中
       const updatedBatchFormData = { ...batchFormData };
@@ -77,7 +77,7 @@ export default function SocialInsuranceConfigView() {
         const insuranceType = config.insuranceType;
         if (
           updatedBatchFormData.configs[
-            insuranceType as keyof typeof updatedBatchFormData.configs
+          insuranceType as keyof typeof updatedBatchFormData.configs
           ]
         ) {
           updatedBatchFormData.configs[
@@ -109,7 +109,7 @@ export default function SocialInsuranceConfigView() {
       // 转换数据格式：将 SocialInsuranceConfig[] 转换为 CompanyConfigData[]
       const transformedRecords: CompanyConfigData[] = response.records.map(
         (config: SocialInsuranceConfig) => ({
-          companyId: config.companyId || "",
+          companyNo: config.companyNo || "",
           companyName: config.companyName || "",
           taxNumber: config.taxNumber || "",
           configs: config.configs || [],
@@ -133,7 +133,7 @@ export default function SocialInsuranceConfigView() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!batchFormData.companyId) {
+    if (!batchFormData.companyNo) {
       toast.error("请选择公司");
       return;
     }
@@ -153,7 +153,7 @@ export default function SocialInsuranceConfigView() {
       );
 
       const batchRequest = {
-        companyId: batchFormData.companyId,
+        companyNo: batchFormData.companyNo,
         configs,
       };
 
@@ -211,7 +211,7 @@ export default function SocialInsuranceConfigView() {
 
   const resetForm = () => {
     setBatchFormData({
-      companyId: "",
+      companyNo: "",
       companyName: "",
       configs: {
         pension: { personalRate: 8, companyRate: 16 },
@@ -226,7 +226,7 @@ export default function SocialInsuranceConfigView() {
   const handleEdit = (companyData: CompanyConfigData) => {
     // 使用公司数据而不是单个配置
     setEditingConfig({
-      companyId: companyData.companyId,
+      companyNo: companyData.companyNo,
       companyName: companyData.companyName,
       taxNumber: companyData.taxNumber,
     } as SocialInsuranceConfig);
@@ -252,7 +252,7 @@ export default function SocialInsuranceConfigView() {
     });
 
     setBatchFormData({
-      companyId: companyData.companyId,
+      companyNo: companyData.companyNo,
       companyName: companyData.companyName,
       configs: formConfigs,
     });
@@ -275,17 +275,17 @@ export default function SocialInsuranceConfigView() {
 
   // 使用接口返回的分组数据
   const groupedConfigs = groupedData.reduce((acc, company) => {
-    const key = company.companyId || "unknown";
+    const key = company.companyNo || "unknown";
     acc[key] = {
       companyInfo: {
-        companyId: company.companyId,
+        companyNo: company.companyNo,
         companyName: company.companyName,
         taxNumber: company.taxNumber,
       },
       configs: company.configs || [],
     };
     return acc;
-  }, {} as Record<string, { companyInfo: { companyId?: string; companyName?: string; taxNumber?: string }; configs: SocialInsuranceDetailConfig[] }>);
+  }, {} as Record<string, { companyInfo: { companyNo: string; companyName: string; taxNumber: string }; configs: SocialInsuranceDetailConfig[] }>);
 
   const getInsuranceTypeLabel = (type: string) => {
     return INSURANCE_TYPES.find((t) => t.value === type)?.label || type;
@@ -338,9 +338,9 @@ export default function SocialInsuranceConfigView() {
             暂无配置数据
           </div>
         ) : (
-          Object.entries(groupedConfigs).map(([companyId, group]) => (
+          Object.entries(groupedConfigs).map(([companyNo, group]) => (
             <div
-              key={companyId}
+              key={companyNo}
               className="bg-white rounded-xl shadow-sm border border-gray-200"
             >
               {/* 公司信息头部 */}
@@ -351,8 +351,8 @@ export default function SocialInsuranceConfigView() {
                       {group.companyInfo.companyName || "未知公司"}
                     </h3>
                     <p className="text-sm text-gray-600">
-                      税号: {group.companyInfo.taxNumber || "-"} | 公司ID:{" "}
-                      {group.companyInfo.companyId || "-"}
+                      税号: {group.companyInfo.taxNumber || "-"} | 公司编号:{" "}
+                      {group.companyInfo.companyNo || "-"}
                     </p>
                   </div>
                   <div className="flex items-center space-x-4">
@@ -363,7 +363,7 @@ export default function SocialInsuranceConfigView() {
                       <button
                         onClick={() =>
                           handleEdit({
-                            companyId: group.companyInfo.companyId || "",
+                            companyNo: group.companyInfo.companyNo || "",
                             companyName: group.companyInfo.companyName || "",
                             taxNumber: group.companyInfo.taxNumber,
                             configs: group.configs,
@@ -380,7 +380,7 @@ export default function SocialInsuranceConfigView() {
                         onClick={() => {
                           setEditingConfig(null);
                           setBatchFormData({
-                            companyId: group.companyInfo.companyId || "",
+                            companyNo: group.companyInfo.companyNo || "",
                             companyName: group.companyInfo.companyName || "",
                             configs: {
                               pension: { personalRate: 8, companyRate: 16 },
@@ -473,11 +473,10 @@ export default function SocialInsuranceConfigView() {
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <span
-                              className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                                config.isActive
+                              className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${config.isActive
                                   ? "bg-green-100 text-green-800"
                                   : "bg-red-100 text-red-800"
-                              }`}
+                                }`}
                             >
                               {config.isActive ? "启用" : "禁用"}
                             </span>
@@ -558,11 +557,10 @@ export default function SocialInsuranceConfigView() {
                                 pageNum
                               );
                             }}
-                            className={`px-3 py-1 text-sm border rounded-md ${
-                              pageNum === pagination.current
+                            className={`px-3 py-1 text-sm border rounded-md ${pageNum === pagination.current
                                 ? "bg-blue-600 text-white border-blue-600"
                                 : "border-gray-300 hover:bg-gray-100"
-                            }`}
+                              }`}
                           >
                             {pageNum}
                           </button>
@@ -628,20 +626,20 @@ export default function SocialInsuranceConfigView() {
                           </span>
                         )}
                         <div className="text-xs text-gray-500 mt-1">
-                          公司ID: {editingConfig.companyId}
+                          公司ID: {editingConfig.companyNo}
                         </div>
                       </div>
                     </div>
                   ) : (
                     <CompanySelector
-                      value={batchFormData.companyId}
-                      onChange={(companyId: string) => {
+                      value={batchFormData.companyNo}
+                      onChange={(companyNo: string) => {
                         setBatchFormData({
                           ...batchFormData,
-                          companyId: companyId || "",
+                          companyNo: companyNo || "",
                         });
-                        if (companyId) {
-                          fetchCompanyConfigs(companyId);
+                        if (companyNo) {
+                          fetchCompanyConfigs(companyNo);
                         }
                       }}
                       className="w-full"
