@@ -7,21 +7,18 @@ export interface CustomerServiceRequest {
   companyId: number;
   companyName: string;
   customerName: string;
-  customerPhone?: string;
-  customerEmail?: string;
-  requestType: string;
+  taskType: string;
   requestTitle: string;
   requestContent: string;
-  priority: string;
   status: string;
   assignedTo?: number;
   assignedName?: string;
   processRemark?: string;
   completionTime?: string;
+  processingTime?: string;
   createTime: string;
   updateTime: string;
   attachments?: CustomerServiceAttachment[];
-  replies?: CustomerServiceReply[];
 }
 
 export interface CustomerServiceAttachment {
@@ -46,12 +43,9 @@ export interface CustomerServiceCreateRequest {
   companyId: number;
   companyName: string;
   customerName: string;
-  customerPhone?: string;
-  customerEmail?: string;
   requestType: string;
   requestTitle: string;
   requestContent: string;
-  priority?: string;
   attachmentFileNames?: string[];
 }
 

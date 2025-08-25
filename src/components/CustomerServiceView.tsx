@@ -19,7 +19,6 @@ import toast from "react-hot-toast";
 // 扩展接口以包含显示所需的额外字段
 interface DisplayRequest extends CustomerServiceRequest {
   messageType: string;
-  actionRequired: boolean;
   attachmentFileNames?: string[];
   processingNotes?: string;
 }
@@ -87,7 +86,7 @@ export default function CustomerServiceView() {
       const displayRequests: DisplayRequest[] = listResponse.records.map(
         (request: CustomerServiceRequest) => ({
           ...request,
-          messageType: getMessageTypeFromRequestType(request.requestType),
+          messageType: getMessageTypeFromRequestType(request.taskType),
           actionRequired: request.status === "PENDING",
         })
       );
@@ -184,8 +183,8 @@ export default function CustomerServiceView() {
     }
   };
 
-  const getRequestTypeColor = (requestType: string) => {
-    switch (requestType) {
+  const getTaskTypeColor = (taskType: string) => {
+    switch (taskType) {
       case "INVOICE_APPLICATION":
         return "bg-red-100 text-red-800";
       case "EMPLOYEE_REMOVE":
@@ -214,8 +213,8 @@ export default function CustomerServiceView() {
     }
   };
 
-  const getRequestTypeText = (requestType: string) => {
-    switch (requestType) {
+  const getTaskTypeText = (taskType: string) => {
+    switch (taskType) {
       case "INVOICE_APPLICATION":
         return "申请开票";
       case "EMPLOYEE_REMOVE":
@@ -229,7 +228,7 @@ export default function CustomerServiceView() {
       case "REPORT":
         return "报告";
       default:
-        return requestType;
+        return taskType;
     }
   };
 
@@ -239,17 +238,6 @@ export default function CustomerServiceView() {
       return request.status === selectedCategory;
     })
     .sort((a, b) => {
-      // 优先级排序：HIGH > MEDIUM > LOW
-      const priorityOrder = { HIGH: 3, MEDIUM: 2, LOW: 1 };
-      const aPriority =
-        priorityOrder[a.priority as keyof typeof priorityOrder] || 0;
-      const bPriority =
-        priorityOrder[b.priority as keyof typeof priorityOrder] || 0;
-
-      if (aPriority !== bPriority) {
-        return bPriority - aPriority;
-      }
-
       // 状态排序：PENDING > PROCESSING > COMPLETED
       const statusOrder = { PENDING: 3, PROCESSING: 2, COMPLETED: 1 };
       const aStatus = statusOrder[a.status as keyof typeof statusOrder] || 0;
@@ -383,11 +371,11 @@ export default function CustomerServiceView() {
                           {getStatusText(request.status)}
                         </span>
                         <span
-                          className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getRequestTypeColor(
-                            request.requestType
+                          className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getTaskTypeColor(
+                            request.taskType
                           )}`}
                         >
-                          {getRequestTypeText(request.requestType)}
+                          {getTaskTypeText(request.taskType)}
                         </span>
                       </div>
                     </div>
@@ -395,9 +383,7 @@ export default function CustomerServiceView() {
                       <span className="text-xs text-gray-500">
                         {new Date(request.createTime).toLocaleDateString()}
                       </span>
-                      {request.actionRequired && (
-                        <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                      )}
+                      
                     </div>
                   </div>
                 </div>
@@ -518,22 +504,6 @@ export default function CustomerServiceView() {
                           {selectedMessage.companyName}
                         </p>
                       </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-700">
-                          联系电话
-                        </label>
-                        <p className="text-sm text-gray-900">
-                          {selectedMessage.customerPhone || "未提供"}
-                        </p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-700">
-                          邮箱地址
-                        </label>
-                        <p className="text-sm text-gray-900">
-                          {selectedMessage.customerEmail || "未提供"}
-                        </p>
-                      </div>
                     </div>
                   </div>
                 </div>
@@ -545,11 +515,11 @@ export default function CustomerServiceView() {
                   </h3>
                   <div className="bg-gray-50 rounded-lg p-4">
                     <span
-                      className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getRequestTypeColor(
-                        selectedMessage.requestType
+                      className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getTaskTypeColor(
+                        selectedMessage.taskType
                       )}`}
                     >
-                      {getRequestTypeText(selectedMessage.requestType)}
+                      {getTaskTypeText(selectedMessage.taskType)}
                     </span>
                   </div>
                 </div>
@@ -582,11 +552,60 @@ export default function CustomerServiceView() {
                   </div>
                 )}
 
-                {/* 时间流信息 */}
+                {/* 时间线信息 */}
                 <div>
                   <h3 className="text-lg font-medium text-gray-900 mb-3">
                     时间线信息
                   </h3>
+                  <div className="relative">
+                    {/* 时间线连接线 */}
+                    <div className="absolute left-4 top-4 bottom-4 w-0.5 bg-gray-200"></div>
+                    
+                    <div className="space-y-6">
+                      {/* 创建时间 */}
+                      <div className="relative flex items-center space-x-3">
+                        <div className="flex-shrink-0 relative z-10">
+                          <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center border-2 border-white">
+                            <Clock className="w-4 h-4 text-blue-600" />
+                          </div>
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-gray-900">请求创建</p>
+                          <p className="text-sm text-gray-500">{selectedMessage.createTime}</p>
+                        </div>
+                      </div>
+
+                      {/* 处理时间 */}
+                      {selectedMessage.processingTime && (
+                        <div className="relative flex items-center space-x-3">
+                          <div className="flex-shrink-0 relative z-10">
+                            <div className="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center border-2 border-white">
+                              <RefreshCw className="w-4 h-4 text-yellow-600" />
+                            </div>
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-sm font-medium text-gray-900">开始处理</p>
+                            <p className="text-sm text-gray-500">{selectedMessage.processingTime}</p>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* 完成时间 */}
+                      {selectedMessage.completionTime && (
+                        <div className="relative flex items-center space-x-3">
+                          <div className="flex-shrink-0 relative z-10">
+                            <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center border-2 border-white">
+                              <CheckCircle className="w-4 h-4 text-green-600" />
+                            </div>
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-sm font-medium text-gray-900">处理完成</p>
+                            <p className="text-sm text-gray-500">{selectedMessage.completionTime}</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
