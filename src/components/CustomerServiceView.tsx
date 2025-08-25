@@ -19,6 +19,7 @@ import toast from "react-hot-toast";
 // 扩展接口以包含显示所需的额外字段
 interface DisplayRequest extends CustomerServiceRequest {
   messageType: string;
+  actionRequired: boolean;
   attachmentFileNames?: string[];
   processingNotes?: string;
 }
@@ -86,7 +87,7 @@ export default function CustomerServiceView() {
       const displayRequests: DisplayRequest[] = listResponse.records.map(
         (request: CustomerServiceRequest) => ({
           ...request,
-          messageType: getMessageTypeFromRequestType(request.taskType),
+          messageType: getMessageTypeFromRequestType(request.requestType),
           actionRequired: request.status === "PENDING",
         })
       );
@@ -183,8 +184,8 @@ export default function CustomerServiceView() {
     }
   };
 
-  const getTaskTypeColor = (taskType: string) => {
-    switch (taskType) {
+  const getRequestTypeColor = (requestType: string) => {
+    switch (requestType) {
       case "INVOICE_APPLICATION":
         return "bg-red-100 text-red-800";
       case "EMPLOYEE_REMOVE":
@@ -213,8 +214,8 @@ export default function CustomerServiceView() {
     }
   };
 
-  const getTaskTypeText = (taskType: string) => {
-    switch (taskType) {
+  const getRequestTypeText = (requestType: string) => {
+    switch (requestType) {
       case "INVOICE_APPLICATION":
         return "申请开票";
       case "EMPLOYEE_REMOVE":
@@ -222,13 +223,13 @@ export default function CustomerServiceView() {
       case "EMPLOYEE_DELETE":
         return "删除员工";
       case "EMPLOYEE_ADD":
-        return "新增员工";
+        return "添加员工";
       case "EMPLOYEE_EDIT":
         return "修改员工";
       case "REPORT":
         return "报告";
       default:
-        return taskType;
+        return requestType;
     }
   };
 
@@ -238,6 +239,17 @@ export default function CustomerServiceView() {
       return request.status === selectedCategory;
     })
     .sort((a, b) => {
+      // 优先级排序：HIGH > MEDIUM > LOW
+      const priorityOrder = { HIGH: 3, MEDIUM: 2, LOW: 1 };
+      const aPriority =
+        priorityOrder[a.priority as keyof typeof priorityOrder] || 0;
+      const bPriority =
+        priorityOrder[b.priority as keyof typeof priorityOrder] || 0;
+
+      if (aPriority !== bPriority) {
+        return bPriority - aPriority;
+      }
+
       // 状态排序：PENDING > PROCESSING > COMPLETED
       const statusOrder = { PENDING: 3, PROCESSING: 2, COMPLETED: 1 };
       const aStatus = statusOrder[a.status as keyof typeof statusOrder] || 0;
@@ -256,7 +268,7 @@ export default function CustomerServiceView() {
   return (
     <div className="flex h-full bg-gray-50">
       {/* 左侧面板 */}
-      <div className="w-2/5 bg-white border-r border-gray-200 flex flex-col">
+      <div className="w-1/2 bg-white border-r border-gray-200 flex flex-col">
         {/* 统计卡片 */}
         <div className="p-4 border-b border-gray-200">
           <div className="flex items-center justify-between mb-4">
@@ -371,11 +383,11 @@ export default function CustomerServiceView() {
                           {getStatusText(request.status)}
                         </span>
                         <span
-                          className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getTaskTypeColor(
-                            request.taskType
+                          className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getRequestTypeColor(
+                            request.requestType
                           )}`}
                         >
-                          {getTaskTypeText(request.taskType)}
+                          {getRequestTypeText(request.requestType)}
                         </span>
                       </div>
                     </div>
@@ -383,6 +395,9 @@ export default function CustomerServiceView() {
                       <span className="text-xs text-gray-500">
                         {new Date(request.createTime).toLocaleDateString()}
                       </span>
+                      {request.actionRequired && (
+                        <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -438,7 +453,7 @@ export default function CustomerServiceView() {
       </div>
 
       {/* 右侧详情面板 */}
-      <div className="w-3/5 bg-white flex flex-col">
+      <div className="w-1/2 bg-white flex flex-col">
         {selectedMessage ? (
           <>
             {/* 详情头部 */}
@@ -503,6 +518,22 @@ export default function CustomerServiceView() {
                           {selectedMessage.companyName}
                         </p>
                       </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-700">
+                          联系电话
+                        </label>
+                        <p className="text-sm text-gray-900">
+                          {selectedMessage.customerPhone || "未提供"}
+                        </p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-700">
+                          邮箱地址
+                        </label>
+                        <p className="text-sm text-gray-900">
+                          {selectedMessage.customerEmail || "未提供"}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -514,11 +545,11 @@ export default function CustomerServiceView() {
                   </h3>
                   <div className="bg-gray-50 rounded-lg p-4">
                     <span
-                      className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getTaskTypeColor(
-                        selectedMessage.taskType
+                      className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getRequestTypeColor(
+                        selectedMessage.requestType
                       )}`}
                     >
-                      {getTaskTypeText(selectedMessage.taskType)}
+                      {getRequestTypeText(selectedMessage.requestType)}
                     </span>
                   </div>
                 </div>
