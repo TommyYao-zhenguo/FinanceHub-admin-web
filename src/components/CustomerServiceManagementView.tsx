@@ -45,6 +45,8 @@ export default function CustomerServiceManagementView() {
   // 表单数据
   const [formData, setFormData] = useState<CreateUserRequest>({
     username: "",
+    name: "",
+    userNo: "",
     password: "",
     roleCode: UserRole.CUSTOMER_SERVICE,
   });
@@ -92,6 +94,8 @@ export default function CustomerServiceManagementView() {
     setEditingUser(null);
     setFormData({
       username: "",
+      name: "",
+      userNo: "",
       password: "",
       roleCode: UserRole.CUSTOMER_SERVICE,
     });
@@ -103,6 +107,8 @@ export default function CustomerServiceManagementView() {
     setEditingUser(user);
     setFormData({
       username: user.username,
+      userNo: user.userNo,
+      name: user.customerServiceName || "",
       password: "",
       roleCode: user.roleCode as UserRole,
     });
@@ -116,8 +122,9 @@ export default function CustomerServiceManagementView() {
     try {
       if (editingUser) {
         const updateData: UpdateUserRequest = {
-          id: editingUser.id,
+          userNo: editingUser.userNo,
           username: formData.username,
+          name: formData.name,
           roleCode: formData.roleCode,
         };
         if (formData.password) {
@@ -218,7 +225,10 @@ export default function CustomerServiceManagementView() {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    客服信息
+                    客服名称
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    客服账号
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     状态
@@ -234,6 +244,13 @@ export default function CustomerServiceManagementView() {
               <tbody className="bg-white divide-y divide-gray-200">
                 {users.map((user) => (
                   <tr key={user.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div>
+                        <div className="text-sm font-medium text-gray-900">
+                          {user.name}
+                        </div>
+                      </div>
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div>
                         <div className="text-sm font-medium text-gray-900">
@@ -323,6 +340,21 @@ export default function CustomerServiceManagementView() {
                     setFormData({ ...formData, username: e.target.value })
                   }
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg   focus:ring-green-500 focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  用户名称
+                </label>
+                <input
+                  type="text"
+                  value={formData.name}
+                  onChange={(e) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-transparent"
+                  placeholder="请输入用户真实姓名"
                 />
               </div>
 

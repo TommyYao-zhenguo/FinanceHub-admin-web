@@ -37,8 +37,8 @@ export default function Sidebar({
   const [isSystemMenuOpen, setIsSystemMenuOpen] = useState(false);
   const { userInfo } = useAdminUserContext();
 
-  const handleItemClick = (item: { id: string;  }) => {
-      onTabChange(item.id);
+  const handleItemClick = (item: { id: string }) => {
+    onTabChange(item.id);
   };
 
   // 检查用户是否有权限查看用户管理菜单
@@ -48,7 +48,16 @@ export default function Sidebar({
   };
   const hasSystemManagementAccess = () => {
     if (!userInfo?.roleCode) return false;
-    return userInfo.roleCode === "SUPER_ADMIN" || userInfo.roleCode === "ADMIN" || userInfo.roleCode === "CUSTOMER_SERVICE";
+    return (
+      userInfo.roleCode === "SUPER_ADMIN" ||
+      userInfo.roleCode === "ADMIN" ||
+      userInfo.roleCode === "CUSTOMER_SERVICE"
+    );
+  };
+
+  const isCustomerServiceUser = () => {
+    if (!userInfo?.roleCode) return false;
+    return userInfo.roleCode === "CUSTOMER_SERVICE";
   };
 
   // 检查用户是否有权限查看公司管理
@@ -99,7 +108,7 @@ export default function Sidebar({
     }
 
     // 添加新的子菜单项
-    if (hasSystemManagementAccess()) {
+    if (isCustomerServiceUser()) {
       items.push({
         id: "social-insurance-config",
         label: "社保比例配置",

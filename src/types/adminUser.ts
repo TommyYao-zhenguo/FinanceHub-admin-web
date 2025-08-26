@@ -3,6 +3,7 @@ export interface AdminUserInfo {
   id: string;
   userNo: string;
   username: string;
+  name?: string; 
   companyNo: string;
   companyName: string;
   roleName: string;
@@ -32,6 +33,8 @@ export interface UserRoleOption {
 // 创建用户请求接口
 export interface CreateUserRequest {
   username: string;
+  name?: string; // 用户真实姓名
+  userNo: string; 
   password: string;
   companyNo?: string;
   roleCode: UserRole;
@@ -40,7 +43,7 @@ export interface CreateUserRequest {
 
 // 更新用户请求接口
 export interface UpdateUserRequest extends Omit<CreateUserRequest, "password"> {
-  id: string;
+  userNo: string;
   password?: string; // 可选，用于修改密码
 }
 

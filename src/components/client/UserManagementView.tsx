@@ -52,6 +52,8 @@ export default function UserManagementView() {
   const [formData, setFormData] = useState<CreateUserRequest>({
     username: "",
     password: "",
+    name: "",
+    userNo: "",
     companyNo: userInfo?.companyNo || "", // 非超级管理员默认使用自己的公司ID
     roleCode: isSuperAdmin ? UserRole.ADMIN : UserRole.EMPLOYEE,
   });
@@ -127,6 +129,8 @@ export default function UserManagementView() {
     setFormData({
       username: "",
       password: "",
+      name: "",
+      userNo: "",
       companyNo: isSuperAdmin ? "" : userInfo?.companyNo || "", // 非超级管理员默认使用自己的公司ID
       roleCode: isSuperAdmin ? UserRole.ADMIN : UserRole.EMPLOYEE,
     });
@@ -139,6 +143,8 @@ export default function UserManagementView() {
     setFormData({
       username: user.username,
       password: "",
+      name: user.name,
+      userNo: user.userNo,
       companyNo: user.companyNo,
       roleCode: user.roleCode as UserRole,
     });
@@ -152,9 +158,10 @@ export default function UserManagementView() {
     try {
       if (editingUser) {
         const updateData: UpdateUserRequest = {
-          id: editingUser.id,
+          userNo: editingUser.userNo,
           username: formData.username,
-          companyNo: formData.companyNo,
+          password: formData.password,
+          name: formData.name,
           roleCode: formData.roleCode,
         };
         if (formData.password) {

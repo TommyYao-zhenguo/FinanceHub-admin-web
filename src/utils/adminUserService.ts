@@ -69,7 +69,7 @@ export class AdminUserService {
 
   // 更新用户
   static async updateUser(data: UpdateUserRequest): Promise<AdminUserInfo> {
-    await httpClient.put<AdminUserInfo>(
+    await httpClient.post<AdminUserInfo>(
       API_ENDPOINTS.CUSTOMER_SERVICE_USER.UPDATE,
       data
     );
