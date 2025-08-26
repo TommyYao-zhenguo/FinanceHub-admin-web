@@ -32,7 +32,7 @@ export default function Header({ onMenuToggle }: HeaderProps) {
   };
 
   return (
-    <header className="bg-white border-b border-gray-200 px-4 py-3 lg:px-6 flex-shrink-0 shadow-sm relative z-10">
+    <header className="fixed top-0 left-0 right-0 bg-white border-b border-gray-200 px-4 py-4 lg:px-6 lg:pl-72 flex-shrink-0 shadow-sm z-20 h-20">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <button
@@ -91,7 +91,7 @@ export default function Header({ onMenuToggle }: HeaderProps) {
                     {getUserDisplayName()}
                   </p>
                   <p className="text-xs text-gray-500">
-                    {userInfo?.mobile || "未设置手机号"}
+                    {getRoleDisplay()}
                   </p>
                   <p className="text-xs text-gray-500">{getCompanyName()}</p>
                 </div>

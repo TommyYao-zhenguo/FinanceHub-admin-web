@@ -46,14 +46,6 @@ export default function Sidebar({
     if (!userInfo?.roleCode) return false;
     return userInfo.roleCode === "SUPER_ADMIN" || userInfo.roleCode === "ADMIN";
   };
-  const hasSystemManagementAccess = () => {
-    if (!userInfo?.roleCode) return false;
-    return (
-      userInfo.roleCode === "SUPER_ADMIN" ||
-      userInfo.roleCode === "ADMIN" ||
-      userInfo.roleCode === "CUSTOMER_SERVICE"
-    );
-  };
 
   const isCustomerServiceUser = () => {
     if (!userInfo?.roleCode) return false;
@@ -146,8 +138,8 @@ export default function Sidebar({
       {/* Sidebar */}
       <aside
         className={`
-        fixed lg:static inset-y-0 left-0 z-20
-        w-64 bg-gradient-to-b from-gray-800 to-gray-900 text-white transform transition-transform duration-300 ease-in-out flex-shrink-0
+        fixed inset-y-0 left-0 z-30
+        w-72 bg-gradient-to-b from-gray-800 to-gray-900 text-white transform transition-transform duration-300 ease-in-out flex-shrink-0
         ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
       `}
       >

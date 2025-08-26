@@ -172,18 +172,18 @@ function AppContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-gray-50">
       <Sidebar
         isOpen={isMobileMenuOpen}
         activeTab={activeTab}
         onTabChange={handleTabChange}
       />
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1">
         <Header
           onMenuToggle={handleMenuToggle}
           isMobileMenuOpen={isMobileMenuOpen}
         />
-        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-4 lg:p-6">
+        <main className="pt-20 lg:pl-72 overflow-x-hidden overflow-y-auto bg-gray-50 p-6 lg:p-8 min-h-screen">
           <Routes>
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route
