@@ -3,7 +3,7 @@ export interface AdminUserInfo {
   id: string;
   userNo: string;
   username: string;
-  companyId: string;
+  companyNo: string;
   companyName: string;
   roleName: string;
   roleCode: string;
@@ -33,7 +33,7 @@ export interface UserRoleOption {
 export interface CreateUserRequest {
   username: string;
   password: string;
-  companyId?: string;
+  companyNo?: string;
   roleCode: UserRole;
   customerServiceId?: string; // 绑定的客服ID
 }
@@ -49,7 +49,7 @@ export interface UserQueryParams {
   page?: number;
   size?: number;
   username?: string;
-  companyId?: string;
+  companyNo?: string;
   roleCode?: UserRole;
   status?: "ACTIVE" | "INACTIVE";
 }

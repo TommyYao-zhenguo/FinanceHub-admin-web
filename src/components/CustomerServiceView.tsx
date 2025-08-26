@@ -93,7 +93,7 @@ export default function CustomerServiceView() {
       );
 
       setRequests(displayRequests);
-      setStatistics(statsResponse);
+      setStatistics(statsResponse || {});
       setPagination((prev) => ({
         ...prev,
         total: listResponse.total,
@@ -161,14 +161,25 @@ export default function CustomerServiceView() {
     {
       id: "all",
       label: "全部",
-      count:
-        statistics.PENDING +
-        statistics.PROCESSING +
-        statistics.COMPLETED,
+      count: statistics
+        ? statistics.PENDING + statistics.PROCESSING + statistics.COMPLETED
+        : 0,
     },
-    { id: "PENDING", label: "待处理", count: statistics.PENDING },
-    { id: "PROCESSING", label: "处理中", count: statistics.PROCESSING },
-    { id: "COMPLETED", label: "已完成", count: statistics.COMPLETED },
+    {
+      id: "PENDING",
+      label: "待处理",
+      count: statistics.PENDING ? statistics.PENDING : 0,
+    },
+    {
+      id: "PROCESSING",
+      label: "处理中",
+      count: statistics.PROCESSING ? statistics.PROCESSING : 0,
+    },
+    {
+      id: "COMPLETED",
+      label: "已完成",
+      count: statistics.COMPLETED ? statistics.COMPLETED : 0,
+    },
   ];
 
   const getStatusColor = (status: string) => {
@@ -239,7 +250,6 @@ export default function CustomerServiceView() {
       return request.status === selectedCategory;
     })
     .sort((a, b) => {
-
       // 状态排序：PENDING > PROCESSING > COMPLETED
       const statusOrder = { PENDING: 3, PROCESSING: 2, COMPLETED: 1 };
       const aStatus = statusOrder[a.status as keyof typeof statusOrder] || 0;
@@ -274,19 +284,19 @@ export default function CustomerServiceView() {
           <div className="grid grid-cols-3 gap-3">
             <div className="bg-red-50 p-3 rounded-lg">
               <div className="text-2xl font-bold text-red-600">
-                {statistics.PENDING}
+                {statistics.PENDING ? statistics.PENDING : 0}
               </div>
               <div className="text-sm text-red-600">待处理</div>
             </div>
             <div className="bg-yellow-50 p-3 rounded-lg">
               <div className="text-2xl font-bold text-yellow-600">
-                {statistics.PROCESSING}
+                {statistics.PROCESSING ? statistics.PROCESSING : 0}
               </div>
               <div className="text-sm text-yellow-600">处理中</div>
             </div>
             <div className="bg-green-50 p-3 rounded-lg">
               <div className="text-2xl font-bold text-green-600">
-                {statistics.COMPLETED}
+                {statistics.COMPLETED ? statistics.COMPLETED : 0}
               </div>
               <div className="text-sm text-green-600">已完成</div>
             </div>
@@ -322,7 +332,7 @@ export default function CustomerServiceView() {
               >
                 <span>{category.label}</span>
                 <span className="bg-white px-2 py-1 rounded-full text-xs font-medium">
-                  {category.count}
+                  {category.count ? category.count : 0}
                 </span>
               </button>
             ))}
@@ -534,9 +544,11 @@ export default function CustomerServiceView() {
                     请求内容
                   </h3>
                   <div className="bg-gray-50 rounded-lg p-4">
-                    <div 
+                    <div
                       className="text-sm text-gray-900 whitespace-pre-wrap"
-                      dangerouslySetInnerHTML={{ __html: selectedMessage.requestContent }}
+                      dangerouslySetInnerHTML={{
+                        __html: selectedMessage.requestContent,
+                      }}
                     />
                   </div>
                 </div>

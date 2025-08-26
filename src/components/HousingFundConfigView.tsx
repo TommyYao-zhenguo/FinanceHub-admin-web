@@ -1,5 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { Home, Save, Plus, Edit, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  Home,
+  Save,
+  Plus,
+  Edit,
+  Trash2,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import toast from "react-hot-toast";
 import { HousingFundConfigService } from "../utils/housingFundConfigService";
 import { HousingFundConfig } from "../types/housingFundConfig";
@@ -8,7 +16,7 @@ import CompanySelector from "./CompanySelector";
 export default function HousingFundConfigView() {
   const [configs, setConfigs] = useState<HousingFundConfig[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchCompanyName, setSearchCompanyName] = useState<string>('');
+  const [searchCompanyName, setSearchCompanyName] = useState<string>("");
   const [showForm, setShowForm] = useState(false);
   const [editingConfig, setEditingConfig] = useState<HousingFundConfig | null>(
     null
@@ -16,15 +24,15 @@ export default function HousingFundConfigView() {
   const [formData, setFormData] = useState({
     companyRate: "",
     personalRate: "",
-    companyNo: ""
+    companyNo: "",
   });
-  
+
   // 分页状态
   const [pagination, setPagination] = useState({
     current: 1,
     size: 10,
     total: 0,
-    pages: 0
+    pages: 0,
   });
 
   useEffect(() => {
@@ -37,16 +45,16 @@ export default function HousingFundConfigView() {
       const params = {
         current: page || pagination.current,
         size: pagination.size,
-        ...(companyName && { companyName })
+        ...(companyName && { companyName }),
       };
       const data = await HousingFundConfigService.getConfigList(params);
       console.log("configs: ", data);
       setConfigs(data.records);
-      setPagination(prev => ({
+      setPagination((prev) => ({
         ...prev,
         total: data.total,
         pages: data.pages,
-        current: data.current
+        current: data.current,
       }));
     } catch {
       toast.error("加载公积金配置失败");
@@ -59,8 +67,9 @@ export default function HousingFundConfigView() {
     e.preventDefault();
 
     try {
+      console.log("formData: ", formData);
       const configData = {
-        companyNo: formData.companyNo!, 
+        companyNo: formData.companyNo!,
         companyRate: parseFloat(formData.companyRate),
         personalRate: parseFloat(formData.personalRate),
         minBase: 0,
@@ -140,7 +149,7 @@ export default function HousingFundConfigView() {
               value={searchCompanyName}
               onChange={(e) => {
                 setSearchCompanyName(e.target.value);
-                setPagination(prev => ({ ...prev, current: 1 }));
+                setPagination((prev) => ({ ...prev, current: 1 }));
                 loadConfigs(e.target.value || undefined, 1);
               }}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none"
@@ -218,12 +227,12 @@ export default function HousingFundConfigView() {
                   <tr key={config.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">
-                        {config.companyName || '-'}
+                        {config.companyName || "-"}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">
-                        {config.taxNumber || '-'}
+                        {config.taxNumber || "-"}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -268,21 +277,24 @@ export default function HousingFundConfigView() {
             </tbody>
           </table>
         </div>
-        
+
         {/* 分页组件 */}
         {pagination.total > 0 && (
           <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
             <div className="flex items-center justify-between">
               <div className="text-sm text-gray-700">
-                显示第 {(pagination.current - 1) * pagination.size + 1} 到{' '}
-                {Math.min(pagination.current * pagination.size, pagination.total)} 条，
-                共 {pagination.total} 条记录
+                显示第 {(pagination.current - 1) * pagination.size + 1} 到{" "}
+                {Math.min(
+                  pagination.current * pagination.size,
+                  pagination.total
+                )}{" "}
+                条， 共 {pagination.total} 条记录
               </div>
               <div className="flex items-center space-x-2">
                 <button
                   onClick={() => {
                     const newPage = pagination.current - 1;
-                    setPagination(prev => ({ ...prev, current: newPage }));
+                    setPagination((prev) => ({ ...prev, current: newPage }));
                     loadConfigs(searchCompanyName || undefined, newPage);
                   }}
                   disabled={pagination.current <= 1}
@@ -291,43 +303,52 @@ export default function HousingFundConfigView() {
                   <ChevronLeft className="h-4 w-4" />
                   <span>上一页</span>
                 </button>
-                
+
                 <div className="flex items-center space-x-1">
-                  {Array.from({ length: Math.min(5, pagination.pages) }, (_, i) => {
-                    let pageNum;
-                    if (pagination.pages <= 5) {
-                      pageNum = i + 1;
-                    } else if (pagination.current <= 3) {
-                      pageNum = i + 1;
-                    } else if (pagination.current >= pagination.pages - 2) {
-                      pageNum = pagination.pages - 4 + i;
-                    } else {
-                      pageNum = pagination.current - 2 + i;
+                  {Array.from(
+                    { length: Math.min(5, pagination.pages) },
+                    (_, i) => {
+                      let pageNum;
+                      if (pagination.pages <= 5) {
+                        pageNum = i + 1;
+                      } else if (pagination.current <= 3) {
+                        pageNum = i + 1;
+                      } else if (pagination.current >= pagination.pages - 2) {
+                        pageNum = pagination.pages - 4 + i;
+                      } else {
+                        pageNum = pagination.current - 2 + i;
+                      }
+
+                      return (
+                        <button
+                          key={pageNum}
+                          onClick={() => {
+                            setPagination((prev) => ({
+                              ...prev,
+                              current: pageNum,
+                            }));
+                            loadConfigs(
+                              searchCompanyName || undefined,
+                              pageNum
+                            );
+                          }}
+                          className={`px-3 py-1 text-sm border rounded-md ${
+                            pageNum === pagination.current
+                              ? "bg-green-600 text-white border-green-600"
+                              : "border-gray-300 hover:bg-gray-100"
+                          }`}
+                        >
+                          {pageNum}
+                        </button>
+                      );
                     }
-                    
-                    return (
-                      <button
-                        key={pageNum}
-                        onClick={() => {
-                          setPagination(prev => ({ ...prev, current: pageNum }));
-                          loadConfigs(searchCompanyName || undefined, pageNum);
-                        }}
-                        className={`px-3 py-1 text-sm border rounded-md ${
-                          pageNum === pagination.current
-                            ? 'bg-green-600 text-white border-green-600'
-                            : 'border-gray-300 hover:bg-gray-100'
-                        }`}
-                      >
-                        {pageNum}
-                      </button>
-                    );
-                  })}
+                  )}
                 </div>
-                
+
                 <button
                   onClick={() => {
                     const newPage = pagination.current + 1;
-                    setPagination(prev => ({ ...prev, current: newPage }));
+                    setPagination((prev) => ({ ...prev, current: newPage }));
                     loadConfigs(searchCompanyName || undefined, newPage);
                   }}
                   disabled={pagination.current >= pagination.pages}
@@ -372,9 +393,9 @@ export default function HousingFundConfigView() {
                     <CompanySelector
                       value={formData.companyNo}
                       onChange={(companyNo: string) => {
-                        setFormData({ 
-                          ...formData, 
-                          companyNo: companyNo 
+                        setFormData({
+                          ...formData,
+                          companyNo: companyNo,
                         });
                       }}
                       className="w-full"
@@ -382,16 +403,22 @@ export default function HousingFundConfigView() {
                   </div>
                 </div>
               )}
-              
+
               {editingConfig && (
                 <div className="bg-gray-50 p-4 rounded-lg">
                   <div className="text-sm text-gray-600">
                     <span className="font-medium">编辑配置：</span>
-                    {editingConfig.companyName ? `${editingConfig.companyName} (${editingConfig.taxNumber ? editingConfig.taxNumber : editingConfig.companyNo})` : `公司编号: ${editingConfig.companyNo}`}
+                    {editingConfig.companyName
+                      ? `${editingConfig.companyName} (${
+                          editingConfig.taxNumber
+                            ? editingConfig.taxNumber
+                            : editingConfig.companyNo
+                        })`
+                      : `公司编号: ${editingConfig.companyNo}`}
                   </div>
                 </div>
               )}
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">

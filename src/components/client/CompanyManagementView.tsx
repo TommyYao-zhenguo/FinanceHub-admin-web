@@ -198,10 +198,10 @@ export default function CompanyManagementView() {
       if (editingCompany) {
         // 编辑公司 - 构建完整的更新数据，保留原有字段
         await CompanyService.updateCompany({
-          companyId: editingCompany.companyId,
+          companyId: editingCompany.companyNo,
           companyName: formData.companyName,
           taxNumber: formData.taxNumber,
-          franchise: formData.isFranchise,
+          isFranchise: formData.isFranchise,
           customerServiceId: formData.customerServiceId,
         });
         toast.success("公司信息更新成功");
@@ -210,7 +210,7 @@ export default function CompanyManagementView() {
         const createData = {
           companyName: formData.companyName,
           taxNumber: formData.taxNumber,
-          franchise: formData.isFranchise, // 添加加盟商属性
+          isFranchise: formData.isFranchise, // 添加加盟商属性
           customerServiceId: formData.customerServiceId,
         };
         await CompanyService.createCompany(createData);

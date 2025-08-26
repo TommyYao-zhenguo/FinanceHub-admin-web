@@ -39,7 +39,7 @@ export default function UserManagementView() {
     page: 1,
     size: 10,
     username: "",
-    companyId: isSuperAdmin ? undefined : userInfo?.companyId || undefined, // 非超级管理员默认使用自己的公司ID
+    companyNo: isSuperAdmin ? undefined : userInfo?.companyNo || undefined, // 非超级管理员默认使用自己的公司ID
     roleCode: isSuperAdmin ? UserRole.ADMIN : UserRole.EMPLOYEE,
     status: undefined,
   });
@@ -52,7 +52,7 @@ export default function UserManagementView() {
   const [formData, setFormData] = useState<CreateUserRequest>({
     username: "",
     password: "",
-    companyId: userInfo?.companyId || "", // 非超级管理员默认使用自己的公司ID
+    companyNo: userInfo?.companyNo || "", // 非超级管理员默认使用自己的公司ID
     roleCode: isSuperAdmin ? UserRole.ADMIN : UserRole.EMPLOYEE,
   });
 
@@ -127,7 +127,7 @@ export default function UserManagementView() {
     setFormData({
       username: "",
       password: "",
-      companyId: isSuperAdmin ? "" : userInfo?.companyId || "", // 非超级管理员默认使用自己的公司ID
+      companyNo: isSuperAdmin ? "" : userInfo?.companyNo || "", // 非超级管理员默认使用自己的公司ID
       roleCode: isSuperAdmin ? UserRole.ADMIN : UserRole.EMPLOYEE,
     });
     setShowModal(true);
@@ -139,7 +139,7 @@ export default function UserManagementView() {
     setFormData({
       username: user.username,
       password: "",
-      companyId: user.companyId,
+      companyNo: user.companyNo,
       roleCode: user.roleCode as UserRole,
     });
     setShowModal(true);
@@ -154,7 +154,7 @@ export default function UserManagementView() {
         const updateData: UpdateUserRequest = {
           id: editingUser.id,
           username: formData.username,
-          companyId: formData.companyId,
+          companyNo: formData.companyNo,
           roleCode: formData.roleCode,
         };
         if (formData.password) {
@@ -247,22 +247,22 @@ export default function UserManagementView() {
             onChange={(e) =>
               setSearchParams({ ...searchParams, username: e.target.value })
             }
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-transparent"
           />
         </div>
         {/* 只有超级管理员才显示企业下拉框 */}
         {isSuperAdmin && (
           <div>
             <select
-              value={searchParams.companyId || ""}
+              value={searchParams.companyNo || ""}
               onChange={(e) =>
-                setSearchParams({ ...searchParams, companyId: e.target.value })
+                setSearchParams({ ...searchParams, companyNo: e.target.value })
               }
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg  focus:ring-green-500 focus:border-transparent"
             >
               <option value="">所有公司</option>
               {companies.map((company) => (
-                <option key={company.id} value={company.id}>
+                <option key={company.companyNo} value={company.companyNo}>
                   {company.companyName}
                 </option>
               ))}
@@ -424,7 +424,7 @@ export default function UserManagementView() {
                   onChange={(e) =>
                     setFormData({ ...formData, username: e.target.value })
                   }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-transparent"
                 />
               </div>
 
@@ -440,7 +440,7 @@ export default function UserManagementView() {
                     onChange={(e) =>
                       setFormData({ ...formData, password: e.target.value })
                     }
-                    className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-transparent"
                   />
                   <button
                     type="button"
@@ -464,15 +464,15 @@ export default function UserManagementView() {
                   </label>
                   <select
                     required
-                    value={formData.companyId}
+                    value={formData.companyNo}
                     onChange={(e) =>
-                      setFormData({ ...formData, companyId: e.target.value })
+                      setFormData({ ...formData, companyNo: e.target.value })
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-transparent"
                   >
                     <option value="">请选择公司</option>
                     {companies.map((company) => (
-                      <option key={company.id} value={company.id}>
+                      <option key={company.companyNo} value={company.companyNo}>
                         {company.companyName}
                       </option>
                     ))}
@@ -493,7 +493,7 @@ export default function UserManagementView() {
                       roleCode: e.target.value as UserRole,
                     })
                   }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-transparent"
                 >
                   {roleOptions.map((role) => (
                     <option key={role.value} value={role.value}>
@@ -505,32 +505,6 @@ export default function UserManagementView() {
                 </select>
               </div>
 
-              {/* 添加客服绑定选择 */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  绑定客服
-                </label>
-                <select
-                  value={formData.customerServiceId || ""}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      customerServiceId: e.target.value || undefined,
-                    })
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                >
-                  <option value="">请选择客服（可选）</option>
-                  {customerServices.map((cs) => (
-                    <option key={cs.id} value={cs.userNo}>
-                      {cs.username}
-                    </option>
-                  ))}
-                </select>
-                <p className="text-xs text-gray-500 mt-1">
-                  为该用户指定专属客服，用户可通过此客服获得服务支持
-                </p>
-              </div>
               <div className="flex justify-end space-x-3 pt-4">
                 <button
                   type="button"
