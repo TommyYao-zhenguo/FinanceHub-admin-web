@@ -115,9 +115,65 @@ export default function CustomerServiceManagementView() {
     setShowModal(true);
   };
 
+  // 校验函数
+  const validateForm = () => {
+    // 校验登录账号
+    if (!formData.username.trim()) {
+      toast.error("请输入客服登录账号");
+      return false;
+    }
+
+    // 登录账号格式校验：只能包含字母、数字、下划线，长度3-20位
+    const usernameRegex = /^[a-zA-Z0-9_]{3,20}$/;
+    if (!usernameRegex.test(formData.username)) {
+      toast.error("登录账号格式不正确，只能包含字母、数字、下划线，长度3-20位");
+      return false;
+    }
+
+    // 校验客服名称
+    if (!formData.name?.trim()) {
+      toast.error("请输入客服名称");
+      return false;
+    }
+
+    if (formData.name && formData.name.length > 50) {
+      toast.error("客服名称长度不能超过50个字符");
+      return false;
+    }
+
+    // 校验密码
+    if (!editingUser && !formData.password) {
+      toast.error("请输入登录密码");
+      return false;
+    }
+
+    if (formData.password) {
+      // 密码长度校验
+      if (formData.password.length < 6 || formData.password.length > 16) {
+        toast.error("密码长度必须为6-16位");
+        return false;
+      }
+
+      // 密码复杂度校验：至少包含字母和数字
+      const passwordRegex = /^(?=.*[a-zA-Z])(?=.*\d)[a-zA-Z\d@$!%*?&]{6,16}$/;
+      if (!passwordRegex.test(formData.password)) {
+        toast.error("密码必须包含字母和数字，可包含特殊字符@$!%*?&");
+        return false;
+      }
+    }
+
+    return true;
+  };
+
   // 提交表单
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // 表单校验
+    if (!validateForm()) {
+      return;
+    }
+
     setFormLoading(true);
     try {
       if (editingUser) {
@@ -225,10 +281,10 @@ export default function CustomerServiceManagementView() {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    客服名称
+                    客服姓名
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    客服账号
+                    客服登陆账号
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     状态
@@ -330,7 +386,7 @@ export default function CustomerServiceManagementView() {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  客服账号名称 *
+                  客服登陆账号 *
                 </label>
                 <input
                   type="text"
@@ -339,13 +395,14 @@ export default function CustomerServiceManagementView() {
                   onChange={(e) =>
                     setFormData({ ...formData, username: e.target.value })
                   }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg   focus:ring-green-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-transparent"
+                  placeholder="请输入登陆账号：字母、数字、下划线，3-20位"
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  用户名称
+                  客服名称 *
                 </label>
                 <input
                   type="text"
@@ -354,7 +411,7 @@ export default function CustomerServiceManagementView() {
                     setFormData({ ...formData, name: e.target.value })
                   }
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-transparent"
-                  placeholder="请输入用户真实姓名"
+                  placeholder="请输入客服名称：用于页面中显示"
                 />
               </div>
 
@@ -371,6 +428,7 @@ export default function CustomerServiceManagementView() {
                       setFormData({ ...formData, password: e.target.value })
                     }
                     className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-transparent"
+                    placeholder="请输入登录密码：6-16位，包含字母和数字"
                   />
                   <button
                     type="button"

@@ -183,7 +183,10 @@ function AppContent() {
           onMenuToggle={handleMenuToggle}
           isMobileMenuOpen={isMobileMenuOpen}
         />
-        <main className="pt-20 lg:pl-72 overflow-x-hidden overflow-y-auto bg-gray-50 p-6 lg:p-8 min-h-screen">
+        <main
+          className="pt-20 lg:pl-72 overflow-x-hidden overflow-y-auto bg-gray-50 p-6 lg:p-8 min-h-screen"
+          style={{ marginTop: "45px", marginLeft: "30px" }}
+        >
           <Routes>
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route
