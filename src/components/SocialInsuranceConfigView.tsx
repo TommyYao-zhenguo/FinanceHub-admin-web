@@ -107,10 +107,10 @@ export default function SocialInsuranceConfigView() {
         ) {
           updatedBatchFormData.configs[
             insuranceType as keyof typeof updatedBatchFormData.configs
-          ].personalRate = config.personalRate * 100; // 转换为百分比
+          ].personalRate = config.personalRate; // 转换为百分比
           updatedBatchFormData.configs[
             insuranceType as keyof typeof updatedBatchFormData.configs
-          ].companyRate = config.companyRate * 100; // 转换为百分比
+          ].companyRate = config.companyRate; // 转换为百分比
         }
       });
       setBatchFormData(updatedBatchFormData);
@@ -303,8 +303,8 @@ export default function SocialInsuranceConfigView() {
       const insuranceType = config.insuranceType as keyof typeof formConfigs;
       if (formConfigs[insuranceType]) {
         formConfigs[insuranceType] = {
-          personalRate: config.personalRate * 100, // 转换为百分比显示
-          companyRate: config.companyRate * 100, // 转换为百分比显示
+          personalRate: config.personalRate, // 转换为百分比显示
+          companyRate: config.companyRate, // 转换为百分比显示
         };
       }
     });
@@ -559,20 +559,20 @@ export default function SocialInsuranceConfigView() {
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap">
                                   <div className="text-sm text-gray-900">
-                                    {config.personalRate * 100}%
+                                    {config.personalRate}%
                                   </div>
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap">
                                   <div className="text-sm text-gray-900">
-                                    {config.companyRate * 100}%
+                                    {config.companyRate}%
                                   </div>
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap">
                                   <div className="text-sm font-medium text-blue-600">
                                     {
                                       (
-                                        config.personalRate * 100 +
-                                        config.companyRate * 100
+                                        config.personalRate +
+                                        config.companyRate
                                       ).toFixed(1)
                                     }
                                     %
