@@ -19,6 +19,7 @@ import CustomerServiceView from "./components/CustomerServiceView";
 import SocialInsuranceConfigView from "./components/SocialInsuranceConfigView";
 import HousingFundConfigView from "./components/HousingFundConfigView";
 import TaxUploadView from "./components/TaxUploadView";
+import EmployeeBaseConfigView from "./components/EmployeeBaseConfigView";
 
 import {
   AdminUserProvider,
@@ -34,6 +35,7 @@ const routeMap: Record<string, string> = {
   "/customer-service": "customer-service",
   "/client/company-management": "company-management",
   "/client/user-management": "user-management",
+  "/employee-base-config": "employee-base-config",
   "/social-insurance-config": "social-insurance-config",
   "/housing-fund-config": "housing-fund-config",
   "/tax-upload": "tax-upload",
@@ -48,6 +50,7 @@ const tabToRouteMap: Record<string, string> = {
   "customer-service": "/customer-service",
   "company-management": "/client/company-management",
   "user-management": "/client/user-management",
+  "employee-base-config": "/employee-base-config",
   "social-insurance-config": "/social-insurance-config",
   "housing-fund-config": "/housing-fund-config",
   "tax-upload": "/tax-upload",
@@ -185,7 +188,7 @@ function AppContent() {
         />
         <main
           className="pt-20 lg:pl-72 overflow-x-hidden overflow-y-auto bg-gray-50 p-6 lg:p-8 min-h-screen"
-          style={{ marginTop: "45px", marginLeft: "30px" }}
+          style={{ marginTop: "80px", marginLeft: "30px" }}
         >
           <Routes>
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
@@ -202,6 +205,10 @@ function AppContent() {
             <Route
               path="/client/user-management"
               element={<UserManagementView />}
+            />
+            <Route
+              path="/employee-base-config"
+              element={<EmployeeBaseConfigView />}
             />
             <Route
               path="/social-insurance-config"

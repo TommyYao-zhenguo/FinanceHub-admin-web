@@ -10,6 +10,7 @@ import {
   Shield,
   Home,
   Upload,
+  Calculator,
 } from "lucide-react";
 import { useAdminUserContext } from "../contexts/AdminUserContext";
 
@@ -101,6 +102,11 @@ export default function Sidebar({
 
     // 添加新的子菜单项
     if (isCustomerServiceUser()) {
+      items.push({
+        id: "employee-base-config",
+        label: "员工基数配置",
+        icon: Calculator,
+      });
       items.push({
         id: "social-insurance-config",
         label: "社保比例配置",
