@@ -543,7 +543,7 @@ export default function CompanyManagementView() {
                   <option value="">请选择客服</option>
                   {customerServices.map((service) => (
                     <option key={service.userNo} value={service.userNo}>
-                      {service.username}
+                      {service.name}
                     </option>
                   ))}
                 </select>
