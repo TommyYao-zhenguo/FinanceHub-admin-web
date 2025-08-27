@@ -390,7 +390,7 @@ export default function CompanyManagementView() {
                         </button>
                         <button
                           onClick={() =>
-                            handleDelete(company.companyId, company.companyName)
+                            handleDelete(company.companyNo, company.companyName)
                           }
                           className="p-1 text-red-600 hover:bg-red-50 rounded"
                           title="删除"
