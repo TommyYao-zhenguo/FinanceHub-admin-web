@@ -34,7 +34,8 @@ const INSURANCE_TYPES = [
 ];
 
 export default function SocialInsuranceConfigView() {
-  const [groupedData, setGroupedData] = useState<CompanyConfigData[]>([]);
+  const [configuredData, setConfiguredData] = useState<CompanyConfigData[]>([]);
+  const [unconfiguredData, setUnconfiguredData] = useState<CompanyConfigData[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchCompanyName, setSearchCompanyName] = useState<string>("");
   const [showForm, setShowForm] = useState(false);
@@ -42,8 +43,16 @@ export default function SocialInsuranceConfigView() {
     useState<SocialInsuranceConfig | null>(null);
   const [activeTab, setActiveTab] = useState<'configured' | 'unconfigured'>('configured');
 
-  // 分页状态
-  const [pagination, setPagination] = useState({
+  // 已配置公司的分页状态
+  const [configuredPagination, setConfiguredPagination] = useState({
+    current: 1,
+    size: 10,
+    total: 0,
+    pages: 0,
+  });
+
+  // 未配置公司的分页状态
+  const [unconfiguredPagination, setUnconfiguredPagination] = useState({
     current: 1,
     size: 10,
     total: 0,
@@ -64,8 +73,23 @@ export default function SocialInsuranceConfigView() {
   });
 
   useEffect(() => {
-    loadConfigs();
-  }, [pagination.current, pagination.size]);
+    loadAllData();
+  }, []);
+
+  // 当分页改变时重新加载数据
+  useEffect(() => {
+    if (configuredPagination.current > 1 || unconfiguredPagination.current > 1) {
+      loadAllData(searchCompanyName || undefined, configuredPagination.current, unconfiguredPagination.current);
+    }
+  }, [configuredPagination.current, unconfiguredPagination.current]);
+
+  const handleSearch = () => {
+    setConfiguredPagination((prev) => ({ ...prev, current: 1 }));
+    setUnconfiguredPagination((prev) => ({ ...prev, current: 1 }));
+    loadAllData(searchCompanyName || undefined, 1, 1);
+  };
+
+  // 当切换tab时不需要重新加载数据，因为数据已经在前端分离了
 
   const fetchCompanyConfigs = async (companyNo: string) => {
     try {
@@ -95,17 +119,19 @@ export default function SocialInsuranceConfigView() {
     }
   };
 
-  const loadConfigs = async (companyName?: string, page?: number) => {
+  // 加载所有数据并分离已配置和未配置
+  const loadAllData = async (companyName?: string, configuredPage?: number, unconfiguredPage?: number) => {
     try {
       setLoading(true);
-      const currentPage = page || pagination.current;
+      
+      // 获取足够大的页面来包含所有数据，然后在前端分离
       const params = {
-        current: currentPage,
-        size: pagination.size,
+        current: 1,
+        size: 1000, // 获取大量数据
         ...(companyName && { companyName }),
       };
       const response = await SocialInsuranceConfigService.getConfigList(params);
-      console.log("social insurance configs: ", response);
+      console.log("all social insurance configs: ", response);
 
       // 转换数据格式：将 SocialInsuranceConfig[] 转换为 CompanyConfigData[]
       const transformedRecords: CompanyConfigData[] = response.records.map(
@@ -117,19 +143,49 @@ export default function SocialInsuranceConfigView() {
         })
       );
 
-      setGroupedData(transformedRecords);
-      setPagination((prev) => ({
+      // 分离已配置和未配置的公司
+      const configured = transformedRecords.filter(company => 
+        company.configs && company.configs.length > 0
+      );
+      const unconfigured = transformedRecords.filter(company => 
+        !company.configs || company.configs.length === 0
+      );
+
+      // 实现前端分页
+      const configuredCurrentPage = configuredPage || configuredPagination.current;
+      const unconfiguredCurrentPage = unconfiguredPage || unconfiguredPagination.current;
+      
+      const configuredStartIndex = (configuredCurrentPage - 1) * configuredPagination.size;
+      const configuredEndIndex = configuredStartIndex + configuredPagination.size;
+      const configuredPageData = configured.slice(configuredStartIndex, configuredEndIndex);
+      
+      const unconfiguredStartIndex = (unconfiguredCurrentPage - 1) * unconfiguredPagination.size;
+      const unconfiguredEndIndex = unconfiguredStartIndex + unconfiguredPagination.size;
+      const unconfiguredPageData = unconfigured.slice(unconfiguredStartIndex, unconfiguredEndIndex);
+
+      setConfiguredData(configuredPageData);
+      setConfiguredPagination((prev) => ({
         ...prev,
-        current: currentPage,
-        total: response.total,
-        pages: response.pages,
+        current: configuredCurrentPage,
+        total: configured.length,
+        pages: Math.ceil(configured.length / prev.size),
+      }));
+
+      setUnconfiguredData(unconfiguredPageData);
+      setUnconfiguredPagination((prev) => ({
+        ...prev,
+        current: unconfiguredCurrentPage,
+        total: unconfigured.length,
+        pages: Math.ceil(unconfigured.length / prev.size),
       }));
     } catch {
-      toast.error("加载社保配置失败");
+      toast.error("加载社保配置数据失败");
     } finally {
       setLoading(false);
     }
   };
+
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -164,7 +220,8 @@ export default function SocialInsuranceConfigView() {
       setShowForm(false);
       setEditingConfig(null);
       resetForm();
-      loadConfigs(searchCompanyName || undefined, pagination.current);
+      // 重新加载数据
+      loadAllData(searchCompanyName || undefined, configuredPagination.current, unconfiguredPagination.current);
     } catch {
       toast.error("配置保存失败");
     } finally {
@@ -267,7 +324,8 @@ export default function SocialInsuranceConfigView() {
     try {
       await SocialInsuranceConfigService.deleteConfig(configId);
       toast.success("删除成功");
-      await loadConfigs(searchCompanyName || undefined, pagination.current);
+      // 重新加载数据
+      loadAllData(searchCompanyName || undefined, configuredPagination.current, unconfiguredPagination.current);
     } catch (error) {
       console.error("删除失败:", error);
       toast.error("删除失败，请重试");
@@ -305,8 +363,7 @@ export default function SocialInsuranceConfigView() {
               value={searchCompanyName}
               onChange={(e) => {
                 setSearchCompanyName(e.target.value);
-                setPagination((prev) => ({ ...prev, current: 1 }));
-                loadConfigs(e.target.value || undefined, 1);
+                handleSearch();
               }}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
             />
@@ -332,7 +389,7 @@ export default function SocialInsuranceConfigView() {
                   ? 'bg-blue-100 text-blue-600'
                   : 'bg-gray-100 text-gray-600'
               }`}>
-                {groupedData.filter(company => company.configs.length > 0).length}
+                {configuredPagination.total}
               </span>
             </button>
             <button
@@ -349,7 +406,7 @@ export default function SocialInsuranceConfigView() {
                   ? 'bg-blue-100 text-blue-600'
                   : 'bg-gray-100 text-gray-600'
               }`}>
-                {groupedData.filter(company => company.configs.length === 0).length}
+                {unconfiguredPagination.total}
               </span>
             </button>
           </nav>
@@ -362,13 +419,9 @@ export default function SocialInsuranceConfigView() {
               加载中...
             </div>
           ) : (() => {
-            const filteredData = groupedData.filter(company => 
-              activeTab === 'configured' 
-                ? company.configs.length > 0 
-                : company.configs.length === 0
-            );
+            const currentData = activeTab === 'configured' ? configuredData : unconfiguredData;
             
-            if (filteredData.length === 0) {
+            if (currentData.length === 0) {
               return (
                 <div className="p-12 text-center text-gray-500">
                   {activeTab === 'configured' ? '暂无已配置的公司' : '暂无未配置的公司'}
@@ -376,7 +429,7 @@ export default function SocialInsuranceConfigView() {
               );
             }
             
-            const filteredGroupedConfigs = filteredData.reduce((acc, company) => {
+            const filteredGroupedConfigs = currentData.reduce((acc, company) => {
               const key = company.companyNo || "unknown";
               acc[key] = {
                 companyInfo: {
@@ -563,90 +616,116 @@ export default function SocialInsuranceConfigView() {
       </div>
 
       {/* 分页组件 */}
-      {pagination.total > 0 && (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 mt-4">
-          <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
-            <div className="flex items-center justify-between">
-              <div className="text-sm text-gray-700">
-                显示第 {(pagination.current - 1) * pagination.size + 1} 到{" "}
-                {Math.min(
-                  pagination.current * pagination.size,
-                  pagination.total
-                )}{" "}
-                条， 共 {pagination.total} 条记录
-              </div>
-              <div className="flex items-center space-x-2">
-                <button
-                  onClick={() => {
-                    const newPage = pagination.current - 1;
-                    setPagination((prev) => ({ ...prev, current: newPage }));
-                    loadConfigs(searchCompanyName || undefined, newPage);
-                  }}
-                  disabled={pagination.current <= 1}
-                  className="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-1"
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                  <span>上一页</span>
-                </button>
-
-                <div className="flex items-center space-x-1">
-                  {Array.from(
-                    { length: Math.min(5, pagination.pages) },
-                    (_, i) => {
-                      let pageNum;
-                      if (pagination.pages <= 5) {
-                        pageNum = i + 1;
-                      } else if (pagination.current <= 3) {
-                        pageNum = i + 1;
-                      } else if (pagination.current >= pagination.pages - 2) {
-                        pageNum = pagination.pages - 4 + i;
-                      } else {
-                        pageNum = pagination.current - 2 + i;
-                      }
-
-                      return (
-                        <button
-                          key={pageNum}
-                          onClick={() => {
-                            setPagination((prev) => ({
-                              ...prev,
-                              current: pageNum,
-                            }));
-                            loadConfigs(
-                              searchCompanyName || undefined,
-                              pageNum
-                            );
-                          }}
-                          className={`px-3 py-1 text-sm border rounded-md ${
-                            pagination.current === pageNum
-                              ? "bg-blue-600 text-white border-blue-600"
-                              : "border-gray-300 hover:bg-gray-100"
-                          }`}
-                        >
-                          {pageNum}
-                        </button>
-                      );
-                    }
-                  )}
+      {(() => {
+        const currentPagination = activeTab === 'configured' ? configuredPagination : unconfiguredPagination;
+        return currentPagination.total > 0 && (
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 mt-4">
+            <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
+              <div className="flex items-center justify-between">
+                <div className="text-sm text-gray-700">
+                  显示第 {(currentPagination.current - 1) * currentPagination.size + 1} 到{" "}
+                  {Math.min(
+                    currentPagination.current * currentPagination.size,
+                    currentPagination.total
+                  )}{" "}
+                  条， 共 {currentPagination.total} 条记录
                 </div>
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={() => {
+                      const newPage = currentPagination.current - 1;
+                      if (activeTab === 'configured') {
+                        setConfiguredPagination((prev) => ({ ...prev, current: newPage }));
+                        loadAllData(searchCompanyName || undefined, newPage, unconfiguredPagination.current);
+                      } else {
+                        setUnconfiguredPagination((prev) => ({ ...prev, current: newPage }));
+                        loadAllData(searchCompanyName || undefined, configuredPagination.current, newPage);
+                      }
+                    }}
+                    disabled={currentPagination.current <= 1}
+                    className="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-1"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                    <span>上一页</span>
+                  </button>
 
-                <button
-                  onClick={() => {
-                    const newPage = pagination.current + 1;
-                    setPagination((prev) => ({ ...prev, current: newPage }));
-                    loadConfigs(searchCompanyName || undefined, newPage);
-                  }}
-                  disabled={pagination.current >= pagination.pages}
-                  className="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-1"
-                >
-                  <span>下一页</span>
-                  <ChevronRight className="h-4 w-4" />
-                </button>
+                  <div className="flex items-center space-x-1">
+                    {Array.from(
+                      { length: Math.min(5, currentPagination.pages) },
+                      (_, i) => {
+                        let pageNum;
+                        if (currentPagination.pages <= 5) {
+                          pageNum = i + 1;
+                        } else if (currentPagination.current <= 3) {
+                          pageNum = i + 1;
+                        } else if (currentPagination.current >= currentPagination.pages - 2) {
+                          pageNum = currentPagination.pages - 4 + i;
+                        } else {
+                          pageNum = currentPagination.current - 2 + i;
+                        }
+
+                        return (
+                          <button
+                            key={pageNum}
+                            onClick={() => {
+                              if (activeTab === 'configured') {
+                                setConfiguredPagination((prev) => ({
+                                  ...prev,
+                                  current: pageNum,
+                                }));
+                                loadAllData(
+                                  searchCompanyName || undefined,
+                                  pageNum,
+                                  unconfiguredPagination.current
+                                );
+                              } else {
+                                setUnconfiguredPagination((prev) => ({
+                                  ...prev,
+                                  current: pageNum,
+                                }));
+                                loadAllData(
+                                  searchCompanyName || undefined,
+                                  configuredPagination.current,
+                                  pageNum
+                                );
+                              }
+                            }}
+                            className={`px-3 py-1 text-sm border rounded-md ${
+                              currentPagination.current === pageNum
+                                ? "bg-blue-600 text-white border-blue-600"
+                                : "border-gray-300 hover:bg-gray-100"
+                            }`}
+                          >
+                            {pageNum}
+                          </button>
+                        );
+                      }
+                    )}
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      const newPage = currentPagination.current + 1;
+                      if (activeTab === 'configured') {
+                        setConfiguredPagination((prev) => ({ ...prev, current: newPage }));
+                        loadAllData(searchCompanyName || undefined, newPage, unconfiguredPagination.current);
+                      } else {
+                        setUnconfiguredPagination((prev) => ({ ...prev, current: newPage }));
+                        loadAllData(searchCompanyName || undefined, configuredPagination.current, newPage);
+                      }
+                    }}
+                    disabled={currentPagination.current >= currentPagination.pages}
+                    className="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-1"
+                  >
+                    <span>下一页</span>
+                    <ChevronRight className="h-4 w-4" />
+                  </button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* 配置表单弹窗 */}
       {showForm && (
