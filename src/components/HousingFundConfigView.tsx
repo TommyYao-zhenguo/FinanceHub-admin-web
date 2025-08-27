@@ -14,21 +14,31 @@ import { HousingFundConfig } from "../types/housingFundConfig";
 import CompanySelector from "./CompanySelector";
 
 export default function HousingFundConfigView() {
-  const [configs, setConfigs] = useState<HousingFundConfig[]>([]);
+  const [configuredData, setConfiguredData] = useState<HousingFundConfig[]>([]);
+  const [unconfiguredData, setUnconfiguredData] = useState<HousingFundConfig[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchCompanyName, setSearchCompanyName] = useState<string>("");
   const [showForm, setShowForm] = useState(false);
   const [editingConfig, setEditingConfig] = useState<HousingFundConfig | null>(
     null
   );
+  const [activeTab, setActiveTab] = useState<'configured' | 'unconfigured'>('configured');
   const [formData, setFormData] = useState({
     companyRate: "",
     personalRate: "",
     companyNo: "",
   });
 
-  // 分页状态
-  const [pagination, setPagination] = useState({
+  // 已配置公司的分页状态
+  const [configuredPagination, setConfiguredPagination] = useState({
+    current: 1,
+    size: 10,
+    total: 0,
+    pages: 0,
+  });
+
+  // 未配置公司的分页状态
+  const [unconfiguredPagination, setUnconfiguredPagination] = useState({
     current: 1,
     size: 10,
     total: 0,
@@ -36,31 +46,81 @@ export default function HousingFundConfigView() {
   });
 
   useEffect(() => {
-    loadConfigs();
-  }, [pagination.current, pagination.size]);
+    loadAllData();
+  }, []);
 
-  const loadConfigs = async (companyName?: string, page?: number) => {
+  // 当分页改变时重新加载数据
+  useEffect(() => {
+    if (configuredPagination.current > 1 || unconfiguredPagination.current > 1) {
+      loadAllData();
+    }
+  }, [configuredPagination.current, unconfiguredPagination.current]);
+
+  const loadAllData = async (companyName?: string) => {
     try {
       setLoading(true);
+      // 获取大量数据以包含所有公司
       const params = {
-        current: page || pagination.current,
-        size: pagination.size,
+        current: 1,
+        size: 1000, // 获取足够多的数据
         ...(companyName && { companyName }),
       };
+
       const data = await HousingFundConfigService.getConfigList(params);
-      console.log("configs: ", data);
-      setConfigs(data.records);
-      setPagination((prev) => ({
+      console.log("housing fund configs: ", data);
+      
+      // 在前端分离已配置和未配置的公司
+      // 这里假设有配置记录的就是已配置，没有的就是未配置
+      // 由于后端API限制，我们需要根据实际返回的数据结构来判断
+      const allConfigs = data.records || [];
+      
+      // 已配置：有具体配置数据的公司
+      const configured = allConfigs.filter(config => config.id && config.companyRate !== undefined);
+      
+      // 未配置：这里需要根据实际业务逻辑来获取未配置的公司列表
+      // 由于API限制，暂时将未配置设为空数组，实际应该从公司列表中排除已配置的
+      const unconfigured: HousingFundConfig[] = [];
+      
+      // 获取当前分页参数
+      const configuredCurrentPage = configuredPagination.current;
+      const unconfiguredCurrentPage = unconfiguredPagination.current;
+      
+      // 前端分页处理
+      const configuredStartIndex = (configuredCurrentPage - 1) * configuredPagination.size;
+      const configuredEndIndex = configuredStartIndex + configuredPagination.size;
+      const configuredPageData = configured.slice(configuredStartIndex, configuredEndIndex);
+      
+      const unconfiguredStartIndex = (unconfiguredCurrentPage - 1) * unconfiguredPagination.size;
+      const unconfiguredEndIndex = unconfiguredStartIndex + unconfiguredPagination.size;
+      const unconfiguredPageData = unconfigured.slice(unconfiguredStartIndex, unconfiguredEndIndex);
+
+      setConfiguredData(configuredPageData);
+      setConfiguredPagination((prev) => ({
         ...prev,
-        total: data.total,
-        pages: data.pages,
-        current: data.current,
+        current: configuredCurrentPage,
+        total: configured.length,
+        pages: Math.ceil(configured.length / prev.size),
+      }));
+
+      setUnconfiguredData(unconfiguredPageData);
+      setUnconfiguredPagination((prev) => ({
+        ...prev,
+        current: unconfiguredCurrentPage,
+        total: unconfigured.length,
+        pages: Math.ceil(unconfigured.length / prev.size),
       }));
     } catch {
-      toast.error("加载公积金配置失败");
+      toast.error("加载公积金配置数据失败");
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSearch = (companyName: string) => {
+    // 重置分页到第一页
+    setConfiguredPagination((prev) => ({ ...prev, current: 1 }));
+    setUnconfiguredPagination((prev) => ({ ...prev, current: 1 }));
+    loadAllData(companyName || undefined);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -90,7 +150,7 @@ export default function HousingFundConfigView() {
       setShowForm(false);
       setEditingConfig(null);
       resetForm();
-      await loadConfigs();
+      await loadAllData();
     } catch (error) {
       console.error("操作失败:", error);
       toast.error("操作失败，请重试");
@@ -121,7 +181,7 @@ export default function HousingFundConfigView() {
     try {
       await HousingFundConfigService.deleteConfig(configId);
       toast.success("删除成功");
-      await loadConfigs();
+      await loadAllData();
     } catch (error) {
       console.error("删除失败:", error);
       toast.error("删除失败，请重试");
@@ -149,8 +209,7 @@ export default function HousingFundConfigView() {
               value={searchCompanyName}
               onChange={(e) => {
                 setSearchCompanyName(e.target.value);
-                setPagination((prev) => ({ ...prev, current: 1 }));
-                loadConfigs(e.target.value || undefined, 1);
+                handleSearch(e.target.value);
               }}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none"
             />
@@ -172,9 +231,41 @@ export default function HousingFundConfigView() {
       {/* 配置列表 */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200">
         <div className="p-6 border-b border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900">
-            公积金配置列表
-          </h3>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-gray-900">
+              公积金配置列表
+            </h3>
+          </div>
+          
+          {/* Tab 导航 */}
+          <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg">
+            <button
+              onClick={() => setActiveTab('configured')}
+              className={`flex-1 px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                activeTab === 'configured'
+                  ? 'bg-white text-green-700 shadow-sm'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              已配置公司
+              <span className="ml-2 px-2 py-0.5 text-xs bg-green-100 text-green-600 rounded-full">
+                {configuredPagination.total}
+              </span>
+            </button>
+            <button
+              onClick={() => setActiveTab('unconfigured')}
+              className={`flex-1 px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                activeTab === 'unconfigured'
+                  ? 'bg-white text-green-700 shadow-sm'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              未配置公司
+              <span className="ml-2 px-2 py-0.5 text-xs bg-gray-100 text-gray-600 rounded-full">
+                {unconfiguredPagination.total}
+              </span>
+            </button>
+          </div>
         </div>
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
@@ -213,7 +304,7 @@ export default function HousingFundConfigView() {
                     加载中...
                   </td>
                 </tr>
-              ) : configs.length === 0 ? (
+              ) : (activeTab === 'configured' ? configuredData : unconfiguredData).length === 0 ? (
                 <tr>
                   <td
                     colSpan={7}
@@ -223,7 +314,7 @@ export default function HousingFundConfigView() {
                   </td>
                 </tr>
               ) : (
-                configs.map((config) => (
+                (activeTab === 'configured' ? configuredData : unconfiguredData).map((config) => (
                   <tr key={config.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">
@@ -279,25 +370,28 @@ export default function HousingFundConfigView() {
         </div>
 
         {/* 分页组件 */}
-        {pagination.total > 0 && (
+        {((activeTab === 'configured' ? configuredPagination : unconfiguredPagination).total > 0) && (
           <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
             <div className="flex items-center justify-between">
               <div className="text-sm text-gray-700">
-                显示第 {(pagination.current - 1) * pagination.size + 1} 到{" "}
+                显示第 {((activeTab === 'configured' ? configuredPagination : unconfiguredPagination).current - 1) * (activeTab === 'configured' ? configuredPagination : unconfiguredPagination).size + 1} 到{" "}
                 {Math.min(
-                  pagination.current * pagination.size,
-                  pagination.total
+                  (activeTab === 'configured' ? configuredPagination : unconfiguredPagination).current * (activeTab === 'configured' ? configuredPagination : unconfiguredPagination).size,
+                  (activeTab === 'configured' ? configuredPagination : unconfiguredPagination).total
                 )}{" "}
-                条， 共 {pagination.total} 条记录
+                条， 共 {(activeTab === 'configured' ? configuredPagination : unconfiguredPagination).total} 条记录
               </div>
               <div className="flex items-center space-x-2">
                 <button
                   onClick={() => {
-                    const newPage = pagination.current - 1;
-                    setPagination((prev) => ({ ...prev, current: newPage }));
-                    loadConfigs(searchCompanyName || undefined, newPage);
+                    const newPage = (activeTab === 'configured' ? configuredPagination : unconfiguredPagination).current - 1;
+                    if (activeTab === 'configured') {
+                      setConfiguredPagination((prev) => ({ ...prev, current: newPage }));
+                    } else {
+                      setUnconfiguredPagination((prev) => ({ ...prev, current: newPage }));
+                    }
                   }}
-                  disabled={pagination.current <= 1}
+                  disabled={(activeTab === 'configured' ? configuredPagination : unconfiguredPagination).current <= 1}
                   className="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-1"
                 >
                   <ChevronLeft className="h-4 w-4" />
@@ -306,34 +400,38 @@ export default function HousingFundConfigView() {
 
                 <div className="flex items-center space-x-1">
                   {Array.from(
-                    { length: Math.min(5, pagination.pages) },
+                    { length: Math.min(5, (activeTab === 'configured' ? configuredPagination : unconfiguredPagination).pages) },
                     (_, i) => {
+                      const currentPagination = activeTab === 'configured' ? configuredPagination : unconfiguredPagination;
                       let pageNum;
-                      if (pagination.pages <= 5) {
+                      if (currentPagination.pages <= 5) {
                         pageNum = i + 1;
-                      } else if (pagination.current <= 3) {
+                      } else if (currentPagination.current <= 3) {
                         pageNum = i + 1;
-                      } else if (pagination.current >= pagination.pages - 2) {
-                        pageNum = pagination.pages - 4 + i;
+                      } else if (currentPagination.current >= currentPagination.pages - 2) {
+                        pageNum = currentPagination.pages - 4 + i;
                       } else {
-                        pageNum = pagination.current - 2 + i;
+                        pageNum = currentPagination.current - 2 + i;
                       }
 
                       return (
                         <button
                           key={pageNum}
                           onClick={() => {
-                            setPagination((prev) => ({
-                              ...prev,
-                              current: pageNum,
-                            }));
-                            loadConfigs(
-                              searchCompanyName || undefined,
-                              pageNum
-                            );
+                            if (activeTab === 'configured') {
+                              setConfiguredPagination((prev) => ({
+                                ...prev,
+                                current: pageNum,
+                              }));
+                            } else {
+                              setUnconfiguredPagination((prev) => ({
+                                ...prev,
+                                current: pageNum,
+                              }));
+                            }
                           }}
                           className={`px-3 py-1 text-sm border rounded-md ${
-                            pageNum === pagination.current
+                            pageNum === currentPagination.current
                               ? "bg-green-600 text-white border-green-600"
                               : "border-gray-300 hover:bg-gray-100"
                           }`}
@@ -347,11 +445,14 @@ export default function HousingFundConfigView() {
 
                 <button
                   onClick={() => {
-                    const newPage = pagination.current + 1;
-                    setPagination((prev) => ({ ...prev, current: newPage }));
-                    loadConfigs(searchCompanyName || undefined, newPage);
+                    const newPage = (activeTab === 'configured' ? configuredPagination : unconfiguredPagination).current + 1;
+                    if (activeTab === 'configured') {
+                      setConfiguredPagination((prev) => ({ ...prev, current: newPage }));
+                    } else {
+                      setUnconfiguredPagination((prev) => ({ ...prev, current: newPage }));
+                    }
                   }}
-                  disabled={pagination.current >= pagination.pages}
+                  disabled={(activeTab === 'configured' ? configuredPagination : unconfiguredPagination).current >= (activeTab === 'configured' ? configuredPagination : unconfiguredPagination).pages}
                   className="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-1"
                 >
                   <span>下一页</span>
