@@ -13,14 +13,22 @@ import { useAdminUserContext } from "../../contexts/AdminUserContext"; // 添加
 interface SimpleCreateCompanyRequest {
   companyName: string;
   taxNumber: string;
-  isFranchise: boolean; // 是否是加盟商
+  franchiseStatus: string; // 加盟商状态
   customerServiceId?: string; // 绑定的客服ID
 }
 
 export default function CompanyManagementView() {
   const [companies, setCompanies] = useState<Company[]>([]);
   const { userInfo } = useAdminUserContext(); // 获取当前用户信息
-  const isSuperAdmin = userInfo?.roleCode === "SUPER_ADMIN";
+
+  // 检查用户是否有权限管理加盟商字段
+  const hasCompanyManagementAccess = () => {
+    if (!userInfo?.roleCode) return false;
+    return (
+      userInfo.roleCode === "SUPER_ADMIN" ||
+      (userInfo.roleCode === "ADMIN" && userInfo?.franchise)
+    );
+  };
 
   const [loading, setLoading] = useState(false);
   // 初始化时页码为1
@@ -47,7 +55,7 @@ export default function CompanyManagementView() {
   const [formData, setFormData] = useState<SimpleCreateCompanyRequest>({
     companyName: "",
     taxNumber: "",
-    isFranchise: false, // 默认不是加盟商
+    franchiseStatus: "DIRECT", // 默认直营
     customerServiceId: "",
   });
 
@@ -124,7 +132,7 @@ export default function CompanyManagementView() {
     setFormData({
       companyName: "",
       taxNumber: "",
-      isFranchise: false,
+      franchiseStatus: "DIRECT",
       customerServiceId: "",
     });
     setFormErrors({});
@@ -136,7 +144,7 @@ export default function CompanyManagementView() {
     setFormData({
       companyName: company.companyName,
       taxNumber: company.taxNumber,
-      isFranchise: company.franchise || false,
+      franchiseStatus: company.franchise ? "1" : "0",
       customerServiceId: company.customerServiceId || "",
     });
     setFormErrors({});
@@ -150,7 +158,7 @@ export default function CompanyManagementView() {
     setFormData({
       companyName: "",
       taxNumber: "",
-      isFranchise: false,
+      franchiseStatus: "DIRECT",
       customerServiceId: "",
     });
     setFormErrors({});
@@ -198,10 +206,10 @@ export default function CompanyManagementView() {
       if (editingCompany) {
         // 编辑公司 - 构建完整的更新数据，保留原有字段
         await CompanyService.updateCompany({
-          companyId: editingCompany.companyNo,
+          companyNo: editingCompany.companyNo,
           companyName: formData.companyName,
           taxNumber: formData.taxNumber,
-          isFranchise: formData.isFranchise,
+          franchiseStatus: formData.franchiseStatus,
           customerServiceId: formData.customerServiceId,
         });
         toast.success("公司信息更新成功");
@@ -210,7 +218,7 @@ export default function CompanyManagementView() {
         const createData = {
           companyName: formData.companyName,
           taxNumber: formData.taxNumber,
-          isFranchise: formData.isFranchise, // 添加加盟商属性
+          franchiseStatus: formData.franchiseStatus, // 加盟商状态
           customerServiceId: formData.customerServiceId,
         };
         await CompanyService.createCompany(createData);
@@ -504,53 +512,55 @@ export default function CompanyManagementView() {
               </div>
 
               {/* 是否是加盟商 */}
-              {isSuperAdmin && (
+              {hasCompanyManagementAccess() && (
                 <div>
-                  <label className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      checked={formData.isFranchise}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          isFranchise: e.target.checked,
-                        })
-                      }
-                      className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                    />
-                    <span className="text-sm font-medium text-gray-700">
-                      是否是加盟商
-                    </span>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    加盟商状态
                   </label>
+                  <select
+                    value={formData.franchiseStatus}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        franchiseStatus: e.target.value,
+                      })
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="0">直营公司</option>
+                    <option value="1">加盟商</option>
+                  </select>
                   <p className="mt-1 text-xs text-gray-500">
-                    勾选此项表示该公司为加盟商，否则为直营公司
+                    选择该公司的经营模式
                   </p>
                 </div>
               )}
 
-              {/* 绑定客服 */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  绑定客服
-                </label>
-                <select
-                  value={formData.customerServiceId || ""}
-                  onChange={(e) =>
-                    handleInputChange("customerServiceId", e.target.value)
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-                >
-                  <option value="">请选择客服</option>
-                  {customerServices.map((service) => (
-                    <option key={service.userNo} value={service.userNo}>
-                      {service.name}
-                    </option>
-                  ))}
-                </select>
-                <p className="mt-1 text-xs text-gray-500">
-                  选择负责该公司的客服人员
-                </p>
-              </div>
+              {/* 绑定客服 - 超级管理员不显示 */}
+              {userInfo?.roleCode !== "SUPER_ADMIN" && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    绑定客服
+                  </label>
+                  <select
+                    value={formData.customerServiceId || ""}
+                    onChange={(e) =>
+                      handleInputChange("customerServiceId", e.target.value)
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                  >
+                    <option value="">请选择客服</option>
+                    {customerServices.map((service) => (
+                      <option key={service.userNo} value={service.userNo}>
+                        {service.name}
+                      </option>
+                    ))}
+                  </select>
+                  <p className="mt-1 text-xs text-gray-500">
+                    选择负责该公司的客服人员
+                  </p>
+                </div>
+              )}
 
               {/* 提示信息 */}
               {!editingCompany && (
