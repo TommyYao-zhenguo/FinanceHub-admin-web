@@ -104,7 +104,7 @@ export default function Sidebar({
     if (isCustomerServiceUser()) {
       items.push({
         id: "employee-base-config",
-        label: "员工基数配置",
+        label: "社保和公积金基数配置",
         icon: Calculator,
       });
       items.push({

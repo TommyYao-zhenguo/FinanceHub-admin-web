@@ -186,7 +186,9 @@ export default function EmployeeBaseConfigView() {
       <div className="mb-6">
         <div className="flex items-center space-x-2 mb-4">
           <Users className="h-6 w-6 text-blue-600" />
-          <h1 className="text-2xl font-bold text-gray-900">员工基数配置</h1>
+          <h1 className="text-2xl font-bold text-gray-900">
+            社保和公积金基数配置
+          </h1>
         </div>
         <p className="text-gray-600">
           配置员工的社保基数和公积金基数，用于计算缴费金额
@@ -255,7 +257,7 @@ export default function EmployeeBaseConfigView() {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     公积金基数
                   </th>
-                  
+
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     操作
                   </th>
@@ -354,7 +356,7 @@ export default function EmployeeBaseConfigView() {
                           </div>
                         )}
                       </td>
-                      
+
                       <td className="px-6 py-4">
                         {editingEmployeeId === employee.employeeNo ? (
                           <div className="flex items-center space-x-2">

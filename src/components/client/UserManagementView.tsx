@@ -466,7 +466,7 @@ export default function UserManagementView() {
                     所属公司 *
                   </label>
                   <select
-                    required
+                    required={isSuperAdmin}
                     value={formData.companyNo}
                     onChange={(e) =>
                       setFormData({ ...formData, companyNo: e.target.value })

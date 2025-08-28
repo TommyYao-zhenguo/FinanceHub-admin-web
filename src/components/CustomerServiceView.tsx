@@ -207,6 +207,8 @@ export default function CustomerServiceView() {
         return "bg-blue-100 text-blue-800";
       case "EMPLOYEE_EDIT":
         return "bg-purple-100 text-purple-800";
+      case "COMPANY_CREATE":
+        return "bg-pink-100 text-pink-800";
       default:
         return "bg-gray-100 text-gray-800";
     }
@@ -237,8 +239,8 @@ export default function CustomerServiceView() {
         return "添加员工";
       case "EMPLOYEE_EDIT":
         return "修改员工";
-      case "REPORT":
-        return "报告";
+      case "COMPANY_CREATE":
+        return "新增公司";
       default:
         return taskType;
     }
@@ -272,7 +274,7 @@ export default function CustomerServiceView() {
         {/* 统计卡片 */}
         <div className="p-4 border-b border-gray-200">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900">客服中心</h2>
+            <h2 className="text-lg font-semibold text-gray-900">任务中心</h2>
             <button
               onClick={refreshData}
               className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
@@ -347,7 +349,7 @@ export default function CustomerServiceView() {
             </div>
           ) : sortedAndFilteredRequests.length === 0 ? (
             <div className="flex items-center justify-center h-32 text-gray-500">
-              暂无请求
+              暂无任务需要处理。
             </div>
           ) : (
             <div className="divide-y divide-gray-200">
@@ -525,7 +527,7 @@ export default function CustomerServiceView() {
                 {/* 服务类型 */}
                 <div>
                   <h3 className="text-lg font-medium text-gray-900 mb-3">
-                    服务类型
+                    任务类型
                   </h3>
                   <div className="bg-gray-50 rounded-lg p-4">
                     <span
@@ -538,10 +540,10 @@ export default function CustomerServiceView() {
                   </div>
                 </div>
 
-                {/* 请求内容 */}
+                {/* 任务内容 */}
                 <div>
                   <h3 className="text-lg font-medium text-gray-900 mb-3">
-                    请求内容
+                    任务内容
                   </h3>
                   <div className="bg-gray-50 rounded-lg p-4">
                     <div
@@ -588,7 +590,7 @@ export default function CustomerServiceView() {
                         </div>
                         <div className="flex-1">
                           <p className="text-sm font-medium text-gray-900">
-                            请求创建
+                            任务创建
                           </p>
                           <p className="text-sm text-gray-500">
                             {selectedMessage.createTime}
