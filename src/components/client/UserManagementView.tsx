@@ -28,7 +28,7 @@ export default function UserManagementView() {
     show: boolean;
     user: AdminUserInfo | null;
   }>({ show: false, user: null });
-  const [customerServices, setCustomerServices] = useState<AdminUserInfo[]>([]); // 添加客服列表状态
+  const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({}); // 添加表单验证错误状态
 
   // 检查是否为超级管理员
   const isSuperAdmin = userInfo?.roleCode === "SUPER_ADMIN";
@@ -151,9 +151,46 @@ export default function UserManagementView() {
     setShowModal(true);
   };
 
+  // 验证用户名格式
+  const validateUsername = (username: string): string | null => {
+    const usernameRegex = /^[a-zA-Z0-9_]+$/;
+    if (!usernameRegex.test(username)) {
+      return "用户名只能包含数字、字母和下划线";
+    }
+    return null;
+  };
+
+  // 验证密码格式
+  const validatePassword = (password: string): string | null => {
+    if (password.length < 6) {
+      return "密码长度至少6位";
+    }
+    return null;
+  };
+
   // 提交表单
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // 验证用户名格式
+    const usernameError = validateUsername(formData.username);
+    let passwordError = null;
+
+    // 验证密码格式（创建用户时必须验证，编辑用户时只在有密码输入时验证）
+    if (!editingUser || formData.password) {
+      passwordError = validatePassword(formData.password);
+    }
+
+    // 如果有验证错误，显示错误信息并阻止提交
+    if (usernameError || passwordError) {
+      setFormErrors({
+        ...formErrors,
+        username: usernameError || "",
+        password: passwordError || "",
+      });
+      return;
+    }
+
     setFormLoading(true);
     try {
       if (editingUser) {
@@ -174,6 +211,7 @@ export default function UserManagementView() {
         toast.success("用户创建成功");
       }
       setShowModal(false);
+      setFormErrors({});
       loadUsers(true);
     } catch (error) {
       console.error("保存用户失败:", error);
@@ -204,23 +242,9 @@ export default function UserManagementView() {
     }
   };
 
-  // 加载客服列表
-  const loadCustomerServices = async () => {
-    try {
-      const response = await AdminUserService.getCustomerServiceList({
-        page: 1,
-        size: 100, // 获取所有客服
-        roleCode: UserRole.CUSTOMER_SERVICE,
-      });
-      setCustomerServices(response.records);
-    } catch (error) {
-      console.error("加载客服列表失败:", error);
-    }
-  };
-
-  // 组件加载时获取客服列表
+  // 组件加载时获取用户列表
   useEffect(() => {
-    loadCustomerServices();
+    loadUsers();
   }, []);
 
   return (
@@ -300,7 +324,7 @@ export default function UserManagementView() {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    用户信息
+                    用户账号
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     所属公司
@@ -418,32 +442,57 @@ export default function UserManagementView() {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  用户名 *
+                  用户账号 <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
                   required
                   value={formData.username}
-                  onChange={(e) =>
-                    setFormData({ ...formData, username: e.target.value })
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-transparent"
+                  onChange={(e) => {
+                    setFormData({ ...formData, username: e.target.value });
+                    // 清除用户名错误信息
+                    if (formErrors.username) {
+                      setFormErrors({ ...formErrors, username: "" });
+                    }
+                  }}
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-green-500 focus:border-transparent ${
+                    formErrors.username ? "border-red-300" : "border-gray-300"
+                  }`}
                 />
+                <p className="mt-1 text-xs text-gray-500">
+                  只能包含数字、字母和下划线
+                </p>
+                {formErrors.username && (
+                  <p className="mt-1 text-xs text-red-600">
+                    {formErrors.username}
+                  </p>
+                )}
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  密码 {editingUser ? "(留空则不修改)" : "*"}
+                  登录密码{" "}
+                  {editingUser ? (
+                    "(留空则不修改)"
+                  ) : (
+                    <span className="text-red-500">*</span>
+                  )}
                 </label>
                 <div className="relative">
                   <input
                     type={showPassword ? "text" : "password"}
                     required={!editingUser}
                     value={formData.password}
-                    onChange={(e) =>
-                      setFormData({ ...formData, password: e.target.value })
-                    }
-                    className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-transparent"
+                    onChange={(e) => {
+                      setFormData({ ...formData, password: e.target.value });
+                      // 清除密码错误信息
+                      if (formErrors.password) {
+                        setFormErrors({ ...formErrors, password: "" });
+                      }
+                    }}
+                    className={`w-full px-3 py-2 pr-10 border rounded-lg focus:ring-green-500 focus:border-transparent ${
+                      formErrors.password ? "border-red-300" : "border-gray-300"
+                    }`}
                   />
                   <button
                     type="button"
@@ -457,13 +506,21 @@ export default function UserManagementView() {
                     )}
                   </button>
                 </div>
+                <p className="mt-1 text-xs text-gray-500">
+                  密码长度至少6位，建议包含字母、数字和特殊字符
+                </p>
+                {formErrors.password && (
+                  <p className="mt-1 text-xs text-red-600">
+                    {formErrors.password}
+                  </p>
+                )}
               </div>
 
               {/* 只有超级管理员才显示企业选择下拉框 */}
               {(isSuperAdmin || isAdmin) && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    所属公司 *
+                    所属公司 <span className="text-red-500">*</span>
                   </label>
                   <select
                     required={isSuperAdmin}
@@ -485,7 +542,7 @@ export default function UserManagementView() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  用户角色 *
+                  用户角色 <span className="text-red-500">*</span>
                 </label>
                 <select
                   required
@@ -511,7 +568,10 @@ export default function UserManagementView() {
               <div className="flex justify-end space-x-3 pt-4">
                 <button
                   type="button"
-                  onClick={() => setShowModal(false)}
+                  onClick={() => {
+                    setShowModal(false);
+                    setFormErrors({});
+                  }}
                   className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50"
                 >
                   取消
