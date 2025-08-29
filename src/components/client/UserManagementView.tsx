@@ -540,31 +540,6 @@ export default function UserManagementView() {
                 </div>
               )}
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  用户角色 <span className="text-red-500">*</span>
-                </label>
-                <select
-                  required
-                  value={formData.roleCode}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      roleCode: e.target.value as UserRole,
-                    })
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-transparent"
-                >
-                  {roleOptions.map((role) => (
-                    <option key={role.value} value={role.value}>
-                      {" "}
-                      {/* 添加 key 属性 */}
-                      {role.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
               <div className="flex justify-end space-x-3 pt-4">
                 <button
                   type="button"
