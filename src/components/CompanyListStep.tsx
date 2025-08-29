@@ -25,9 +25,9 @@ export default function CompanyListStep({
     try {
       setLoading(true);
       const params = {
-        page: pagination.current,
+        current: pagination.current,
         size: pagination.size,
-        ...(searchKeyword && { keyword: searchKeyword }),
+        ...(searchKeyword && { companyName: searchKeyword }),
       };
 
       const response = await CompanyService.getCompanyList(params);
@@ -47,12 +47,23 @@ export default function CompanyListStep({
   // 搜索公司
   const handleSearch = () => {
     setPagination({ ...pagination, current: 1 });
+    // 触发接口请求
+    loadCompanies();
   };
 
   // 监听分页和搜索变化
   useEffect(() => {
     loadCompanies();
   }, [pagination.current]);
+
+  // 监听搜索关键词变化，实现实时搜索
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setPagination({ ...pagination, current: 1 });
+    }, 300); // 300ms 防抖
+
+    return () => clearTimeout(timer);
+  }, [searchKeyword]);
 
   // 处理公司选择
   const handleCompanyClick = (company: Company) => {
@@ -72,11 +83,11 @@ export default function CompanyListStep({
           <div className="relative">
             <input
               type="text"
-              placeholder="搜索公司名称..."
+              placeholder="输入公司名称进行搜索..."
               value={searchKeyword}
               onChange={(e) => setSearchKeyword(e.target.value)}
               onKeyPress={(e) => e.key === "Enter" && handleSearch()}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md   focus:ring-blue-500 focus:border-blue-500"
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
             />
             <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
           </div>
@@ -159,7 +170,7 @@ export default function CompanyListStep({
           </div>
 
           {/* 分页 */}
-          {pagination.pages > 1 && (
+          {pagination.pages > 0 && (
             <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
               <div className="flex-1 flex justify-between sm:hidden">
                 <button
