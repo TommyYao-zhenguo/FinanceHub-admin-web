@@ -103,11 +103,6 @@ export default function Sidebar({
     // 添加新的子菜单项
     if (isCustomerServiceUser()) {
       items.push({
-        id: "employee-base-config",
-        label: "社保和公积金基数配置",
-        icon: Calculator,
-      });
-      items.push({
         id: "social-insurance-config",
         label: "社保比例配置",
         icon: Shield,
@@ -116,6 +111,11 @@ export default function Sidebar({
         id: "housing-fund-config",
         label: "公积金比例配置",
         icon: Home,
+      });
+      items.push({
+        id: "employee-base-config",
+        label: "社保和公积金基数配置",
+        icon: Calculator,
       });
       items.push({
         id: "tax-upload",
