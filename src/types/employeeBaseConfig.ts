@@ -25,6 +25,7 @@ export interface Employee {
   status: "ACTIVE" | "INACTIVE";
   hireDate?: string;
   phone?: string;
+  idCard?: string;
   email?: string;
   createTime?: string;
   updateTime?: string;

@@ -129,6 +129,12 @@ export default function CustomerServiceView() {
     loadData();
   };
 
+  // 每秒钟刷新一次
+  useEffect(() => {
+    const interval = setInterval(refreshData, 1000 * 60 * 5);
+    return () => clearInterval(interval);
+  }, []);
+
   // 防抖搜索
   useEffect(() => {
     const timer = setTimeout(() => {

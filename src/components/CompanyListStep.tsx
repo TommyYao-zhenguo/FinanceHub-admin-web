@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { Building2, Search } from "lucide-react";
 import { CompanyService } from "../utils/companyService";
+import { EmployeeBaseConfigService } from "../utils/employeeBaseConfigService";
 import { Company } from "../types/company";
+import toast from "react-hot-toast";
 
 interface CompanyListStepProps {
   onCompanySelect: (companyNo: string, companyName: string) => void;
@@ -66,8 +68,22 @@ export default function CompanyListStep({
   }, [searchKeyword]);
 
   // 处理公司选择
-  const handleCompanyClick = (company: Company) => {
-    onCompanySelect(company.companyNo, company.companyName);
+  const handleCompanyClick = async (company: Company) => {
+    try {
+      // 检查公司是否已配置社保和公积金比例
+      const { itemDesc, itemHasConfig } =
+        await EmployeeBaseConfigService.checkRateConfiged(company.companyNo);
+
+      if (!itemHasConfig && itemDesc) {
+        toast.error(itemDesc);
+        return;
+      }
+
+      onCompanySelect(company.companyNo, company.companyName);
+    } catch (error) {
+      console.error("检查比例配置失败:", error);
+      alert("检查配置失败，请稍后重试");
+    }
   };
 
   return (

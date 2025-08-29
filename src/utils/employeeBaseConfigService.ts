@@ -117,16 +117,16 @@ export class EmployeeBaseConfigService {
     data: BatchUpdateEmployeeBaseConfigRequest
   ): Promise<void> {
     // 使用新的员工基数更新接口进行批量更新
-    const updatePromises = data.configs.map(config => {
+    const updatePromises = data.configs.map((config) => {
       // 需要根据employeeNo找到对应的员工ID
       // 这里假设我们有一个方法可以通过employeeNo获取员工ID
       return this.updateEmployeeBaseByEmployeeNo(config.employeeNo, {
         socialSecurityBase: config.socialInsuranceBase || 0,
         housingFundBase: config.housingFundBase || 0,
-        effectiveDate: config.effectiveDate
+        effectiveDate: config.effectiveDate,
       });
     });
-    
+
     await Promise.all(updatePromises);
   }
 
@@ -142,18 +142,18 @@ export class EmployeeBaseConfigService {
     // 这里需要先通过employeeNo获取员工ID，然后调用更新接口
     // 由于当前的员工列表已经包含了ID，我们可以在调用时直接传递ID
     // 暂时保留原有的批量更新接口作为备用
-    await httpClient.post<void>(
-      "/api/v1/employee-base-config/batch-update",
-      {
-        configs: [{
+    await httpClient.post<void>("/api/v1/employee-base-config/batch-update", {
+      configs: [
+        {
           employeeNo,
           socialInsuranceBase: data.socialSecurityBase,
           housingFundBase: data.housingFundBase,
-          effectiveDate: data.effectiveDate || new Date().toISOString().split('T')[0]
-        }],
-        companyNo: "" // 这个会在后端通过session获取
-      }
-    );
+          effectiveDate:
+            data.effectiveDate || new Date().toISOString().split("T")[0],
+        },
+      ],
+      companyNo: "", // 这个会在后端通过session获取
+    });
   }
 
   // 根据公司编号获取员工基数配置统计
@@ -167,6 +167,19 @@ export class EmployeeBaseConfigService {
       configuredEmployees: number;
       unconfiguredEmployees: number;
     }>(`/api/v1/employee-base-config/stats/${companyNo}`);
+    return response;
+  }
+
+  // 检查公司是否已配置社保和公积金比例
+  static async checkRateConfiged(companyNo: string): Promise<{
+    itemDesc: string;
+    itemHasConfig: boolean;
+  }> {
+    const url = `/api/v1/employee/check-rate-configed?companyNo=${companyNo}`;
+    const response = await httpClient.get<{
+      itemDesc: string;
+      itemHasConfig: boolean;
+    }>(url);
     return response;
   }
 }

@@ -81,6 +81,7 @@ export default function EmployeeBaseConfigView() {
                 : ("INACTIVE" as "ACTIVE" | "INACTIVE"),
             hireDate: employee.hireDate,
             phone: employee.phone,
+            idCard: employee.idCard,
             createTime: employee.createTime,
             updateTime: employee.updateTime,
             socialInsuranceBase: employee.socialSecurityBase || 0,
@@ -288,10 +289,10 @@ export default function EmployeeBaseConfigView() {
                       <td className="px-6 py-4">
                         <div>
                           <div className="text-sm font-medium text-gray-900">
-                            {employee.employeeName}
+                            员工姓名：{employee.employeeName}
                           </div>
                           <div className="text-sm text-gray-500">
-                            工号: {employee.employeeNo}
+                            身份证号码：{employee.idCard}
                           </div>
                           {employee.department && (
                             <div className="text-sm text-gray-500">
@@ -304,7 +305,6 @@ export default function EmployeeBaseConfigView() {
                         {editingEmployeeId === employee.employeeNo ? (
                           <div className="flex items-center space-x-2">
                             <input
-                              type="number"
                               value={editingData.socialInsuranceBase || ""}
                               onChange={(e) =>
                                 setEditingData({
@@ -332,7 +332,6 @@ export default function EmployeeBaseConfigView() {
                         {editingEmployeeId === employee.employeeNo ? (
                           <div className="flex items-center space-x-2">
                             <input
-                              type="number"
                               value={editingData.housingFundBase || ""}
                               onChange={(e) =>
                                 setEditingData({
