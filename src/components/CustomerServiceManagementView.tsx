@@ -31,7 +31,7 @@ export default function CustomerServiceManagementView() {
 
   // 搜索参数
   const [searchParams, setSearchParams] = useState<UserQueryParams>({
-    page: 1,
+    current: 1,
     size: 10,
     username: "",
     roleCode: UserRole.CUSTOMER_SERVICE,
@@ -39,7 +39,7 @@ export default function CustomerServiceManagementView() {
   });
 
   // 分页信息
-  const [totalElements, setTotalElements] = useState(0);
+  const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
 
   // 表单数据
@@ -51,6 +51,13 @@ export default function CustomerServiceManagementView() {
     roleCode: UserRole.CUSTOMER_SERVICE,
   });
 
+  // 表单错误状态
+  const [formErrors, setFormErrors] = useState<{
+    username?: string;
+    name?: string;
+    password?: string;
+  }>({});
+
   // 加载用户列表
   const loadUsers = async (resetPage = false) => {
     setLoading(true);
@@ -61,8 +68,8 @@ export default function CustomerServiceManagementView() {
       }
       const response = await AdminUserService.getCustomerServiceList(params);
       setUsers(response.records);
-      setTotalElements(response.totalElements);
-      setTotalPages(response.totalPages);
+      setTotal(response.total);
+      setTotalPages(response.pages);
     } catch (error) {
       console.error("加载客服列表失败:", error);
       toast.error("加载客服列表失败");
@@ -81,12 +88,12 @@ export default function CustomerServiceManagementView() {
 
   // 搜索处理
   const handleSearch = () => {
-    setSearchParams({ ...searchParams, page: 1 });
+    setSearchParams({ ...searchParams, current: 1 });
   };
 
   // 分页处理
   const handlePageChange = (page: number) => {
-    setSearchParams({ ...searchParams, page });
+    setSearchParams({ ...searchParams, current: page });
   };
 
   // 打开添加用户模态框
@@ -99,6 +106,7 @@ export default function CustomerServiceManagementView() {
       password: "",
       roleCode: UserRole.CUSTOMER_SERVICE,
     });
+    setFormErrors({});
     setShowModal(true);
   };
 
@@ -108,61 +116,63 @@ export default function CustomerServiceManagementView() {
     setFormData({
       username: user.username,
       userNo: user.userNo,
-      name: user.customerServiceName || "",
+      name: user.name || "",
       password: "",
       roleCode: user.roleCode as UserRole,
     });
+    setFormErrors({});
     setShowModal(true);
   };
 
   // 校验函数
   const validateForm = () => {
+    const errors: { username?: string; name?: string; password?: string } = {};
+    let isValid = true;
+
     // 校验登录账号
     if (!formData.username.trim()) {
-      toast.error("请输入客服登录账号");
-      return false;
-    }
-
-    // 登录账号格式校验：只能包含字母、数字、下划线，长度3-20位
-    const usernameRegex = /^[a-zA-Z0-9_]{3,20}$/;
-    if (!usernameRegex.test(formData.username)) {
-      toast.error("登录账号格式不正确，只能包含字母、数字、下划线，长度3-20位");
-      return false;
+      errors.username = "请输入客服登录账号";
+      isValid = false;
+    } else {
+      // 登录账号格式校验：只能包含字母、数字、下划线，长度3-20位
+      const usernameRegex = /^[a-zA-Z0-9_]{3,20}$/;
+      if (!usernameRegex.test(formData.username)) {
+        errors.username =
+          "登录账号格式不正确，只能包含字母、数字、下划线，长度3-20位";
+        isValid = false;
+      }
     }
 
     // 校验客服名称
     if (!formData.name?.trim()) {
-      toast.error("请输入客服名称");
-      return false;
-    }
-
-    if (formData.name && formData.name.length > 50) {
-      toast.error("客服名称长度不能超过50个字符");
-      return false;
+      errors.name = "请输入客服名称";
+      isValid = false;
+    } else if (formData.name && formData.name.length > 50) {
+      errors.name = "客服名称长度不能超过50个字符";
+      isValid = false;
     }
 
     // 校验密码
     if (!editingUser && !formData.password) {
-      toast.error("请输入登录密码");
-      return false;
-    }
-
-    if (formData.password) {
+      errors.password = "请输入登录密码";
+      isValid = false;
+    } else if (formData.password) {
       // 密码长度校验
       if (formData.password.length < 6 || formData.password.length > 16) {
-        toast.error("密码长度必须为6-16位");
-        return false;
-      }
-
-      // 密码复杂度校验：至少包含字母和数字
-      const passwordRegex = /^(?=.*[a-zA-Z])(?=.*\d)[a-zA-Z\d@$!%*?&]{6,16}$/;
-      if (!passwordRegex.test(formData.password)) {
-        toast.error("密码必须包含字母和数字，可包含特殊字符@$!%*?&");
-        return false;
+        errors.password = "密码长度必须为6-16位";
+        isValid = false;
+      } else {
+        // 密码复杂度校验：至少包含字母和数字
+        const passwordRegex = /^(?=.*[a-zA-Z])(?=.*\d)[a-zA-Z\d@$!%*?&]{6,16}$/;
+        if (!passwordRegex.test(formData.password)) {
+          errors.password = "密码必须包含字母和数字，可包含特殊字符@$!%*?&";
+          isValid = false;
+        }
       }
     }
 
-    return true;
+    setFormErrors(errors);
+    return isValid;
   };
 
   // 提交表单
@@ -254,7 +264,7 @@ export default function CustomerServiceManagementView() {
             onChange={(e) =>
               setSearchParams({ ...searchParams, username: e.target.value })
             }
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg  focus:ring-green-500 focus:border-transparent"
           />
         </div>
         <div>
@@ -353,20 +363,19 @@ export default function CustomerServiceManagementView() {
           {/* 分页 */}
           <div className="flex items-center justify-between mt-6">
             <div className="text-sm text-gray-700">
-              共 {totalElements} 条记录，第 {searchParams.page} / {totalPages}{" "}
-              页
+              共 {total} 条记录，第 {searchParams.current} / {totalPages} 页
             </div>
             <div className="flex space-x-2">
               <button
-                onClick={() => handlePageChange(searchParams.page! - 1)}
-                disabled={searchParams.page === 1}
+                onClick={() => handlePageChange(searchParams.current! - 1)}
+                disabled={searchParams.current === 1}
                 className="px-3 py-1 border border-gray-300 rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
               >
                 上一页
               </button>
               <button
-                onClick={() => handlePageChange(searchParams.page! + 1)}
-                disabled={searchParams.page === totalPages}
+                onClick={() => handlePageChange(searchParams.current! + 1)}
+                disabled={searchParams.current === totalPages}
                 className="px-3 py-1 border border-gray-300 rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
               >
                 下一页
@@ -386,49 +395,86 @@ export default function CustomerServiceManagementView() {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  客服登陆账号 *
+                  客服登陆账号 <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
                   required
                   value={formData.username}
-                  onChange={(e) =>
-                    setFormData({ ...formData, username: e.target.value })
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-transparent"
-                  placeholder="请输入登陆账号：字母、数字、下划线，3-20位"
+                  onChange={(e) => {
+                    setFormData({ ...formData, username: e.target.value });
+                    if (formErrors.username) {
+                      setFormErrors({ ...formErrors, username: undefined });
+                    }
+                  }}
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-green-500 focus:border-transparent ${
+                    formErrors.username ? "border-red-500" : "border-gray-300"
+                  }`}
+                  placeholder="请输入登陆账号"
                 />
+                {formErrors.username ? (
+                  <p className="mt-1 text-sm text-red-600">
+                    {formErrors.username}
+                  </p>
+                ) : (
+                  <p className="mt-1 text-xs text-gray-500">
+                    用于客服登录系统的账号，支持字母、数字、下划线，长度3-20位
+                  </p>
+                )}
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  客服名称 *
+                  客服名称 <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
+                  required
                   value={formData.name}
-                  onChange={(e) =>
-                    setFormData({ ...formData, name: e.target.value })
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-transparent"
-                  placeholder="请输入客服名称：用于页面中显示"
+                  onChange={(e) => {
+                    setFormData({ ...formData, name: e.target.value });
+                    if (formErrors.name) {
+                      setFormErrors({ ...formErrors, name: undefined });
+                    }
+                  }}
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-green-500 focus:border-transparent ${
+                    formErrors.name ? "border-red-500" : "border-gray-300"
+                  }`}
+                  placeholder="请输入客服名称"
                 />
+                {formErrors.name ? (
+                  <p className="mt-1 text-sm text-red-600">{formErrors.name}</p>
+                ) : (
+                  <p className="mt-1 text-xs text-gray-500">
+                    客服的真实姓名，用于在系统中显示和识别客服身份
+                  </p>
+                )}
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  客服账号密码 {editingUser ? "(留空则不修改)" : "*"}
+                  客服账号密码{" "}
+                  {editingUser ? (
+                    "(留空则不修改)"
+                  ) : (
+                    <span className="text-red-500">*</span>
+                  )}
                 </label>
                 <div className="relative">
                   <input
                     type={showPassword ? "text" : "password"}
                     required={!editingUser}
                     value={formData.password}
-                    onChange={(e) =>
-                      setFormData({ ...formData, password: e.target.value })
-                    }
-                    className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-transparent"
-                    placeholder="请输入登录密码：6-16位，包含字母和数字"
+                    onChange={(e) => {
+                      setFormData({ ...formData, password: e.target.value });
+                      if (formErrors.password) {
+                        setFormErrors({ ...formErrors, password: undefined });
+                      }
+                    }}
+                    className={`w-full px-3 py-2 pr-10 border rounded-lg focus:ring-green-500 focus:border-transparent ${
+                      formErrors.password ? "border-red-500" : "border-gray-300"
+                    }`}
+                    placeholder="请输入登录密码"
                   />
                   <button
                     type="button"
@@ -442,6 +488,17 @@ export default function CustomerServiceManagementView() {
                     )}
                   </button>
                 </div>
+                {formErrors.password ? (
+                  <p className="mt-1 text-sm text-red-600">
+                    {formErrors.password}
+                  </p>
+                ) : (
+                  <p className="mt-1 text-xs text-gray-500">
+                    {editingUser
+                      ? "如需修改密码请输入新密码，留空则保持原密码不变"
+                      : "密码长度6-16位，建议包含字母、数字和特殊字符以提高安全性"}
+                  </p>
+                )}
               </div>
               <div className="flex justify-end space-x-3 pt-4">
                 <button

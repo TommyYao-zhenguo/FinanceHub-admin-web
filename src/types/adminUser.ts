@@ -49,7 +49,7 @@ export interface UpdateUserRequest extends Omit<CreateUserRequest, "password"> {
 
 // 用户列表查询参数
 export interface UserQueryParams {
-  page?: number;
+  current?: number;
   size?: number;
   username?: string;
   companyNo?: string;
@@ -60,10 +60,10 @@ export interface UserQueryParams {
 // 用户列表响应接口
 export interface UserListResponse {
   records: AdminUserInfo[];
-  totalElements: number;
-  totalPages: number;
+  total: number;
+  pages: number;
   size: number;
-  number: number;
+  current: number;
 }
 
 // 用户上下文类型
