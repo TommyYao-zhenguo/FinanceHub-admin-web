@@ -305,7 +305,7 @@ export default function EmployeeBaseConfigView() {
                         {editingEmployeeId === employee.employeeNo ? (
                           <div className="flex items-center space-x-2">
                             <input
-                              value={editingData.socialInsuranceBase || ""}
+                              value={editingData.socialInsuranceBase || 0}
                               onChange={(e) =>
                                 setEditingData({
                                   ...editingData,
@@ -332,7 +332,7 @@ export default function EmployeeBaseConfigView() {
                         {editingEmployeeId === employee.employeeNo ? (
                           <div className="flex items-center space-x-2">
                             <input
-                              value={editingData.housingFundBase || ""}
+                              value={editingData.housingFundBase || 0}
                               onChange={(e) =>
                                 setEditingData({
                                   ...editingData,
