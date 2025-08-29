@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Bell, Settings, LogOut, Menu, User, ChevronDown } from "lucide-react";
+import { Settings, LogOut, Menu, User, ChevronDown } from "lucide-react";
 import { useAdminUserContext } from "../contexts/AdminUserContext";
 
 interface HeaderProps {
@@ -56,13 +56,6 @@ export default function Header({ onMenuToggle }: HeaderProps) {
         </div>
 
         <div className="flex items-center space-x-4">
-          <button className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors relative">
-            <Bell className="h-5 w-5" />
-            <span className="absolute -top-1 -right-1 h-4 w-4 bg-orange-500 rounded-full text-xs text-white flex items-center justify-center">
-              3
-            </span>
-          </button>
-
           {/* 用户信息区域 */}
           <div className="relative">
             <button
@@ -90,9 +83,7 @@ export default function Header({ onMenuToggle }: HeaderProps) {
                   <p className="text-sm font-medium text-gray-900">
                     {getUserDisplayName()}
                   </p>
-                  <p className="text-xs text-gray-500">
-                    {getRoleDisplay()}
-                  </p>
+                  <p className="text-xs text-gray-500">{getRoleDisplay()}</p>
                   <p className="text-xs text-gray-500">{getCompanyName()}</p>
                 </div>
 
