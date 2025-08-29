@@ -70,16 +70,20 @@ export default function HousingFundConfigView() {
       console.log("housing fund configs: ", data);
       
       // 在前端分离已配置和未配置的公司
-      // 这里假设有配置记录的就是已配置，没有的就是未配置
-      // 由于后端API限制，我们需要根据实际返回的数据结构来判断
+      // 根据后端返回的数据结构：companyRate 或 personalRate 为空则表示未配置
       const allConfigs = data.records || [];
       
-      // 已配置：有具体配置数据的公司
-      const configured = allConfigs.filter(config => config.id && config.companyRate !== undefined);
+      // 已配置：companyRate 和 personalRate 都不为空的公司
+      const configured = allConfigs.filter(config => 
+        config.companyRate !== null && config.companyRate !== undefined &&
+        config.personalRate !== null && config.personalRate !== undefined
+      );
       
-      // 未配置：这里需要根据实际业务逻辑来获取未配置的公司列表
-      // 由于API限制，暂时将未配置设为空数组，实际应该从公司列表中排除已配置的
-      const unconfigured: HousingFundConfig[] = [];
+      // 未配置：companyRate 或 personalRate 为空的公司
+      const unconfigured = allConfigs.filter(config => 
+        config.companyRate === null || config.companyRate === undefined ||
+        config.personalRate === null || config.personalRate === undefined
+      );
       
       // 获取当前分页参数
       const configuredCurrentPage = configuredPagination.current;
@@ -166,12 +170,26 @@ export default function HousingFundConfigView() {
   };
 
   const handleEdit = (config: HousingFundConfig) => {
-    setEditingConfig(config);
-    setFormData({
-      companyRate: config.companyRate.toString(),
-      personalRate: config.personalRate.toString(),
-      companyNo: config.companyNo,
-    });
+    // 如果是未配置的公司（companyRate 或 personalRate 为空），则作为新增处理
+    const isConfigured = config.companyRate !== null && config.companyRate !== undefined && 
+                        config.personalRate !== null && config.personalRate !== undefined;
+    
+    if (isConfigured) {
+      setEditingConfig(config);
+      setFormData({
+        companyRate: config.companyRate.toString(),
+        personalRate: config.personalRate.toString(),
+        companyNo: config.companyNo,
+      });
+    } else {
+      // 未配置的公司，作为新增处理
+      setEditingConfig(null);
+      setFormData({
+        companyRate: "",
+        personalRate: "",
+        companyNo: config.companyNo, // 预填充公司编号
+      });
+    }
     setShowForm(true);
   };
 
@@ -328,18 +346,25 @@ export default function HousingFundConfigView() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">
-                        {config.companyRate}%
+                        {config.companyRate !== null && config.companyRate !== undefined ? `${config.companyRate}%` : "-"}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">
-                        {config.personalRate}%
+                        {config.personalRate !== null && config.personalRate !== undefined ? `${config.personalRate}%` : "-"}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
-                        启用
-                      </span>
+                      {config.companyRate !== null && config.companyRate !== undefined && 
+                       config.personalRate !== null && config.personalRate !== undefined ? (
+                        <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                          已配置
+                        </span>
+                      ) : (
+                        <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-600">
+                          未配置
+                        </span>
+                      )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">
@@ -351,15 +376,21 @@ export default function HousingFundConfigView() {
                         <button
                           onClick={() => handleEdit(config)}
                           className="text-green-600 hover:text-green-900 p-1 rounded"
+                          title={config.companyRate !== null && config.companyRate !== undefined && 
+                                 config.personalRate !== null && config.personalRate !== undefined ? "编辑配置" : "新增配置"}
                         >
                           <Edit className="h-4 w-4" />
                         </button>
-                        <button
-                          onClick={() => handleDelete(config.id!)}
-                          className="text-red-600 hover:text-red-900 p-1 rounded"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
+                        {config.companyRate !== null && config.companyRate !== undefined && 
+                         config.personalRate !== null && config.personalRate !== undefined && config.id && (
+                          <button
+                            onClick={() => handleDelete(config.id!)}
+                            className="text-red-600 hover:text-red-900 p-1 rounded"
+                            title="删除配置"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>
