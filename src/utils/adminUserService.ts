@@ -15,8 +15,8 @@ export class AdminUserService {
   ): Promise<UserListResponse> {
     const queryParams = new URLSearchParams();
 
-    if (params.page !== undefined)
-      queryParams.append("page", params.page.toString());
+    if (params.current !== undefined)
+      queryParams.append("current", params.current.toString());
     if (params.size !== undefined)
       queryParams.append("size", params.size.toString());
     if (params.username) queryParams.append("username", params.username);

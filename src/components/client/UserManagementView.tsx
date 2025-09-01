@@ -36,7 +36,7 @@ export default function UserManagementView() {
 
   // 搜索参数
   const [searchParams, setSearchParams] = useState<UserQueryParams>({
-    page: 1,
+    current: 1,
     size: 10,
     username: "",
     companyNo: isSuperAdmin ? undefined : userInfo?.companyNo || undefined, // 非超级管理员默认使用自己的公司ID
@@ -65,6 +65,7 @@ export default function UserManagementView() {
 
   // 加载用户列表
   const loadUsers = async (resetPage = false) => {
+    console.log("加载用户列表:", searchParams);
     setLoading(true);
     try {
       const params = resetPage ? { ...searchParams, page: 1 } : searchParams;
@@ -72,9 +73,10 @@ export default function UserManagementView() {
         setSearchParams(params);
       }
       const response = await AdminUserService.getUserList(params);
+      console.log("dededededede加载用户列表成功:", response);
       setUsers(response.records);
-      setTotalElements(response.totalElements);
-      setTotalPages(response.totalPages);
+      setTotalElements(response.total);
+      setTotalPages(response.pages);
     } catch (error) {
       console.error("加载用户列表失败:", error);
       toast.error("加载用户列表失败");
@@ -90,7 +92,6 @@ export default function UserManagementView() {
     }
     try {
       const response = await CompanyService.getCompanyList({ size: 1000 });
-      console.log("加载公司列表成功:", response);
       setCompanies(response.records);
     } catch (error) {
       console.error("加载公司列表失败:", error);
@@ -115,12 +116,12 @@ export default function UserManagementView() {
 
   // 搜索处理
   const handleSearch = () => {
-    setSearchParams({ ...searchParams, page: 1 });
+    setSearchParams({ ...searchParams, current: 1 });
   };
 
   // 分页处理
   const handlePageChange = (page: number) => {
-    setSearchParams({ ...searchParams, page });
+    setSearchParams({ ...searchParams, current: page });
   };
 
   // 打开添加用户模态框
@@ -409,20 +410,20 @@ export default function UserManagementView() {
           {/* 分页 */}
           <div className="flex items-center justify-between mt-6">
             <div className="text-sm text-gray-700">
-              共 {totalElements} 条记录，第 {searchParams.page} / {totalPages}{" "}
-              页
+              共 {totalElements} 条记录，第 {searchParams.current} /{" "}
+              {totalPages} 页
             </div>
             <div className="flex space-x-2">
               <button
-                onClick={() => handlePageChange(searchParams.page! - 1)}
-                disabled={searchParams.page === 1}
+                onClick={() => handlePageChange(searchParams.current! - 1)}
+                disabled={searchParams.current === 1}
                 className="px-3 py-1 border border-gray-300 rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
               >
                 上一页
               </button>
               <button
-                onClick={() => handlePageChange(searchParams.page! + 1)}
-                disabled={searchParams.page === totalPages}
+                onClick={() => handlePageChange(searchParams.current! + 1)}
+                disabled={searchParams.current === totalPages}
                 className="px-3 py-1 border border-gray-300 rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
               >
                 下一页
