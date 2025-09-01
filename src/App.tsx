@@ -20,6 +20,7 @@ import SocialInsuranceConfigView from "./components/SocialInsuranceConfigView";
 import HousingFundConfigView from "./components/HousingFundConfigView";
 import TaxUploadView from "./components/TaxUploadView";
 import EmployeeBaseConfigView from "./components/EmployeeBaseConfigView";
+import InvoiceTypeManagementView from "./components/InvoiceTypeManagementView";
 
 import {
   AdminUserProvider,
@@ -39,6 +40,7 @@ const routeMap: Record<string, string> = {
   "/social-insurance-config": "social-insurance-config",
   "/housing-fund-config": "housing-fund-config",
   "/tax-upload": "tax-upload",
+  "/invoice-type-management": "invoice-type-management",
   "/settings": "settings",
   "/support": "support",
 };
@@ -54,6 +56,7 @@ const tabToRouteMap: Record<string, string> = {
   "social-insurance-config": "/social-insurance-config",
   "housing-fund-config": "/housing-fund-config",
   "tax-upload": "/tax-upload",
+  "invoice-type-management": "/invoice-type-management",
   settings: "/settings",
   support: "/support",
 };
@@ -219,6 +222,10 @@ function AppContent() {
               element={<HousingFundConfigView />}
             />
             <Route path="/tax-upload" element={<TaxUploadView />} />
+            <Route
+              path="/invoice-type-management"
+              element={<InvoiceTypeManagementView />}
+            />
             <Route
               path="/settings"
               element={

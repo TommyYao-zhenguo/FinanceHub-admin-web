@@ -11,6 +11,7 @@ import {
   Home,
   Upload,
   Calculator,
+  FileText,
 } from "lucide-react";
 import { useAdminUserContext } from "../contexts/AdminUserContext";
 
@@ -121,6 +122,11 @@ export default function Sidebar({
         id: "tax-upload",
         label: "税费上传",
         icon: Upload,
+      });
+      items.push({
+        id: "invoice-type-management",
+        label: "发票类型管理",
+        icon: FileText,
       });
     }
 
