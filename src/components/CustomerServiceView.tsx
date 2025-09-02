@@ -20,6 +20,10 @@ import {
   CustomerServiceAttachment,
 } from "../utils/customerServiceService";
 import { AttachmentUploadResponse } from "../services/attachmentService";
+import {
+  EmployeeService,
+  EmployeeSalaryConfirmedResponse,
+} from "../utils/employeeService";
 import toast from "react-hot-toast";
 
 // 扩展接口以包含显示所需的额外字段
@@ -50,10 +54,18 @@ export default function CustomerServiceView() {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [lastRefreshTime, setLastRefreshTime] = useState<Date | null>(null);
-  const [invoiceAttachments, setInvoiceAttachments] = useState<AttachmentUploadResponse[]>([]);
+  const [invoiceAttachments, setInvoiceAttachments] = useState<
+    AttachmentUploadResponse[]
+  >([]);
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
-  const [existingAttachments, setExistingAttachments] = useState<CustomerServiceAttachment[]>([]);
+  const [existingAttachments, setExistingAttachments] = useState<
+    CustomerServiceAttachment[]
+  >([]);
   const [attachmentLoading, setAttachmentLoading] = useState(false);
+  const [salaryConfirmData, setSalaryConfirmData] = useState<
+    EmployeeSalaryConfirmedResponse[]
+  >([]);
+  const [salaryDataLoading, setSalaryDataLoading] = useState(false);
   const [pagination, setPagination] = useState({
     current: 1,
     size: 10,
@@ -102,7 +114,12 @@ export default function CustomerServiceView() {
           messageType: getMessageTypeFromTaskType(request.taskType),
           actionRequired: request.status === "PENDING",
           // 直接使用后端返回的开票附件数据
-          requestInvoiceAttachments: (request as CustomerServiceRequest & { requestInvoiceAttachments?: AttachmentUploadResponse[] }).requestInvoiceAttachments || [],
+          requestInvoiceAttachments:
+            (
+              request as CustomerServiceRequest & {
+                requestInvoiceAttachments?: AttachmentUploadResponse[];
+              }
+            ).requestInvoiceAttachments || [],
         })
       );
 
@@ -185,7 +202,10 @@ export default function CustomerServiceView() {
     if (selectedMessage) {
       loadExistingAttachments(selectedMessage.id);
       // 直接使用列表接口返回的开票附件数据
-      if (selectedMessage.taskType === 'INVOICE_APPLICATION' && selectedMessage.requestInvoiceAttachments) {
+      if (
+        selectedMessage.taskType === "INVOICE_APPLICATION" &&
+        selectedMessage.requestInvoiceAttachments
+      ) {
         setInvoiceAttachments(selectedMessage.requestInvoiceAttachments);
       } else {
         setInvoiceAttachments([]);
@@ -200,7 +220,7 @@ export default function CustomerServiceView() {
   useEffect(() => {
     return () => {
       // 组件卸载时清理所有本地文件URL
-      uploadedFiles.forEach(file => {
+      uploadedFiles.forEach((file) => {
         const fileUrl = URL.createObjectURL(file);
         URL.revokeObjectURL(fileUrl);
       });
@@ -259,6 +279,8 @@ export default function CustomerServiceView() {
         return "bg-purple-100 text-purple-800";
       case "COMPANY_CREATE":
         return "bg-pink-100 text-pink-800";
+      case "CONFIRM_SALARY":
+        return "bg-indigo-100 text-indigo-800";
       default:
         return "bg-gray-100 text-gray-800";
     }
@@ -291,6 +313,8 @@ export default function CustomerServiceView() {
         return "修改员工";
       case "COMPANY_CREATE":
         return "新增公司";
+      case "CONFIRM_SALARY":
+        return "月度工资确认";
       default:
         return taskType;
     }
@@ -314,21 +338,21 @@ export default function CustomerServiceView() {
       const fileUrl = URL.createObjectURL(fileToRemove);
       URL.revokeObjectURL(fileUrl);
     }
-    
+
     setUploadedFiles((prev) => prev.filter((_, i) => i !== index));
     toast.success("已删除附件");
   };
 
   // 预览文件
   const previewFile = (fileUrl: string, fileName: string) => {
-    console.log('预览文件:', { fileUrl, fileName });
-    
-    const extension = fileName.split('.').pop()?.toLowerCase();
-    
+    console.log("预览文件:", { fileUrl, fileName });
+
+    const extension = fileName.split(".").pop()?.toLowerCase();
+
     // 对于图片文件，可以考虑在模态框中显示
-    if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(extension || '')) {
+    if (["jpg", "jpeg", "png", "gif", "webp"].includes(extension || "")) {
       // 图片预览 - 在新窗口中打开
-      const previewWindow = window.open('', '_blank');
+      const previewWindow = window.open("", "_blank");
       if (previewWindow) {
         previewWindow.document.write(`
           <html>
@@ -341,67 +365,67 @@ export default function CustomerServiceView() {
       }
     } else {
       // 其他文件类型直接在新窗口中打开
-      window.open(fileUrl, '_blank');
+      window.open(fileUrl, "_blank");
     }
   };
 
   // 下载文件
   const downloadFile = async (fileUrl: string, fileName: string) => {
-    console.log('下载文件:', { fileUrl, fileName });
+    console.log("下载文件:", { fileUrl, fileName });
     try {
       // 对于远程文件，使用fetch下载以确保跨域兼容性
-      if (fileUrl.startsWith('http')) {
+      if (fileUrl.startsWith("http")) {
         const response = await fetch(fileUrl);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
-        
+
         const blob = await response.blob();
         const url = window.URL.createObjectURL(blob);
-        
-        const link = document.createElement('a');
+
+        const link = document.createElement("a");
         link.href = url;
         link.download = fileName;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-        
+
         // 清理临时URL
         window.URL.revokeObjectURL(url);
       } else {
         // 对于本地文件（blob URL），直接使用
-        const link = document.createElement('a');
+        const link = document.createElement("a");
         link.href = fileUrl;
         link.download = fileName;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
       }
-      
+
       toast.success(`开始下载: ${fileName}`);
     } catch (error) {
-      console.error('下载失败:', error);
-      toast.error('下载失败，请检查网络连接或文件是否存在');
-      
+      console.error("下载失败:", error);
+      toast.error("下载失败，请检查网络连接或文件是否存在");
+
       // 如果fetch失败，尝试直接打开链接
-      window.open(fileUrl, '_blank');
+      window.open(fileUrl, "_blank");
     }
   };
 
   // 获取文件图标
   const getFileIcon = (fileName: string) => {
-    const extension = fileName.split('.').pop()?.toLowerCase();
+    const extension = fileName.split(".").pop()?.toLowerCase();
     switch (extension) {
-      case 'pdf':
+      case "pdf":
         return <span className="text-red-500">📄</span>;
-      case 'doc':
-      case 'docx':
+      case "doc":
+      case "docx":
         return <span className="text-blue-500">📝</span>;
-      case 'jpg':
-      case 'jpeg':
-      case 'png':
+      case "jpg":
+      case "jpeg":
+      case "png":
         return <span className="text-green-500">🖼️</span>;
-      case 'txt':
+      case "txt":
         return <span className="text-gray-500">📋</span>;
       default:
         return <span className="text-gray-500">📎</span>;
@@ -412,7 +436,9 @@ export default function CustomerServiceView() {
   const loadExistingAttachments = async (taskId: number) => {
     try {
       setAttachmentLoading(true);
-      const attachments = await CustomerServiceService.getAttachmentsByTaskId(taskId);
+      const attachments = await CustomerServiceService.getAttachmentsByTaskId(
+        taskId
+      );
       setExistingAttachments(attachments);
     } catch (error) {
       console.error("加载附件失败:", error);
@@ -436,42 +462,50 @@ export default function CustomerServiceView() {
 
     try {
       setAttachmentLoading(true);
-      
+
       // 显示上传进度
       const totalFiles = uploadedFiles.length;
       let uploadedCount = 0;
-      
+
       // 逐个上传文件到OSS
       for (const file of uploadedFiles) {
         try {
           uploadedCount++;
-          toast.loading(`正在上传文件 ${uploadedCount}/${totalFiles}: ${file.name}`, {
-            id: 'upload-progress'
-          });
-          
+          toast.loading(
+            `正在上传文件 ${uploadedCount}/${totalFiles}: ${file.name}`,
+            {
+              id: "upload-progress",
+            }
+          );
+
           await CustomerServiceService.uploadAttachment(
             file,
             selectedMessage.id,
-            'RECEIPT',
-            '客服回执附件'
+            "RECEIPT",
+            "客服回执附件"
           );
         } catch (fileError) {
           console.error(`上传文件 ${file.name} 失败:`, fileError);
-          toast.error(`上传文件 ${file.name} 失败: ${fileError instanceof Error ? fileError.message : '未知错误'}`);
+          toast.error(
+            `上传文件 ${file.name} 失败: ${
+              fileError instanceof Error ? fileError.message : "未知错误"
+            }`
+          );
           throw fileError; // 重新抛出错误以停止后续上传
         }
       }
-      
-      toast.dismiss('upload-progress');
+
+      toast.dismiss("upload-progress");
       toast.success(`成功上传 ${totalFiles} 个附件`);
       setUploadedFiles([]);
-      
+
       // 重新加载附件列表
       await loadExistingAttachments(selectedMessage.id);
     } catch (error) {
       console.error("上传附件失败:", error);
-      toast.dismiss('upload-progress');
-      const errorMessage = error instanceof Error ? error.message : '上传失败，请重试';
+      toast.dismiss("upload-progress");
+      const errorMessage =
+        error instanceof Error ? error.message : "上传失败，请重试";
       toast.error(errorMessage);
     } finally {
       setAttachmentLoading(false);
@@ -479,49 +513,79 @@ export default function CustomerServiceView() {
   };
 
   // 处理消息选择
-  const handleMessageSelect = (request: DisplayRequest) => {
+  const handleMessageSelect = async (request: DisplayRequest) => {
     if (uploadedFiles.length > 0) {
       Modal.confirm({
-        title: '切换消息确认',
+        title: "切换消息确认",
         content: `当前有 ${uploadedFiles.length} 个未上传的附件，切换消息将清空这些附件。是否继续？`,
-        okText: '确认',
-        cancelText: '取消',
-        onOk: () => {
+        okText: "确认",
+        cancelText: "取消",
+        onOk: async () => {
           setUploadedFiles([]);
           setSelectedMessage(request);
-        }
+          await loadMessageDetails(request);
+        },
       });
     } else {
       setSelectedMessage(request);
+      await loadMessageDetails(request);
     }
+  };
+
+  // 加载消息详情
+  const loadMessageDetails = async (request: DisplayRequest) => {
+    // 如果是月度工资确认类型，加载确认后的工资数据
+    if (request.taskType === "CONFIRM_SALARY") {
+      try {
+        setSalaryDataLoading(true);
+        // 从请求内容中提取期间信息，假设格式为 "YYYY-MM"
+        const period = extractPeriodFromContent(request.requestContent);
+        if (period) {
+          const salaryData = await EmployeeService.getConfirmedSalary(period);
+          setSalaryConfirmData(salaryData);
+        }
+      } catch (error) {
+        console.error("加载月度工资确认数据失败:", error);
+        toast.error("加载工资确认数据失败");
+      } finally {
+        setSalaryDataLoading(false);
+      }
+    }
+  };
+
+  // 从请求内容中提取期间信息
+  const extractPeriodFromContent = (content: string): string | null => {
+    // 尝试匹配 YYYY-MM 格式的日期
+    const periodMatch = content.match(/(\d{4}-\d{2})/);
+    return periodMatch ? periodMatch[1] : null;
   };
 
   // 删除现有附件
   const deleteExistingAttachment = async (attachmentId: number) => {
     Modal.confirm({
-      title: '删除附件确认',
-      content: '确定要删除这个附件吗？此操作不可撤销。',
-      okText: '确认删除',
-      cancelText: '取消',
-      okType: 'danger',
+      title: "删除附件确认",
+      content: "确定要删除这个附件吗？此操作不可撤销。",
+      okText: "确认删除",
+      cancelText: "取消",
+      okType: "danger",
       onOk: async () => {
         try {
           setAttachmentLoading(true);
           await CustomerServiceService.deleteAttachment(attachmentId);
-          toast.success('附件删除成功');
+          toast.success("附件删除成功");
           if (selectedMessage) {
             await loadExistingAttachments(selectedMessage.id);
           }
         } catch (error) {
-          console.error('删除附件失败:', error);
-          toast.error('删除附件失败，请重试');
+          console.error("删除附件失败:", error);
+          toast.error("删除附件失败，请重试");
         } finally {
           setAttachmentLoading(false);
         }
       },
       onCancel: () => {
         // 用户取消，不做任何操作
-      }
+      },
     });
   };
 
@@ -783,14 +847,14 @@ export default function CustomerServiceView() {
                     onClick={() => {
                       if (uploadedFiles.length > 0) {
                         Modal.confirm({
-                          title: '关闭面板确认',
+                          title: "关闭面板确认",
                           content: `当前有 ${uploadedFiles.length} 个未上传的附件，关闭面板将清空这些附件。是否继续？`,
-                          okText: '确认',
-                          cancelText: '取消',
+                          okText: "确认",
+                          cancelText: "取消",
                           onOk: () => {
                             setUploadedFiles([]);
                             setSelectedMessage(null);
-                          }
+                          },
                         });
                       } else {
                         setSelectedMessage(null);
@@ -866,8 +930,108 @@ export default function CustomerServiceView() {
                   </div>
                 </div>
 
+                {/* 月度工资确认数据 */}
+                {selectedMessage.taskType === "CONFIRM_SALARY" && (
+                  <div>
+                    <h3 className="text-lg font-medium text-gray-900 mb-3">
+                      工资确认详情
+                    </h3>
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      {salaryDataLoading ? (
+                        <div className="flex items-center justify-center py-8">
+                          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                          <span className="ml-2 text-gray-600">
+                            加载工资数据中...
+                          </span>
+                        </div>
+                      ) : salaryConfirmData.length > 0 ? (
+                        <div className="overflow-x-auto">
+                          <table className="min-w-full divide-y divide-gray-200">
+                            <thead className="bg-gray-100">
+                              <tr>
+                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                  员工编号
+                                </th>
+                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                  员工姓名
+                                </th>
+                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                  基本工资
+                                </th>
+                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                  确认工资
+                                </th>
+                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                  实发工资
+                                </th>
+                              </tr>
+                            </thead>
+                            <tbody className="bg-white divide-y divide-gray-200">
+                              {salaryConfirmData.map((employee, index) => {
+                                const isDifferent =
+                                  employee.basicSalary !==
+                                  employee.confirmSalary;
+                                return (
+                                  <tr
+                                    key={index}
+                                    className={
+                                      isDifferent ? "bg-yellow-50" : ""
+                                    }
+                                  >
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">
+                                      {employee.employeeNo}
+                                    </td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">
+                                      {employee.employeeName}
+                                    </td>
+                                    <td
+                                      className={`px-4 py-2 whitespace-nowrap text-sm ${
+                                        isDifferent
+                                          ? "text-red-600 font-medium"
+                                          : "text-gray-900"
+                                      }`}
+                                    >
+                                      ¥{employee.basicSalary.toLocaleString()}
+                                    </td>
+                                    <td
+                                      className={`px-4 py-2 whitespace-nowrap text-sm ${
+                                        isDifferent
+                                          ? "text-green-600 font-medium"
+                                          : "text-gray-900"
+                                      }`}
+                                    >
+                                      ¥{employee.confirmSalary.toLocaleString()}
+                                    </td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">
+                                      ¥{employee.netSalary.toLocaleString()}
+                                    </td>
+                                  </tr>
+                                );
+                              })}
+                            </tbody>
+                          </table>
+                          {salaryConfirmData.some(
+                            (emp) => emp.basicSalary !== emp.confirmSalary
+                          ) && (
+                            <div className="mt-3 p-3 bg-yellow-100 border border-yellow-300 rounded-lg">
+                              <p className="text-sm text-yellow-800">
+                                <span className="font-medium">提示：</span>
+                                高亮行表示基本工资与确认工资不一致的员工
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="text-center py-8 text-gray-500">
+                          暂无工资确认数据
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
                 {/* 开票附件 */}
-                {selectedMessage.taskType === 'INVOICE_APPLICATION' && (
+                {selectedMessage.taskType === "INVOICE_APPLICATION" && (
                   <div>
                     <h3 className="text-lg font-medium text-gray-900 mb-3">
                       开票附件
@@ -887,21 +1051,36 @@ export default function CustomerServiceView() {
                                     {attachment.fileName}
                                   </span>
                                   <div className="text-xs text-gray-500">
-                                    {attachment.fileSize ? `${(attachment.fileSize / 1024).toFixed(1)} KB` : ''}
-                                    {attachment.createTime && ` • ${attachment.createTime}`}
+                                    {attachment.fileSize
+                                      ? `${(attachment.fileSize / 1024).toFixed(
+                                          1
+                                        )} KB`
+                                      : ""}
+                                    {attachment.createTime &&
+                                      ` • ${attachment.createTime}`}
                                   </div>
                                 </div>
                               </div>
                               <div className="flex items-center space-x-2">
                                 <button
-                                  onClick={() => previewFile(attachment.attachmentUrl, attachment.fileName)}
+                                  onClick={() =>
+                                    previewFile(
+                                      attachment.attachmentUrl,
+                                      attachment.fileName
+                                    )
+                                  }
                                   className="px-2 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
                                   title="预览文件"
                                 >
                                   预览
                                 </button>
                                 <button
-                                  onClick={() => downloadFile(attachment.attachmentUrl, attachment.fileName)}
+                                  onClick={() =>
+                                    downloadFile(
+                                      attachment.attachmentUrl,
+                                      attachment.fileName
+                                    )
+                                  }
                                   className="px-2 py-1 text-xs bg-green-500 text-white rounded hover:bg-green-600 transition-colors"
                                   title="下载文件"
                                 >
@@ -1036,7 +1215,9 @@ export default function CustomerServiceView() {
                     >
                       <Paperclip className="h-4 w-4" />
                       <span>
-                        {attachmentLoading ? '上传中...' : `提交附件 (${uploadedFiles.length})`}
+                        {attachmentLoading
+                          ? "上传中..."
+                          : `提交附件 (${uploadedFiles.length})`}
                       </span>
                     </button>
                   )}
@@ -1062,27 +1243,41 @@ export default function CustomerServiceView() {
                               {attachment.originalFileName}
                             </span>
                             <div className="text-xs text-green-600">
-                              {(attachment.fileSize / 1024).toFixed(1)} KB • {attachment.uploaderName} • {attachment.createTime}
+                              {(attachment.fileSize / 1024).toFixed(1)} KB •{" "}
+                              {attachment.uploaderName} •{" "}
+                              {attachment.createTime}
                             </div>
                           </div>
                         </div>
                         <div className="flex items-center space-x-2">
                           <button
-                            onClick={() => previewFile(attachment.fileUrl, attachment.originalFileName)}
+                            onClick={() =>
+                              previewFile(
+                                attachment.fileUrl,
+                                attachment.originalFileName
+                              )
+                            }
                             className="px-2 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
                             title="预览文件"
                           >
                             预览
                           </button>
                           <button
-                            onClick={() => downloadFile(attachment.fileUrl, attachment.originalFileName)}
+                            onClick={() =>
+                              downloadFile(
+                                attachment.fileUrl,
+                                attachment.originalFileName
+                              )
+                            }
                             className="px-2 py-1 text-xs bg-green-500 text-white rounded hover:bg-green-600 transition-colors"
                             title="下载文件"
                           >
                             下载
                           </button>
                           <button
-                            onClick={() => deleteExistingAttachment(attachment.id)}
+                            onClick={() =>
+                              deleteExistingAttachment(attachment.id)
+                            }
                             disabled={attachmentLoading}
                             className="p-1 text-red-500 hover:text-red-700 transition-colors disabled:opacity-50"
                           >
