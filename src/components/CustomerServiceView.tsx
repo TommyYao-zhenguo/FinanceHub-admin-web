@@ -8,6 +8,9 @@ import {
   MessageSquare,
   RefreshCw,
   AlarmClock,
+  Upload,
+  Paperclip,
+  X,
 } from "lucide-react";
 import {
   CustomerServiceService,
@@ -43,6 +46,7 @@ export default function CustomerServiceView() {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [lastRefreshTime, setLastRefreshTime] = useState<Date | null>(null);
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [pagination, setPagination] = useState({
     current: 1,
     size: 10,
@@ -100,7 +104,7 @@ export default function CustomerServiceView() {
         total: listResponse.total,
         pages: listResponse.pages,
       }));
-      
+
       // 更新刷新时间
       setLastRefreshTime(new Date());
     } catch (error) {
@@ -256,6 +260,40 @@ export default function CustomerServiceView() {
     }
   };
 
+  // 处理文件上传
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (files) {
+      const newFiles = Array.from(files);
+      setUploadedFiles((prev) => [...prev, ...newFiles]);
+      toast.success(`已添加 ${newFiles.length} 个附件`);
+    }
+  };
+
+  // 删除已上传的文件
+  const removeFile = (index: number) => {
+    setUploadedFiles((prev) => prev.filter((_, i) => i !== index));
+    toast.success("已删除附件");
+  };
+
+  // 提交附件
+  const submitAttachments = async () => {
+    if (!selectedMessage || uploadedFiles.length === 0) {
+      toast.error("请先选择要上传的附件");
+      return;
+    }
+
+    try {
+      // 这里应该调用实际的文件上传API
+      // await CustomerServiceService.uploadAttachments(selectedMessage.id, uploadedFiles);
+      toast.success("回执附件上传成功");
+      setUploadedFiles([]);
+    } catch (error) {
+      console.error("上传附件失败:", error);
+      toast.error("上传附件失败，请重试");
+    }
+  };
+
   const sortedAndFilteredRequests = requests
     .filter((request) => {
       if (selectedCategory === "all") return true;
@@ -280,7 +318,7 @@ export default function CustomerServiceView() {
   return (
     <div className="flex h-full bg-gray-50">
       {/* 左侧面板 */}
-      <div className="w-1/2 bg-white border-r border-gray-200 flex flex-col">
+      <div className="w-1/2 bg-white border-r border-gray-200 flex flex-col h-screen max-h-screen overflow-hidden">
         {/* 统计卡片 */}
         <div className="p-4 border-b border-gray-200">
           <div className="flex items-center justify-between mb-4">
@@ -288,7 +326,10 @@ export default function CustomerServiceView() {
             <div className="flex items-center gap-3">
               {lastRefreshTime && (
                 <span className="text-sm text-gray-500">
-                  最近刷新: {lastRefreshTime.toLocaleTimeString('zh-CN', { hour12: false })}
+                  最近刷新:{" "}
+                  {lastRefreshTime.toLocaleTimeString("zh-CN", {
+                    hour12: false,
+                  })}
                 </span>
               )}
               <button
@@ -472,7 +513,7 @@ export default function CustomerServiceView() {
       </div>
 
       {/* 右侧详情面板 */}
-      <div className="w-1/2 bg-white flex flex-col">
+      <div className="w-1/2 bg-white flex flex-col h-screen max-h-screen overflow-hidden">
         {selectedMessage ? (
           <>
             {/* 详情头部 */}
@@ -656,6 +697,73 @@ export default function CustomerServiceView() {
                   </div>
                 </div>
               </div>
+            </div>
+
+            {/* 回执附件上传区域 */}
+
+            <div className="p-6 border-t border-gray-200">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">
+                上传回执附件
+              </h3>
+
+              {/* 文件上传区域 */}
+              <div className="mb-4">
+                <div className="flex items-center space-x-4">
+                  <label className="flex items-center space-x-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg cursor-pointer transition-colors">
+                    <Upload className="h-4 w-4" />
+                    <span>选择文件</span>
+                    <input
+                      type="file"
+                      multiple
+                      onChange={handleFileUpload}
+                      className="hidden"
+                      accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.txt"
+                    />
+                  </label>
+                  {uploadedFiles.length > 0 && (
+                    <button
+                      onClick={submitAttachments}
+                      className="flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+                    >
+                      <Paperclip className="h-4 w-4" />
+                      <span>提交附件 ({uploadedFiles.length})</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* 已选择的文件列表 */}
+              {uploadedFiles.length > 0 && (
+                <div className="mb-4">
+                  <h4 className="text-sm font-medium text-gray-700 mb-2">
+                    已选择的文件:
+                  </h4>
+                  <div className="space-y-2">
+                    {uploadedFiles.map((file, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center justify-between bg-gray-50 p-2 rounded-lg"
+                      >
+                        <div className="flex items-center space-x-2">
+                          <Paperclip className="h-4 w-4 text-gray-500" />
+                          <span className="text-sm text-gray-700">
+                            {file.name}
+                          </span>
+                          <span className="text-xs text-gray-500">
+                            ({(file.size / 1024).toFixed(1)} KB)
+                          </span>
+                        </div>
+                        <button
+                          onClick={() => removeFile(index)}
+                          className="p-1 text-red-500 hover:text-red-700 transition-colors"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* 操作按钮 */}
