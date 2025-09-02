@@ -2,11 +2,11 @@ import React, { useState, useEffect } from "react";
 import { FileText, Plus, Edit, Trash2, Search, Building2, ArrowLeft } from "lucide-react";
 import toast from "react-hot-toast";
 import { 
-  invoiceTypeService, 
+  InvoiceTypeService, 
   InvoiceType, 
   CreateInvoiceTypeRequest, 
   UpdateInvoiceTypeRequest,
-  InvoiceTypeListResponse 
+  InvoiceTypePageResponse 
 } from '../utils/invoiceTypeService';
 import { CompanyService } from '../utils/companyService';
 import { Company } from '../types/company';
@@ -16,7 +16,6 @@ interface InvoiceTypeQueryParams {
   page?: number;
   size?: number;
   name?: string;
-  code?: string;
   status?: "ACTIVE" | "INACTIVE";
   companyNo?: string;
 }
@@ -54,7 +53,6 @@ export default function InvoiceTypeManagementView() {
     page: 1,
     size: 10,
     name: "",
-    code: "",
     status: undefined,
     companyNo: undefined,
   });
@@ -98,20 +96,32 @@ export default function InvoiceTypeManagementView() {
     try {
       setLoading(true);
       
-      const response: InvoiceTypeListResponse = await invoiceTypeService.getInvoiceTypeList(
-        searchParams.page || 1,
-        searchParams.size || 10,
-        searchParams.name,
-        searchParams.code,
-        searchParams.status
+      const queryParams = {
+        current: searchParams.page || 1,
+        size: searchParams.size || 10,
+        companyNo: selectedCompany.companyNo,
+        ...(searchParams.name && { name: searchParams.name }),
+        ...(searchParams.status && { status: searchParams.status })
+      };
+      
+      const response: InvoiceTypePageResponse = await InvoiceTypeService.getInvoiceTypeList(
+        queryParams.current,
+        queryParams.size,
+        queryParams.name,
+        queryParams.status,
+        queryParams.companyNo
       );
       
-      setInvoiceTypes(response.content);
-      setTotalElements(response.totalElements);
-      setTotalPages(response.totalPages);
+      setInvoiceTypes(response.content || []);
+      setTotalElements(response.totalElements || 0);
+      setTotalPages(response.totalPages || 0);
     } catch (error) {
       console.error("加载发票类型列表失败:", error);
       toast.error("加载发票类型列表失败");
+      // 确保在错误情况下重置状态
+      setInvoiceTypes([]);
+      setTotalElements(0);
+      setTotalPages(0);
     } finally {
       setLoading(false);
     }
@@ -149,7 +159,6 @@ export default function InvoiceTypeManagementView() {
       page: 1,
       size: 10,
       name: "",
-      code: "",
       status: undefined,
       companyNo: company.companyNo,
     });
@@ -174,9 +183,18 @@ export default function InvoiceTypeManagementView() {
   
   // 添加发票类型
   const handleAdd = async (data: CreateInvoiceTypeRequest) => {
+    if (!selectedCompany) {
+      toast.error('请先选择公司');
+      return;
+    }
+    
     try {
       setFormLoading(true);
-      await invoiceTypeService.createInvoiceType(data);
+      const requestData = {
+        ...data,
+        companyNo: selectedCompany.companyNo
+      };
+      await InvoiceTypeService.createInvoiceType(requestData);
       toast.success('发票类型创建成功');
       setShowModal(false);
       setEditingInvoiceType(null);
@@ -191,9 +209,16 @@ export default function InvoiceTypeManagementView() {
 
   // 编辑发票类型
   const handleEdit = async (data: UpdateInvoiceTypeRequest) => {
+    if (!editingInvoiceType || !selectedCompany) return;
+    
     try {
       setFormLoading(true);
-      await invoiceTypeService.updateInvoiceType(data);
+      const dataToUpdate = {
+        ...data,
+        companyNo: selectedCompany.companyNo,
+        id: editingInvoiceType.id,
+      };
+      await InvoiceTypeService.updateInvoiceType(dataToUpdate);
       toast.success('发票类型更新成功');
       setShowModal(false);
       setEditingInvoiceType(null);
@@ -208,9 +233,11 @@ export default function InvoiceTypeManagementView() {
 
   // 删除发票类型
   const handleDelete = async (invoiceType: InvoiceType) => {
+    if (!selectedCompany) return;
+    
     try {
       setDeleteLoading(true);
-      await invoiceTypeService.deleteInvoiceType(invoiceType.id);
+      await InvoiceTypeService.deleteInvoiceType(invoiceType.id, selectedCompany.companyNo);
       toast.success('发票类型删除成功');
       setDeleteConfirm({ show: false, invoiceType: null });
       loadInvoiceTypes(); // 重新加载数据
@@ -365,7 +392,7 @@ export default function InvoiceTypeManagementView() {
 
       {/* 搜索和筛选 */}
       <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               发票类型名称
@@ -376,20 +403,6 @@ export default function InvoiceTypeManagementView() {
               value={searchParams.name || ""}
               onChange={(e) =>
                 setSearchParams({ ...searchParams, name: e.target.value, page: 1 })
-              }
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-orange-500 focus:border-orange-500"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              发票类型编码
-            </label>
-            <input
-              type="text"
-              placeholder="请输入发票类型编码"
-              value={searchParams.code || ""}
-              onChange={(e) =>
-                setSearchParams({ ...searchParams, code: e.target.value, page: 1 })
               }
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-orange-500 focus:border-orange-500"
             />
@@ -432,7 +445,7 @@ export default function InvoiceTypeManagementView() {
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600"></div>
             <span className="ml-2 text-gray-600">加载中...</span>
           </div>
-        ) : invoiceTypes.length === 0 ? (
+        ) : !invoiceTypes || invoiceTypes.length === 0 ? (
           <div className="text-center py-12">
             <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
             <p className="text-gray-500">暂无发票类型数据</p>
@@ -445,9 +458,6 @@ export default function InvoiceTypeManagementView() {
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       发票类型名称
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      发票类型编码
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       状态
@@ -468,9 +478,6 @@ export default function InvoiceTypeManagementView() {
                     <tr key={invoiceType.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                         {invoiceType.name}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {invoiceType.code}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span
@@ -592,9 +599,10 @@ interface InvoiceTypeModalProps {
 function InvoiceTypeModal({ invoiceType, onSave, onCancel, loading }: InvoiceTypeModalProps) {
   const [formData, setFormData] = useState<CreateInvoiceTypeRequest>({
     name: invoiceType?.name || "",
-    code: invoiceType?.code || "",
+    description: invoiceType?.description || "",
     status: invoiceType?.status || "ACTIVE",
     sortOrder: invoiceType?.sortOrder || 0,
+    companyNo: invoiceType?.companyNo || "",
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -622,18 +630,6 @@ function InvoiceTypeModal({ invoiceType, onSave, onCancel, loading }: InvoiceTyp
               required
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-orange-500 focus:border-orange-500"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              发票类型编码 *
-            </label>
-            <input
-              type="text"
-              required
-              value={formData.code}
-              onChange={(e) => setFormData({ ...formData, code: e.target.value })}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-orange-500 focus:border-orange-500"
             />
           </div>

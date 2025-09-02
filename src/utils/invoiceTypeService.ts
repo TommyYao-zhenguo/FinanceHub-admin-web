@@ -1,10 +1,10 @@
-import { API_ENDPOINTS, buildApiUrl } from '../config/api';
+import { API_ENDPOINTS } from '../config/api';
 import { httpClient } from './http';
 
 // 发票类型接口定义
 export interface InvoiceType {
   id: number;
-  code: string;
+  companyNo: string;
   name: string;
   description?: string;
   status: 'ACTIVE' | 'INACTIVE';
@@ -17,7 +17,7 @@ export interface InvoiceType {
 
 // 创建发票类型请求
 export interface CreateInvoiceTypeRequest {
-  code: string;
+  companyNo: string;
   name: string;
   description?: string;
   status: 'ACTIVE' | 'INACTIVE';
@@ -27,7 +27,7 @@ export interface CreateInvoiceTypeRequest {
 // 更新发票类型请求
 export interface UpdateInvoiceTypeRequest {
   id: number;
-  code: string;
+  companyNo: string;
   name: string;
   description?: string;
   status: 'ACTIVE' | 'INACTIVE';
@@ -35,7 +35,7 @@ export interface UpdateInvoiceTypeRequest {
 }
 
 // 发票类型列表响应
-export interface InvoiceTypeListResponse {
+export interface InvoiceTypePageResponse {
   content: InvoiceType[];
   totalElements: number;
   totalPages: number;
@@ -44,32 +44,32 @@ export interface InvoiceTypeListResponse {
 }
 
 // 发票类型服务
-export const invoiceTypeService = {
+export const InvoiceTypeService = {
   // 获取发票类型列表（分页）
   async getInvoiceTypeList(
     current: number = 1,
     size: number = 10,
     name?: string,
-    code?: string,
-    status?: string
-  ): Promise<InvoiceTypeListResponse> {
+    status?: string,
+    companyNo?: string
+  ): Promise<InvoiceTypePageResponse> {
     const params = new URLSearchParams();
     params.append('current', current.toString());
     params.append('size', size.toString());
     if (name) params.append('name', name);
-    if (code) params.append('code', code);
     if (status) params.append('status', status);
+    if (companyNo) params.append('companyNo', companyNo);
 
     const response = await httpClient.get(
-      `${buildApiUrl(API_ENDPOINTS.INVOICE_TYPE.LIST)}?${params.toString()}`
+      `${API_ENDPOINTS.INVOICE_TYPE.LIST}?${params.toString()}`
     );
-    return response as InvoiceTypeListResponse;
+    return response as InvoiceTypePageResponse;
   },
 
   // 创建发票类型
   async createInvoiceType(data: CreateInvoiceTypeRequest): Promise<InvoiceType> {
     const response = await httpClient.post(
-      buildApiUrl(API_ENDPOINTS.INVOICE_TYPE.CREATE),
+      API_ENDPOINTS.INVOICE_TYPE.CREATE,
       data as unknown as Record<string, unknown>
     );
     return response as InvoiceType;
@@ -78,23 +78,23 @@ export const invoiceTypeService = {
   // 更新发票类型
   async updateInvoiceType(data: UpdateInvoiceTypeRequest): Promise<InvoiceType> {
     const response = await httpClient.put(
-      `${buildApiUrl(API_ENDPOINTS.INVOICE_TYPE.UPDATE)}/${data.id}`,
+      `${API_ENDPOINTS.INVOICE_TYPE.UPDATE}/${data.id}`,
       data as unknown as Record<string, unknown>
     );
     return response as InvoiceType;
   },
 
   // 删除发票类型
-  async deleteInvoiceType(id: number): Promise<void> {
+  async deleteInvoiceType(id: number, companyNo: string): Promise<void> {
     await httpClient.delete(
-      `${buildApiUrl(API_ENDPOINTS.INVOICE_TYPE.DELETE)}/${id}`
+      `${API_ENDPOINTS.INVOICE_TYPE.DELETE}/${companyNo}/${id}`
     );
   },
 
   // 获取发票类型详情
   async getInvoiceTypeDetail(id: number): Promise<InvoiceType> {
     const response = await httpClient.get(
-      `${buildApiUrl(API_ENDPOINTS.INVOICE_TYPE.DETAIL)}/${id}`
+      `${API_ENDPOINTS.INVOICE_TYPE.DETAIL}/${id}`
     );
     return response as InvoiceType;
   },
@@ -102,7 +102,7 @@ export const invoiceTypeService = {
   // 获取所有启用的发票类型
   async getActiveInvoiceTypes(): Promise<InvoiceType[]> {
     const response = await httpClient.get(
-      buildApiUrl(API_ENDPOINTS.INVOICE_TYPE.ACTIVE)
+      API_ENDPOINTS.INVOICE_TYPE.ACTIVE
     );
     return response as InvoiceType[];
   },
