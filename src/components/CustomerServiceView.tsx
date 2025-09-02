@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Modal } from "antd";
 import {
   Bell,
   User,
@@ -353,24 +354,51 @@ export default function CustomerServiceView() {
     }
   };
 
+  // 处理消息选择
+  const handleMessageSelect = (request: DisplayRequest) => {
+    if (uploadedFiles.length > 0) {
+      Modal.confirm({
+        title: '切换消息确认',
+        content: `当前有 ${uploadedFiles.length} 个未上传的附件，切换消息将清空这些附件。是否继续？`,
+        okText: '确认',
+        cancelText: '取消',
+        onOk: () => {
+          setUploadedFiles([]);
+          setSelectedMessage(request);
+        }
+      });
+    } else {
+      setSelectedMessage(request);
+    }
+  };
+
   // 删除现有附件
   const deleteExistingAttachment = async (attachmentId: number) => {
-    if (!confirm('确定要删除这个附件吗？')) return;
-    
-    try {
-      setAttachmentLoading(true);
-      await CustomerServiceService.deleteAttachment(attachmentId);
-      toast.success("附件删除成功");
-      // 重新加载附件列表
-      if (selectedMessage) {
-        await loadExistingAttachments(selectedMessage.id);
+    Modal.confirm({
+      title: '删除附件确认',
+      content: '确定要删除这个附件吗？此操作不可撤销。',
+      okText: '确认删除',
+      cancelText: '取消',
+      okType: 'danger',
+      onOk: async () => {
+        try {
+          setAttachmentLoading(true);
+          await CustomerServiceService.deleteAttachment(attachmentId);
+          toast.success('附件删除成功');
+          if (selectedMessage) {
+            await loadExistingAttachments(selectedMessage.id);
+          }
+        } catch (error) {
+          console.error('删除附件失败:', error);
+          toast.error('删除附件失败，请重试');
+        } finally {
+          setAttachmentLoading(false);
+        }
+      },
+      onCancel: () => {
+        // 用户取消，不做任何操作
       }
-    } catch (error) {
-      console.error("删除附件失败:", error);
-      toast.error("删除附件失败，请重试");
-    } finally {
-      setAttachmentLoading(false);
-    }
+    });
   };
 
   const sortedAndFilteredRequests = requests
@@ -493,7 +521,7 @@ export default function CustomerServiceView() {
               {sortedAndFilteredRequests.map((request) => (
                 <div
                   key={request.id}
-                  onClick={() => setSelectedMessage(request)}
+                  onClick={() => handleMessageSelect(request)}
                   className={`p-4 cursor-pointer transition-colors hover:bg-gray-50 ${
                     selectedMessage?.id === request.id
                       ? "bg-blue-50 border-r-2 border-blue-500"
@@ -627,6 +655,28 @@ export default function CustomerServiceView() {
                   >
                     {getStatusText(selectedMessage.status)}
                   </span>
+                  <button
+                    onClick={() => {
+                      if (uploadedFiles.length > 0) {
+                        Modal.confirm({
+                          title: '关闭面板确认',
+                          content: `当前有 ${uploadedFiles.length} 个未上传的附件，关闭面板将清空这些附件。是否继续？`,
+                          okText: '确认',
+                          cancelText: '取消',
+                          onOk: () => {
+                            setUploadedFiles([]);
+                            setSelectedMessage(null);
+                          }
+                        });
+                      } else {
+                        setSelectedMessage(null);
+                      }
+                    }}
+                    className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
+                    title="关闭详情面板"
+                  >
+                    <X className="h-5 w-5" />
+                  </button>
                 </div>
               </div>
             </div>

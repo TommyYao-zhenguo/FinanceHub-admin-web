@@ -4,7 +4,7 @@ import toast from "react-hot-toast";
 interface RequestOptions {
   method?: "GET" | "POST" | "PUT" | "DELETE";
   headers?: Record<string, string>;
-  body?: unknown;
+  body?: any;
   timeout?: number;
   showErrorAlert?: boolean; // 是否显示错误弹窗
 }
@@ -35,7 +35,7 @@ class HttpClient {
     const url = `${this.baseUrl}${endpoint}`;
 
     // 合并默认headers和自定义headers
-    const mergedHeaders: Record<string, string> = {
+    const mergedHeaders = {
       ...this.defaultHeaders,
       "X-Requested-With": "XMLHttpRequest",
       Accept: "application/json, text/plain, */*",
@@ -48,19 +48,6 @@ class HttpClient {
       mergedHeaders["token"] = `${SA_TOKEN_CONFIG.tokenPrefix} ${token}`;
     }
 
-    // 处理请求体
-    let requestBody: BodyInit | undefined = undefined;
-    if (body) {
-      if (body instanceof FormData) {
-        // 对于FormData，不设置Content-Type，让浏览器自动设置boundary
-        delete mergedHeaders["Content-Type"];
-        requestBody = body;
-      } else {
-        // 对于其他类型的数据，JSON序列化
-        requestBody = JSON.stringify(body);
-      }
-    }
-
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeout);
 
@@ -68,7 +55,7 @@ class HttpClient {
       const response = await fetch(url, {
         method,
         headers: mergedHeaders,
-        body: requestBody,
+        body: body ? JSON.stringify(body) : undefined,
         signal: controller.signal,
       });
 
@@ -216,7 +203,7 @@ class HttpClient {
 
   async post<T>(
     endpoint: string,
-    body?: unknown,
+    body?: any,
     headers?: Record<string, string>,
     showErrorAlert?: boolean
   ): Promise<T> {
@@ -230,7 +217,7 @@ class HttpClient {
 
   async put<T>(
     endpoint: string,
-    body?: unknown,
+    body?: any,
     headers?: Record<string, string>,
     showErrorAlert?: boolean
   ): Promise<T> {
