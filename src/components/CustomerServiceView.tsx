@@ -184,6 +184,17 @@ export default function CustomerServiceView() {
     }
   }, [selectedMessage]);
 
+  // 清理本地文件URL，防止内存泄漏
+  useEffect(() => {
+    return () => {
+      // 组件卸载时清理所有本地文件URL
+      uploadedFiles.forEach(file => {
+        const fileUrl = URL.createObjectURL(file);
+        URL.revokeObjectURL(fileUrl);
+      });
+    };
+  }, [uploadedFiles]);
+
   const messageCategories = [
     {
       id: "all",
@@ -285,8 +296,104 @@ export default function CustomerServiceView() {
 
   // 删除已上传的文件
   const removeFile = (index: number) => {
+    // 清理本地文件的URL对象
+    const fileToRemove = uploadedFiles[index];
+    if (fileToRemove) {
+      const fileUrl = URL.createObjectURL(fileToRemove);
+      URL.revokeObjectURL(fileUrl);
+    }
+    
     setUploadedFiles((prev) => prev.filter((_, i) => i !== index));
     toast.success("已删除附件");
+  };
+
+  // 预览文件
+  const previewFile = (fileUrl: string, fileName: string) => {
+    console.log('预览文件:', { fileUrl, fileName });
+    
+    const extension = fileName.split('.').pop()?.toLowerCase();
+    
+    // 对于图片文件，可以考虑在模态框中显示
+    if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(extension || '')) {
+      // 图片预览 - 在新窗口中打开
+      const previewWindow = window.open('', '_blank');
+      if (previewWindow) {
+        previewWindow.document.write(`
+          <html>
+            <head><title>预览: ${fileName}</title></head>
+            <body style="margin:0;padding:20px;background:#f5f5f5;display:flex;justify-content:center;align-items:center;min-height:100vh;">
+              <img src="${fileUrl}" style="max-width:100%;max-height:100%;object-fit:contain;box-shadow:0 4px 8px rgba(0,0,0,0.1);" alt="${fileName}" />
+            </body>
+          </html>
+        `);
+      }
+    } else {
+      // 其他文件类型直接在新窗口中打开
+      window.open(fileUrl, '_blank');
+    }
+  };
+
+  // 下载文件
+  const downloadFile = async (fileUrl: string, fileName: string) => {
+    console.log('下载文件:', { fileUrl, fileName });
+    try {
+      // 对于远程文件，使用fetch下载以确保跨域兼容性
+      if (fileUrl.startsWith('http')) {
+        const response = await fetch(fileUrl);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        // 清理临时URL
+        window.URL.revokeObjectURL(url);
+      } else {
+        // 对于本地文件（blob URL），直接使用
+        const link = document.createElement('a');
+        link.href = fileUrl;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+      
+      toast.success(`开始下载: ${fileName}`);
+    } catch (error) {
+      console.error('下载失败:', error);
+      toast.error('下载失败，请检查网络连接或文件是否存在');
+      
+      // 如果fetch失败，尝试直接打开链接
+      window.open(fileUrl, '_blank');
+    }
+  };
+
+  // 获取文件图标
+  const getFileIcon = (fileName: string) => {
+    const extension = fileName.split('.').pop()?.toLowerCase();
+    switch (extension) {
+      case 'pdf':
+        return <span className="text-red-500">📄</span>;
+      case 'doc':
+      case 'docx':
+        return <span className="text-blue-500">📝</span>;
+      case 'jpg':
+      case 'jpeg':
+      case 'png':
+        return <span className="text-green-500">🖼️</span>;
+      case 'txt':
+        return <span className="text-gray-500">📋</span>;
+      default:
+        return <span className="text-gray-500">📎</span>;
+    }
   };
 
   // 加载现有附件
@@ -877,7 +984,7 @@ export default function CustomerServiceView() {
                         className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-lg"
                       >
                         <div className="flex items-center space-x-3">
-                          <Paperclip className="h-4 w-4 text-green-600" />
+                          {getFileIcon(attachment.originalFileName)}
                           <div>
                             <span className="text-sm font-medium text-green-800">
                               {attachment.originalFileName}
@@ -887,13 +994,29 @@ export default function CustomerServiceView() {
                             </div>
                           </div>
                         </div>
-                        <button
-                          onClick={() => deleteExistingAttachment(attachment.id)}
-                          disabled={attachmentLoading}
-                          className="p-1 text-red-500 hover:text-red-700 transition-colors disabled:opacity-50"
-                        >
-                          <X className="h-4 w-4" />
-                        </button>
+                        <div className="flex items-center space-x-2">
+                          <button
+                            onClick={() => previewFile(attachment.fileUrl, attachment.originalFileName)}
+                            className="px-2 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+                            title="预览文件"
+                          >
+                            预览
+                          </button>
+                          <button
+                            onClick={() => downloadFile(attachment.fileUrl, attachment.originalFileName)}
+                            className="px-2 py-1 text-xs bg-green-500 text-white rounded hover:bg-green-600 transition-colors"
+                            title="下载文件"
+                          >
+                            下载
+                          </button>
+                          <button
+                            onClick={() => deleteExistingAttachment(attachment.id)}
+                            disabled={attachmentLoading}
+                            className="p-1 text-red-500 hover:text-red-700 transition-colors disabled:opacity-50"
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -907,28 +1030,42 @@ export default function CustomerServiceView() {
                     待上传的文件:
                   </h4>
                   <div className="space-y-2">
-                    {uploadedFiles.map((file, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center justify-between bg-gray-50 p-2 rounded-lg"
-                      >
-                        <div className="flex items-center space-x-2">
-                          <Paperclip className="h-4 w-4 text-gray-500" />
-                          <span className="text-sm text-gray-700">
-                            {file.name}
-                          </span>
-                          <span className="text-xs text-gray-500">
-                            ({(file.size / 1024).toFixed(1)} KB)
-                          </span>
-                        </div>
-                        <button
-                          onClick={() => removeFile(index)}
-                          className="p-1 text-red-500 hover:text-red-700 transition-colors"
+                    {uploadedFiles.map((file, index) => {
+                      const fileUrl = URL.createObjectURL(file);
+                      return (
+                        <div
+                          key={index}
+                          className="flex items-center justify-between bg-gray-50 p-3 rounded-lg border"
                         >
-                          <X className="h-4 w-4" />
-                        </button>
-                      </div>
-                    ))}
+                          <div className="flex items-center space-x-3">
+                            {getFileIcon(file.name)}
+                            <div>
+                              <span className="text-sm font-medium text-gray-700">
+                                {file.name}
+                              </span>
+                              <div className="text-xs text-gray-500">
+                                {(file.size / 1024).toFixed(1)} KB
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <button
+                              onClick={() => previewFile(fileUrl, file.name)}
+                              className="px-2 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+                              title="预览文件"
+                            >
+                              预览
+                            </button>
+                            <button
+                              onClick={() => removeFile(index)}
+                              className="p-1 text-red-500 hover:text-red-700 transition-colors"
+                            >
+                              <X className="h-4 w-4" />
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               )}
