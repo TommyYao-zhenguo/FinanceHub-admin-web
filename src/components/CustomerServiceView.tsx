@@ -19,7 +19,7 @@ import {
   CustomerServiceStatistics,
   CustomerServiceAttachment,
 } from "../utils/customerServiceService";
-import { AttachmentService, AttachmentUploadResponse } from "../services/attachmentService";
+import { AttachmentUploadResponse } from "../services/attachmentService";
 import toast from "react-hot-toast";
 
 // 扩展接口以包含显示所需的额外字段
@@ -28,6 +28,7 @@ interface DisplayRequest extends CustomerServiceRequest {
   actionRequired: boolean;
   attachmentFileNames?: string[];
   processingNotes?: string;
+  requestInvoiceAttachments?: AttachmentUploadResponse[];
 }
 
 export default function CustomerServiceView() {
@@ -50,7 +51,6 @@ export default function CustomerServiceView() {
   const [searchTerm, setSearchTerm] = useState("");
   const [lastRefreshTime, setLastRefreshTime] = useState<Date | null>(null);
   const [invoiceAttachments, setInvoiceAttachments] = useState<AttachmentUploadResponse[]>([]);
-  const [loadingAttachments, setLoadingAttachments] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [existingAttachments, setExistingAttachments] = useState<CustomerServiceAttachment[]>([]);
   const [attachmentLoading, setAttachmentLoading] = useState(false);
@@ -101,6 +101,8 @@ export default function CustomerServiceView() {
           ...request,
           messageType: getMessageTypeFromTaskType(request.taskType),
           actionRequired: request.status === "PENDING",
+          // 直接使用后端返回的开票附件数据
+          requestInvoiceAttachments: (request as CustomerServiceRequest & { requestInvoiceAttachments?: AttachmentUploadResponse[] }).requestInvoiceAttachments || [],
         })
       );
 
@@ -182,7 +184,12 @@ export default function CustomerServiceView() {
   useEffect(() => {
     if (selectedMessage) {
       loadExistingAttachments(selectedMessage.id);
-      loadInvoiceAttachments(selectedMessage.id);
+      // 直接使用列表接口返回的开票附件数据
+      if (selectedMessage.taskType === 'INVOICE_APPLICATION' && selectedMessage.requestInvoiceAttachments) {
+        setInvoiceAttachments(selectedMessage.requestInvoiceAttachments);
+      } else {
+        setInvoiceAttachments([]);
+      }
     } else {
       setExistingAttachments([]);
       setInvoiceAttachments([]);
@@ -415,26 +422,10 @@ export default function CustomerServiceView() {
     }
   };
 
-  // 加载开票附件
-  const loadInvoiceAttachments = async (taskId: number) => {
-    try {
-      setLoadingAttachments(true);
-      // 先获取客服任务详情，获取relatedId（发票ID）
-      const task = await CustomerServiceService.getRequest(taskId);
-      if (task.taskType === 'INVOICE_APPLICATION' && task.relatedId) {
-        // 通过发票ID获取开票附件
-        const attachments = await AttachmentService.getAttachmentsByInvoiceId(task.relatedId);
-        setInvoiceAttachments(attachments);
-      } else {
-        setInvoiceAttachments([]);
-      }
-    } catch (error) {
-      console.error("加载开票附件失败:", error);
-      toast.error("加载开票附件失败");
-    } finally {
-      setLoadingAttachments(false);
-    }
-  };
+  // 注释：不再需要单独加载开票附件，直接使用列表接口返回的数据
+  // const loadInvoiceAttachments = async (taskId: number) => {
+  //   // 已优化：直接使用分页列表接口返回的 requestInvoiceAttachments 字段
+  // };
 
   // 提交附件
   const submitAttachments = async () => {
@@ -882,12 +873,7 @@ export default function CustomerServiceView() {
                       开票附件
                     </h3>
                     <div className="bg-gray-50 rounded-lg p-4">
-                      {loadingAttachments ? (
-                        <div className="flex items-center justify-center py-4">
-                          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-                          <span className="ml-2 text-sm text-gray-600">加载中...</span>
-                        </div>
-                      ) : invoiceAttachments.length > 0 ? (
+                      {invoiceAttachments.length > 0 ? (
                         <div className="space-y-2">
                           {invoiceAttachments.map((attachment, index) => (
                             <div
