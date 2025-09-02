@@ -16,6 +16,7 @@ import {
   CustomerServiceService,
   CustomerServiceRequest,
   CustomerServiceStatistics,
+  CustomerServiceAttachment,
 } from "../utils/customerServiceService";
 import toast from "react-hot-toast";
 
@@ -47,6 +48,8 @@ export default function CustomerServiceView() {
   const [searchTerm, setSearchTerm] = useState("");
   const [lastRefreshTime, setLastRefreshTime] = useState<Date | null>(null);
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [existingAttachments, setExistingAttachments] = useState<CustomerServiceAttachment[]>([]);
+  const [attachmentLoading, setAttachmentLoading] = useState(false);
   const [pagination, setPagination] = useState({
     current: 1,
     size: 10,
@@ -171,6 +174,15 @@ export default function CustomerServiceView() {
     loadData();
   }, []);
 
+  // 当选中消息变化时，加载对应的附件
+  useEffect(() => {
+    if (selectedMessage) {
+      loadExistingAttachments(selectedMessage.id);
+    } else {
+      setExistingAttachments([]);
+    }
+  }, [selectedMessage]);
+
   const messageCategories = [
     {
       id: "all",
@@ -276,6 +288,20 @@ export default function CustomerServiceView() {
     toast.success("已删除附件");
   };
 
+  // 加载现有附件
+  const loadExistingAttachments = async (taskId: number) => {
+    try {
+      setAttachmentLoading(true);
+      const attachments = await CustomerServiceService.getAttachmentsByTaskId(taskId);
+      setExistingAttachments(attachments);
+    } catch (error) {
+      console.error("加载附件失败:", error);
+      toast.error("加载附件失败");
+    } finally {
+      setAttachmentLoading(false);
+    }
+  };
+
   // 提交附件
   const submitAttachments = async () => {
     if (!selectedMessage || uploadedFiles.length === 0) {
@@ -284,13 +310,66 @@ export default function CustomerServiceView() {
     }
 
     try {
-      // 这里应该调用实际的文件上传API
-      // await CustomerServiceService.uploadAttachments(selectedMessage.id, uploadedFiles);
-      toast.success("回执附件上传成功");
+      setAttachmentLoading(true);
+      
+      // 显示上传进度
+      const totalFiles = uploadedFiles.length;
+      let uploadedCount = 0;
+      
+      // 逐个上传文件到OSS
+      for (const file of uploadedFiles) {
+        try {
+          uploadedCount++;
+          toast.loading(`正在上传文件 ${uploadedCount}/${totalFiles}: ${file.name}`, {
+            id: 'upload-progress'
+          });
+          
+          await CustomerServiceService.uploadAttachment(
+            file,
+            selectedMessage.id,
+            'RECEIPT',
+            '客服回执附件'
+          );
+        } catch (fileError) {
+          console.error(`上传文件 ${file.name} 失败:`, fileError);
+          toast.error(`上传文件 ${file.name} 失败: ${fileError instanceof Error ? fileError.message : '未知错误'}`);
+          throw fileError; // 重新抛出错误以停止后续上传
+        }
+      }
+      
+      toast.dismiss('upload-progress');
+      toast.success(`成功上传 ${totalFiles} 个附件`);
       setUploadedFiles([]);
+      
+      // 重新加载附件列表
+      await loadExistingAttachments(selectedMessage.id);
     } catch (error) {
       console.error("上传附件失败:", error);
-      toast.error("上传附件失败，请重试");
+      toast.dismiss('upload-progress');
+      const errorMessage = error instanceof Error ? error.message : '上传失败，请重试';
+      toast.error(errorMessage);
+    } finally {
+      setAttachmentLoading(false);
+    }
+  };
+
+  // 删除现有附件
+  const deleteExistingAttachment = async (attachmentId: number) => {
+    if (!confirm('确定要删除这个附件吗？')) return;
+    
+    try {
+      setAttachmentLoading(true);
+      await CustomerServiceService.deleteAttachment(attachmentId);
+      toast.success("附件删除成功");
+      // 重新加载附件列表
+      if (selectedMessage) {
+        await loadExistingAttachments(selectedMessage.id);
+      }
+    } catch (error) {
+      console.error("删除附件失败:", error);
+      toast.error("删除附件失败，请重试");
+    } finally {
+      setAttachmentLoading(false);
     }
   };
 
@@ -723,20 +802,59 @@ export default function CustomerServiceView() {
                   {uploadedFiles.length > 0 && (
                     <button
                       onClick={submitAttachments}
-                      className="flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+                      disabled={attachmentLoading}
+                      className="flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <Paperclip className="h-4 w-4" />
-                      <span>提交附件 ({uploadedFiles.length})</span>
+                      <span>
+                        {attachmentLoading ? '上传中...' : `提交附件 (${uploadedFiles.length})`}
+                      </span>
                     </button>
                   )}
                 </div>
               </div>
 
+              {/* 现有附件列表 */}
+              {existingAttachments.length > 0 && (
+                <div className="mb-4">
+                  <h4 className="text-sm font-medium text-gray-700 mb-2">
+                    已上传的附件:
+                  </h4>
+                  <div className="space-y-2">
+                    {existingAttachments.map((attachment) => (
+                      <div
+                        key={attachment.id}
+                        className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-lg"
+                      >
+                        <div className="flex items-center space-x-3">
+                          <Paperclip className="h-4 w-4 text-green-600" />
+                          <div>
+                            <span className="text-sm font-medium text-green-800">
+                              {attachment.originalFileName}
+                            </span>
+                            <div className="text-xs text-green-600">
+                              {(attachment.fileSize / 1024).toFixed(1)} KB • {attachment.uploaderName} • {attachment.createTime}
+                            </div>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => deleteExistingAttachment(attachment.id)}
+                          disabled={attachmentLoading}
+                          className="p-1 text-red-500 hover:text-red-700 transition-colors disabled:opacity-50"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* 已选择的文件列表 */}
               {uploadedFiles.length > 0 && (
                 <div className="mb-4">
                   <h4 className="text-sm font-medium text-gray-700 mb-2">
-                    已选择的文件:
+                    待上传的文件:
                   </h4>
                   <div className="space-y-2">
                     {uploadedFiles.map((file, index) => (

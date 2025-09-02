@@ -59,6 +59,37 @@ export interface CustomerServiceStatistics {
   requestsByPriority: Record<string, number>;
 }
 
+// 客服回执附件接口类型定义
+export interface CustomerServiceAttachment {
+  id: number;
+  customerServiceTaskId: number;
+  fileName: string;
+  originalFileName: string;
+  fileUrl: string;
+  fileSize: number;
+  fileType: string;
+  attachmentType: string;
+  uploaderId: number;
+  uploaderName: string;
+  remark?: string;
+  createTime: string;
+  updateTime: string;
+}
+
+export interface CustomerServiceAttachmentCreateRequest {
+  customerServiceTaskId: number;
+  fileName: string;
+  originalFileName: string;
+  fileUrl: string;
+  fileSize: number;
+  fileType: string;
+  attachmentType: string;
+  uploaderId: number;
+  uploaderName: string;
+  ossFileId: string;
+  remark?: string;
+}
+
 export class CustomerServiceService {
   // 创建客服请求
   static async createRequest(
@@ -89,8 +120,8 @@ export class CustomerServiceService {
       queryParams.append("current", params.page.toString());
     if (params.size !== undefined)
       queryParams.append("size", params.size.toString());
-    if (params.requestType)
-      queryParams.append("requestType", params.requestType);
+    if (params.taskType)
+      queryParams.append("taskType", params.taskType);
     if (params.status) queryParams.append("status", params.status);
     if (params.keyword) queryParams.append("keyword", params.keyword);
     if (params.startTime) queryParams.append("startTime", params.startTime);
@@ -139,6 +170,137 @@ export class CustomerServiceService {
       {
         assignedTo,
       }
+    );
+  }
+
+  // 附件相关API
+  // 上传附件到OSS
+  static async uploadFileToOSS(file: File): Promise<{
+    fileId: string;
+    fileName: string;
+    fileSize: number;
+    fileUrl: string;
+  }> {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await httpClient.post<{
+      success: boolean;
+      fileId: string;
+      fileName: string;
+      fileSize: number;
+      fileUrl: string;
+      message: string;
+    }>(
+      '/api/v1/oss/upload',
+      formData,
+      {
+        'Content-Type': 'multipart/form-data',
+      }
+    );
+
+    if (!response.success) {
+      throw new Error(response.message || '文件上传失败');
+    }
+
+    return {
+      fileId: response.fileId,
+      fileName: response.fileName,
+      fileSize: response.fileSize,
+      fileUrl: response.fileUrl,
+    };
+  }
+
+  // 上传附件（先上传到OSS，再创建附件记录）
+  static async uploadAttachment(
+    file: File,
+    customerServiceTaskId: number,
+    attachmentType: string = 'RECEIPT',
+    remark?: string
+  ): Promise<CustomerServiceAttachment> {
+    // 先上传文件到OSS
+    const ossResult = await this.uploadFileToOSS(file);
+
+    // 获取文件扩展名
+    const getFileExtension = (filename: string): string => {
+      const lastDotIndex = filename.lastIndexOf('.');
+      return lastDotIndex !== -1 ? filename.substring(lastDotIndex + 1).toLowerCase() : '';
+    };
+
+    // 创建附件记录
+    const attachmentData: CustomerServiceAttachmentCreateRequest = {
+      customerServiceTaskId,
+      fileName: ossResult.fileName,
+      originalFileName: file.name,
+      fileUrl: ossResult.fileUrl,
+      fileSize: ossResult.fileSize,
+      fileType: getFileExtension(file.name),
+      attachmentType,
+      uploaderId: 1, // TODO: 从当前登录用户获取
+      uploaderName: '管理员', // TODO: 从当前登录用户获取
+      ossFileId: ossResult.fileId,
+      remark,
+    };
+
+    const response = await httpClient.post<CustomerServiceAttachment>(
+      '/api/v1/admin/customer-service/attachments',
+      attachmentData
+    );
+    return response;
+  }
+
+  // 批量创建附件
+  static async createAttachments(
+    attachments: CustomerServiceAttachmentCreateRequest[]
+  ): Promise<CustomerServiceAttachment[]> {
+    const response = await httpClient.post<CustomerServiceAttachment[]>(
+      '/api/v1/admin/customer-service/attachments/batch',
+      attachments
+    );
+    return response;
+  }
+
+  // 根据客服请求ID查询附件列表
+  static async getAttachmentsByTaskId(
+    customerServiceTaskId: number
+  ): Promise<CustomerServiceAttachment[]> {
+    const response = await httpClient.get<CustomerServiceAttachment[]>(
+      `/api/v1/admin/customer-service/attachments/task/${customerServiceTaskId}`
+    );
+    return response;
+  }
+
+  // 根据ID查询附件详情
+  static async getAttachmentById(
+    id: number
+  ): Promise<CustomerServiceAttachment> {
+    const response = await httpClient.get<CustomerServiceAttachment>(
+      `/api/v1/admin/customer-service/attachments/${id}`
+    );
+    return response;
+  }
+
+  // 删除附件
+  static async deleteAttachment(id: number): Promise<void> {
+    await httpClient.delete(
+      `/api/v1/admin/customer-service/attachments/${id}`
+    );
+  }
+
+  // 根据客服请求ID删除所有附件
+  static async deleteAttachmentsByTaskId(
+    customerServiceTaskId: number
+  ): Promise<void> {
+    await httpClient.delete(
+      `/api/v1/admin/customer-service/attachments/task/${customerServiceTaskId}`
+    );
+  }
+
+  // 批量删除附件
+  static async deleteAttachments(ids: number[]): Promise<void> {
+    await httpClient.post(
+      '/api/v1/admin/customer-service/attachments/batch-delete',
+      { ids }
     );
   }
 }
