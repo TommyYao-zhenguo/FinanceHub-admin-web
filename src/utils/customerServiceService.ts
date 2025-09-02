@@ -16,6 +16,7 @@ export interface CustomerServiceRequest {
   processRemark?: string;
   completionTime?: string;
   processingTime?: string;
+  relatedId?: string;
   createTime: string;
   updateTime: string;
 }

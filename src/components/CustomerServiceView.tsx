@@ -19,6 +19,7 @@ import {
   CustomerServiceStatistics,
   CustomerServiceAttachment,
 } from "../utils/customerServiceService";
+import { AttachmentService, AttachmentUploadResponse } from "../services/attachmentService";
 import toast from "react-hot-toast";
 
 // 扩展接口以包含显示所需的额外字段
@@ -48,6 +49,8 @@ export default function CustomerServiceView() {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [lastRefreshTime, setLastRefreshTime] = useState<Date | null>(null);
+  const [invoiceAttachments, setInvoiceAttachments] = useState<AttachmentUploadResponse[]>([]);
+  const [loadingAttachments, setLoadingAttachments] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [existingAttachments, setExistingAttachments] = useState<CustomerServiceAttachment[]>([]);
   const [attachmentLoading, setAttachmentLoading] = useState(false);
@@ -179,8 +182,10 @@ export default function CustomerServiceView() {
   useEffect(() => {
     if (selectedMessage) {
       loadExistingAttachments(selectedMessage.id);
+      loadInvoiceAttachments(selectedMessage.id);
     } else {
       setExistingAttachments([]);
+      setInvoiceAttachments([]);
     }
   }, [selectedMessage]);
 
@@ -407,6 +412,27 @@ export default function CustomerServiceView() {
       toast.error("加载附件失败");
     } finally {
       setAttachmentLoading(false);
+    }
+  };
+
+  // 加载开票附件
+  const loadInvoiceAttachments = async (taskId: number) => {
+    try {
+      setLoadingAttachments(true);
+      // 先获取客服任务详情，获取relatedId（发票ID）
+      const task = await CustomerServiceService.getRequest(taskId);
+      if (task.taskType === 'INVOICE_APPLICATION' && task.relatedId) {
+        // 通过发票ID获取开票附件
+        const attachments = await AttachmentService.getAttachmentsByInvoiceId(task.relatedId);
+        setInvoiceAttachments(attachments);
+      } else {
+        setInvoiceAttachments([]);
+      }
+    } catch (error) {
+      console.error("加载开票附件失败:", error);
+      toast.error("加载开票附件失败");
+    } finally {
+      setLoadingAttachments(false);
     }
   };
 
@@ -848,6 +874,66 @@ export default function CustomerServiceView() {
                     />
                   </div>
                 </div>
+
+                {/* 开票附件 */}
+                {selectedMessage.taskType === 'INVOICE_APPLICATION' && (
+                  <div>
+                    <h3 className="text-lg font-medium text-gray-900 mb-3">
+                      开票附件
+                    </h3>
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      {loadingAttachments ? (
+                        <div className="flex items-center justify-center py-4">
+                          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                          <span className="ml-2 text-sm text-gray-600">加载中...</span>
+                        </div>
+                      ) : invoiceAttachments.length > 0 ? (
+                        <div className="space-y-2">
+                          {invoiceAttachments.map((attachment, index) => (
+                            <div
+                              key={index}
+                              className="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg"
+                            >
+                              <div className="flex items-center space-x-3">
+                                {getFileIcon(attachment.fileName)}
+                                <div>
+                                  <span className="text-sm font-medium text-gray-800">
+                                    {attachment.fileName}
+                                  </span>
+                                  <div className="text-xs text-gray-500">
+                                    {attachment.fileSize ? `${(attachment.fileSize / 1024).toFixed(1)} KB` : ''}
+                                    {attachment.createTime && ` • ${attachment.createTime}`}
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <button
+                                  onClick={() => previewFile(attachment.attachmentUrl, attachment.fileName)}
+                                  className="px-2 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+                                  title="预览文件"
+                                >
+                                  预览
+                                </button>
+                                <button
+                                  onClick={() => downloadFile(attachment.attachmentUrl, attachment.fileName)}
+                                  className="px-2 py-1 text-xs bg-green-500 text-white rounded hover:bg-green-600 transition-colors"
+                                  title="下载文件"
+                                >
+                                  下载
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-center py-4 text-gray-500">
+                          <Paperclip className="h-8 w-8 mx-auto mb-2 text-gray-300" />
+                          <p className="text-sm">暂无开票附件</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
 
                 {/* 处理备注 */}
                 {selectedMessage.processRemark && (
