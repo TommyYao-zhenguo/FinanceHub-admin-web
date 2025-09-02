@@ -297,7 +297,7 @@ export default function EmployeeBaseConfigView() {
                     <tr key={employee.employeeNo} className="hover:bg-gray-50">
                       <td className="px-6 py-4">
                         <div className="text-sm text-gray-900">
-                          员工姓名：{employee.employeeName}
+                          {employee.employeeName}
                         </div>
                       </td>
                       <td className="px-6 py-4">
