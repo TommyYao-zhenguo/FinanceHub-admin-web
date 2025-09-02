@@ -42,6 +42,7 @@ export default function CustomerServiceView() {
   );
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
+  const [lastRefreshTime, setLastRefreshTime] = useState<Date | null>(null);
   const [pagination, setPagination] = useState({
     current: 1,
     size: 10,
@@ -99,6 +100,9 @@ export default function CustomerServiceView() {
         total: listResponse.total,
         pages: listResponse.pages,
       }));
+      
+      // 更新刷新时间
+      setLastRefreshTime(new Date());
     } catch (error) {
       console.error("加载数据失败:", error);
       toast.error("加载数据失败，请稍后重试");
@@ -281,13 +285,20 @@ export default function CustomerServiceView() {
         <div className="p-4 border-b border-gray-200">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-gray-900">任务中心</h2>
-            <button
-              onClick={refreshData}
-              className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-              title="刷新数据"
-            >
-              <RefreshCw className="h-4 w-4" />
-            </button>
+            <div className="flex items-center gap-3">
+              {lastRefreshTime && (
+                <span className="text-sm text-gray-500">
+                  最近刷新: {lastRefreshTime.toLocaleTimeString('zh-CN', { hour12: false })}
+                </span>
+              )}
+              <button
+                onClick={refreshData}
+                className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                title="刷新数据"
+              >
+                <RefreshCw className="h-4 w-4" />
+              </button>
+            </div>
           </div>
           <div className="grid grid-cols-3 gap-3">
             <div className="bg-red-50 p-3 rounded-lg">
