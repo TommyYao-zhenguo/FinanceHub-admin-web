@@ -539,9 +539,14 @@ export default function CustomerServiceView() {
       try {
         setSalaryDataLoading(true);
         // 从请求内容中提取期间信息，假设格式为 "YYYY-MM"
-        const period = extractPeriodFromContent(request.requestContent);
-        if (period) {
-          const salaryData = await EmployeeService.getConfirmedSalary(period);
+        const statsDate = extractPeriodFromContent(request.requestContent);
+        console.log("提取到的期间信息:", statsDate);
+        const companyNo = request.companyNo;
+        if (statsDate) {
+          const salaryData = await EmployeeService.getConfirmedSalary(
+            statsDate,
+            companyNo
+          );
           setSalaryConfirmData(salaryData);
         }
       } catch (error) {
@@ -950,19 +955,16 @@ export default function CustomerServiceView() {
                             <thead className="bg-gray-100">
                               <tr>
                                 <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                  员工编号
+                                  员工姓名
                                 </th>
                                 <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                  员工姓名
+                                  员工身份证号
                                 </th>
                                 <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                   基本工资
                                 </th>
                                 <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                   确认工资
-                                </th>
-                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                  实发工资
                                 </th>
                               </tr>
                             </thead>
@@ -979,10 +981,10 @@ export default function CustomerServiceView() {
                                     }
                                   >
                                     <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">
-                                      {employee.employeeNo}
+                                      {employee.employeeName}
                                     </td>
                                     <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">
-                                      {employee.employeeName}
+                                      {employee.idCard}
                                     </td>
                                     <td
                                       className={`px-4 py-2 whitespace-nowrap text-sm ${
@@ -1001,9 +1003,6 @@ export default function CustomerServiceView() {
                                       }`}
                                     >
                                       ¥{employee.confirmSalary.toLocaleString()}
-                                    </td>
-                                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">
-                                      ¥{employee.netSalary.toLocaleString()}
                                     </td>
                                   </tr>
                                 );

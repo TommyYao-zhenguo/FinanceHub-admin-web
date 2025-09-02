@@ -6,6 +6,7 @@ export interface CustomerServiceRequest {
   requestNumber: string;
   companyId: number;
   companyName: string;
+  companyNo: string;
   customerName: string;
   taskType: string;
   requestTitle: string;
