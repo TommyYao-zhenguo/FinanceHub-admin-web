@@ -84,6 +84,7 @@ export default function EmployeeBaseConfigView() {
             idCard: employee.idCard,
             createTime: employee.createTime,
             updateTime: employee.updateTime,
+            basicSalary: employee.basicSalary,
             socialInsuranceBase: employee.socialSecurityBase || 0,
             housingFundBase: employee.housingFundBase || 0,
             effectiveDate: new Date().toISOString().split("T")[0], // 默认当前日期
@@ -250,8 +251,16 @@ export default function EmployeeBaseConfigView() {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    员工信息
+                    员工姓名
                   </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    身份证号码
+                  </th>
+                  {/* 基本工资 */}
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    基本工资
+                  </th>
+
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     社保基数
                   </th>
@@ -287,18 +296,21 @@ export default function EmployeeBaseConfigView() {
                   employees.map((employee) => (
                     <tr key={employee.employeeNo} className="hover:bg-gray-50">
                       <td className="px-6 py-4">
-                        <div>
-                          <div className="text-sm font-medium text-gray-900">
-                            员工姓名：{employee.employeeName}
-                          </div>
-                          <div className="text-sm text-gray-500">
-                            身份证号码：{employee.idCard}
-                          </div>
-                          {employee.department && (
-                            <div className="text-sm text-gray-500">
-                              {employee.department}
-                            </div>
-                          )}
+                        <div className="text-sm text-gray-900">
+                          员工姓名：{employee.employeeName}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="text-sm text-gray-900">
+                          {employee.idCard}
+                        </div>
+                      </td>
+                      {/* 基本工资 */}
+                      <td className="px-6 py-4">
+                        <div className="text-sm text-gray-900">
+                          {employee.basicSalary
+                            ? `${employee.basicSalary.toLocaleString()}`
+                            : "0"}
                         </div>
                       </td>
                       <td className="px-6 py-4">

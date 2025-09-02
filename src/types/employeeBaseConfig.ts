@@ -20,7 +20,7 @@ export interface Employee {
   employeeName: string;
   companyNo: string;
   companyName: string;
-  department?: string;
+  basicSalary: number;
   position?: string;
   status: "ACTIVE" | "INACTIVE";
   hireDate?: string;
