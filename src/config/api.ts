@@ -17,7 +17,7 @@ const getApiConfig = (): ApiConfig => {
 
   const timeout = import.meta.env.VITE_API_TIMEOUT
     ? parseInt(import.meta.env.VITE_API_TIMEOUT)
-    : 15000;
+    : 3000000;
 
   return {
     baseUrl,

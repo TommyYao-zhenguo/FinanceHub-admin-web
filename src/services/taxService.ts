@@ -2,17 +2,13 @@ import { httpClient } from "../utils/http";
 
 // 税费上传记录接口
 export interface TaxUploadRecord {
-  id: number;
+  period: string;
   companyNo: string;
   companyName: string;
   creditCode: string;
-  period: string;
   taxType: string;
   taxName: string;
   amount: number;
-  status: string;
-  createTime: string;
-  updateTime: string;
 }
 
 // 税费上传响应接口
@@ -35,10 +31,31 @@ export const TaxService = {
     );
   },
 
-  // 获取税费上传记录列表
-  async getUploadRecords(period: string): Promise<TaxUploadRecord[]> {
-    return await httpClient.get<TaxUploadRecord[]>(
-      `/api/v1/admin/tax/upload/records?period=${period}`
+  // 获取税费上传记录列表（分页）
+  async getUploadRecords(
+    period: string,
+    page: number = 1,
+    size: number = 10,
+    companyName?: string
+  ): Promise<{
+    records: TaxUploadRecord[];
+    total: number;
+    current: number;
+    size: number;
+    pages: number;
+  }> {
+    const params = new URLSearchParams({
+      period,
+      page: page.toString(),
+      size: size.toString()
+    });
+    
+    if (companyName) {
+      params.append('companyName', companyName);
+    }
+    
+    return await httpClient.get(
+      `/api/v1/admin/tax/upload/records?${params.toString()}`
     );
   },
 };

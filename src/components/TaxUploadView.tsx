@@ -1,11 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import {
   Upload,
-  FileText,
-  Download,
-  Trash2,
-  AlertCircle,
-  CheckCircle,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { TaxService, TaxUploadRecord } from "../services/taxService";
@@ -17,14 +12,26 @@ export default function TaxUploadView() {
   const [selectedPeriod, setSelectedPeriod] = useState(
     new Date().toISOString().slice(0, 7)
   );
+  const [pagination, setPagination] = useState({
+    current: 1,
+    size: 10,
+    total: 0,
+    pages: 0
+  });
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // 获取上传记录
-  const fetchUploadRecords = async () => {
+  const fetchUploadRecords = async (page: number = 1) => {
     try {
       setLoading(true);
-      const data = await TaxService.getUploadRecords(selectedPeriod);
+      const data = await TaxService.getUploadRecords(selectedPeriod, page, pagination.size);
       setRecords(data.records);
+      setPagination({
+        current: data.current,
+        size: data.size,
+        total: data.total,
+        pages: data.pages
+      });
     } catch (error) {
       console.error("获取上传记录失败:", error);
       toast.error("获取上传记录失败");
@@ -112,30 +119,9 @@ export default function TaxUploadView() {
     }
   };
 
-  
-
-  
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case "1":
-        return <CheckCircle className="h-5 w-5 text-green-500" />;
-      case "0":
-        return <AlertCircle className="h-5 w-5 text-red-500" />;
-      default:
-        return <AlertCircle className="h-5 w-5 text-yellow-500" />;
-    }
-  };
-
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case "1":
-        return "有效";
-      case "0":
-        return "无效";
-      default:
-        return "未知";
-    }
+  // 分页处理
+  const handlePageChange = (page: number) => {
+    fetchUploadRecords(page);
   };
 
   const formatAmount = (amount: number) => {
@@ -237,6 +223,9 @@ export default function TaxUploadView() {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  公司名称
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   税种名称
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -245,30 +234,27 @@ export default function TaxUploadView() {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   金额
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  创建时间
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  状态
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  操作
-                </th>
+               
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {records.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={7}
+                    colSpan={5}
                     className="px-6 py-12 text-center text-gray-500"
                   >
                     暂无上传记录
                   </td>
                 </tr>
               ) : (
-                records.map((record) => (
-                  <tr key={record.id} className="hover:bg-gray-50">
+                records.map((record, index) => (
+                  <tr key={`${record.companyNo}-${record.taxType}-${index}`} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">
+                        {record.companyName}
+                      </div>
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">
                         {record.taxName}
@@ -284,25 +270,38 @@ export default function TaxUploadView() {
                         {formatAmount(record.amount)}
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">
-                        {new Date(record.createTime).toLocaleString()}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center space-x-2">
-                        {getStatusIcon(record.status)}
-                        <span className="text-sm text-gray-900">
-                          {getStatusText(record.status)}
-                        </span>
-                      </div>
-                    </td>
+                    
                   </tr>
                 ))
               )}
             </tbody>
           </table>
         </div>
+        
+        {/* 分页控件 */}
+        {pagination.total > 0 && (
+          <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+            <div className="text-sm text-gray-700">
+              共 {pagination.total} 条记录，第 {pagination.current} / {pagination.pages} 页
+            </div>
+            <div className="flex space-x-2">
+              <button
+                onClick={() => handlePageChange(pagination.current - 1)}
+                disabled={pagination.current <= 1}
+                className="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                上一页
+              </button>
+              <button
+                onClick={() => handlePageChange(pagination.current + 1)}
+                disabled={pagination.current >= pagination.pages}
+                className="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                下一页
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
