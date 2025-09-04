@@ -107,6 +107,8 @@ export interface BackendEmployeeData {
   housingFundBase: number;
   supplementaryHousingFundBase?: number;
   supplementaryHousingFundRate?: number;
+  socialInsurance?: boolean; // 是否缴纳社保
+  housingFund?: boolean; // 是否缴纳公积金
   socialSecurityFee?: number;
   housingFundFee?: number;
   personalTax?: number;

@@ -1,11 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  Users,
-  Edit,
-  ChevronLeft,
-  ChevronRight,
-  Search,
-} from "lucide-react";
+import { Users, Edit, ChevronLeft, ChevronRight, Search } from "lucide-react";
 import toast from "react-hot-toast";
 import { EmployeeBaseConfigService } from "../utils/employeeBaseConfigService";
 import {
@@ -23,6 +17,8 @@ interface EmployeeWithConfig extends Employee {
   housingFundBase: number;
   supplementaryHousingFundBase?: number;
   supplementaryHousingFundRate?: number;
+  socialInsurance?: boolean;
+  housingFund?: boolean;
   effectiveDate?: string;
 }
 
@@ -36,9 +32,8 @@ export default function EmployeeBaseConfigView() {
   const [loading, setLoading] = useState(false);
   const [searchEmployeeName, setSearchEmployeeName] = useState<string>("");
   const [modalOpen, setModalOpen] = useState(false);
-  const [selectedEmployee, setSelectedEmployee] = useState<EmployeeWithConfig | null>(null);
-  
-  
+  const [selectedEmployee, setSelectedEmployee] =
+    useState<EmployeeWithConfig | null>(null);
 
   // 分页状态
   const [pagination, setPagination] = useState({
@@ -83,10 +78,14 @@ export default function EmployeeBaseConfigView() {
             createTime: employee.createTime,
             updateTime: employee.updateTime,
             basicSalary: employee.basicSalary,
+            housingFund: employee.housingFund,
+            socialInsurance: employee.socialInsurance,
             socialInsuranceBase: employee.socialSecurityBase,
             housingFundBase: employee.housingFundBase,
-            supplementaryHousingFundBase: employee.supplementaryHousingFundBase || 0,
-            supplementaryHousingFundRate: employee.supplementaryHousingFundRate || 0,
+            supplementaryHousingFundBase:
+              employee.supplementaryHousingFundBase || 0,
+            supplementaryHousingFundRate:
+              employee.supplementaryHousingFundRate || 0,
             effectiveDate: new Date().toISOString().split("T")[0], // 默认当前日期
           };
         }
@@ -252,7 +251,12 @@ export default function EmployeeBaseConfigView() {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     补充公积金比例
                   </th>
-
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    是否缴纳社保
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    是否缴纳公积金
+                  </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     操作
                   </th>
@@ -262,7 +266,7 @@ export default function EmployeeBaseConfigView() {
                 {loading ? (
                   <tr>
                     <td
-                      colSpan={7}
+                      colSpan={9}
                       className="px-6 py-12 text-center text-gray-500"
                     >
                       加载中...
@@ -271,7 +275,7 @@ export default function EmployeeBaseConfigView() {
                 ) : employees.length === 0 ? (
                   <tr>
                     <td
-                      colSpan={7}
+                      colSpan={9}
                       className="px-6 py-12 text-center text-gray-500"
                     >
                       暂无员工数据
@@ -330,6 +334,48 @@ export default function EmployeeBaseConfigView() {
                             : "未配置"}
                         </div>
                       </td>
+                      {/* 是否缴纳社保 */}
+                      <td className="px-6 py-4">
+                        <div className="text-sm">
+                          {employee.socialInsurance !== null &&
+                          employee.socialInsurance !== undefined ? (
+                            <span
+                              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                employee.socialInsurance
+                                  ? "bg-green-100 text-green-800"
+                                  : "bg-red-100 text-red-800"
+                              }`}
+                            >
+                              {employee.socialInsurance ? "是" : "否"}
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                              未设置
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      {/* 是否缴纳公积金 */}
+                      <td className="px-6 py-4">
+                        <div className="text-sm">
+                          {employee.housingFund !== null &&
+                          employee.housingFund !== undefined ? (
+                            <span
+                              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                employee.housingFund
+                                  ? "bg-green-100 text-green-800"
+                                  : "bg-red-100 text-red-800"
+                              }`}
+                            >
+                              {employee.housingFund ? "是" : "否"}
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                              未设置
+                            </span>
+                          )}
+                        </div>
+                      </td>
 
                       <td className="px-6 py-4">
                         <button
@@ -382,10 +428,10 @@ export default function EmployeeBaseConfigView() {
                 </div>
               </div>
             </div>
-          )})
+          )}
         </div>
       )}
-      
+
       {/* 配置弹窗 */}
       <EmployeeBaseConfigModal
         isOpen={modalOpen}

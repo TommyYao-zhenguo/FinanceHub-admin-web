@@ -150,8 +150,6 @@ export default function EmployeeBaseConfigModal({
               社保基数
             </label>
             <input
-              type="number"
-              step="0.01"
               min="0"
               value={formData.socialInsuranceBase}
               onChange={(e) =>
@@ -172,8 +170,6 @@ export default function EmployeeBaseConfigModal({
               公积金基数
             </label>
             <input
-              type="number"
-              step="0.01"
               min="0"
               value={formData.housingFundBase}
               onChange={(e) =>
@@ -194,8 +190,6 @@ export default function EmployeeBaseConfigModal({
               补充公积金基数
             </label>
             <input
-              type="number"
-              step="0.01"
               min="0"
               value={formData.supplementaryHousingFundBase}
               onChange={(e) =>
@@ -216,8 +210,6 @@ export default function EmployeeBaseConfigModal({
               补充公积金比例 (%)
             </label>
             <input
-              type="number"
-              step="0.01"
               min="0"
               max="100"
               value={formData.supplementaryHousingFundRate}
