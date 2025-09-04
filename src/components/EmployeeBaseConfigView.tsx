@@ -21,6 +21,8 @@ interface EmployeeWithConfig extends Employee {
   baseConfig?: EmployeeBaseConfig;
   socialInsuranceBase: number;
   housingFundBase: number;
+  supplementaryHousingFundBase?: number;
+  supplementaryHousingFundRate?: number;
   effectiveDate?: string;
 }
 
@@ -83,6 +85,8 @@ export default function EmployeeBaseConfigView() {
             basicSalary: employee.basicSalary,
             socialInsuranceBase: employee.socialSecurityBase,
             housingFundBase: employee.housingFundBase,
+            supplementaryHousingFundBase: employee.supplementaryHousingFundBase || 0,
+            supplementaryHousingFundRate: employee.supplementaryHousingFundRate || 0,
             effectiveDate: new Date().toISOString().split("T")[0], // 默认当前日期
           };
         }
@@ -242,6 +246,12 @@ export default function EmployeeBaseConfigView() {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     公积金基数
                   </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    补充公积金基数
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    补充公积金比例
+                  </th>
 
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     操作
@@ -252,7 +262,7 @@ export default function EmployeeBaseConfigView() {
                 {loading ? (
                   <tr>
                     <td
-                      colSpan={5}
+                      colSpan={7}
                       className="px-6 py-12 text-center text-gray-500"
                     >
                       加载中...
@@ -261,7 +271,7 @@ export default function EmployeeBaseConfigView() {
                 ) : employees.length === 0 ? (
                   <tr>
                     <td
-                      colSpan={5}
+                      colSpan={7}
                       className="px-6 py-12 text-center text-gray-500"
                     >
                       暂无员工数据
@@ -301,6 +311,22 @@ export default function EmployeeBaseConfigView() {
                           {employee.housingFundBase !== null &&
                           employee.housingFundBase !== undefined
                             ? `${employee.housingFundBase.toLocaleString()}`
+                            : "未配置"}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="text-sm text-gray-900">
+                          {employee.supplementaryHousingFundBase !== null &&
+                          employee.supplementaryHousingFundBase !== undefined
+                            ? `${employee.supplementaryHousingFundBase.toLocaleString()}`
+                            : "未配置"}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="text-sm text-gray-900">
+                          {employee.supplementaryHousingFundRate !== null &&
+                          employee.supplementaryHousingFundRate !== undefined
+                            ? `${employee.supplementaryHousingFundRate}%`
                             : "未配置"}
                         </div>
                       </td>

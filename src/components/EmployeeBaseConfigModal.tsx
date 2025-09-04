@@ -10,6 +10,8 @@ interface Employee {
   idCard?: string;
   socialInsuranceBase?: number;
   housingFundBase?: number;
+  supplementaryHousingFundBase?: number;
+  supplementaryHousingFundRate?: number;
 }
 
 interface EmployeeBaseConfigModalProps {
@@ -36,6 +38,8 @@ export default function EmployeeBaseConfigModal({
   const [formData, setFormData] = useState({
     socialInsuranceBase: 0,
     housingFundBase: 0,
+    supplementaryHousingFundBase: 0,
+    supplementaryHousingFundRate: 0,
     effectiveMonth: getCurrentMonth(),
   });
   const [loading, setLoading] = useState(false);
@@ -46,6 +50,8 @@ export default function EmployeeBaseConfigModal({
       setFormData({
         socialInsuranceBase: employee.socialInsuranceBase || 0,
         housingFundBase: employee.housingFundBase || 0,
+        supplementaryHousingFundBase: employee.supplementaryHousingFundBase || 0,
+        supplementaryHousingFundRate: employee.supplementaryHousingFundRate || 0,
         effectiveMonth: getCurrentMonth(),
       });
     }
@@ -67,6 +73,8 @@ export default function EmployeeBaseConfigModal({
         {
           socialSecurityBase: formData.socialInsuranceBase,
           housingFundBase: formData.housingFundBase,
+          supplementaryHousingFundBase: formData.supplementaryHousingFundBase,
+          supplementaryHousingFundRate: formData.supplementaryHousingFundRate,
           effectiveDate: effectiveDate,
         }
       );
@@ -176,6 +184,51 @@ export default function EmployeeBaseConfigModal({
               }
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
               placeholder="请输入公积金基数"
+              disabled={loading}
+            />
+          </div>
+
+          {/* 补充公积金基数 */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              补充公积金基数
+            </label>
+            <input
+              type="number"
+              step="0.01"
+              min="0"
+              value={formData.supplementaryHousingFundBase}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  supplementaryHousingFundBase: parseFloat(e.target.value) || 0,
+                })
+              }
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+              placeholder="请输入补充公积金基数"
+              disabled={loading}
+            />
+          </div>
+
+          {/* 补充公积金比例 */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              补充公积金比例 (%)
+            </label>
+            <input
+              type="number"
+              step="0.01"
+              min="0"
+              max="100"
+              value={formData.supplementaryHousingFundRate}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  supplementaryHousingFundRate: parseFloat(e.target.value) || 0,
+                })
+              }
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+              placeholder="请输入补充公积金比例"
               disabled={loading}
             />
           </div>

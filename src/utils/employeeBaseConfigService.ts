@@ -103,6 +103,8 @@ export class EmployeeBaseConfigService {
     data: {
       socialSecurityBase: number;
       housingFundBase: number;
+      supplementaryHousingFundBase?: number;
+      supplementaryHousingFundRate?: number;
       effectiveDate?: string;
     }
   ): Promise<void> {
@@ -123,6 +125,8 @@ export class EmployeeBaseConfigService {
       return this.updateEmployeeBaseByEmployeeNo(config.employeeNo, {
         socialSecurityBase: config.socialInsuranceBase || 0,
         housingFundBase: config.housingFundBase || 0,
+        supplementaryHousingFundBase: config.supplementaryHousingFundBase,
+        supplementaryHousingFundRate: config.supplementaryHousingFundRate,
         effectiveDate: config.effectiveDate,
       });
     });
@@ -136,6 +140,8 @@ export class EmployeeBaseConfigService {
     data: {
       socialSecurityBase: number;
       housingFundBase: number;
+      supplementaryHousingFundBase?: number;
+      supplementaryHousingFundRate?: number;
       effectiveDate?: string;
     }
   ): Promise<void> {
@@ -148,6 +154,8 @@ export class EmployeeBaseConfigService {
           employeeNo,
           socialInsuranceBase: data.socialSecurityBase,
           housingFundBase: data.housingFundBase,
+          supplementaryHousingFundBase: data.supplementaryHousingFundBase,
+          supplementaryHousingFundRate: data.supplementaryHousingFundRate,
           effectiveDate:
             data.effectiveDate || new Date().toISOString().split("T")[0],
         },

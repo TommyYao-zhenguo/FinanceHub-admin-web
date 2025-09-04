@@ -7,6 +7,8 @@ export interface EmployeeBaseConfig {
   companyName: string;
   socialInsuranceBase?: number; // 社保基数
   housingFundBase?: number; // 公积金基数
+  supplementaryHousingFundBase?: number; // 补充公积金基数
+  supplementaryHousingFundRate?: number; // 补充公积金比例
   effectiveDate: string; // 生效日期
   status: "ACTIVE" | "INACTIVE";
   createTime?: string;
@@ -37,6 +39,8 @@ export interface CreateEmployeeBaseConfigRequest {
   companyNo: string;
   socialInsuranceBase?: number;
   housingFundBase?: number;
+  supplementaryHousingFundBase?: number;
+  supplementaryHousingFundRate?: number;
   effectiveDate: string;
 }
 
@@ -44,6 +48,8 @@ export interface UpdateEmployeeBaseConfigRequest {
   id: string;
   socialInsuranceBase?: number;
   housingFundBase?: number;
+  supplementaryHousingFundBase?: number;
+  supplementaryHousingFundRate?: number;
   effectiveDate: string;
 }
 
@@ -99,6 +105,8 @@ export interface BackendEmployeeData {
   basicSalary: number;
   socialSecurityBase: number;
   housingFundBase: number;
+  supplementaryHousingFundBase?: number;
+  supplementaryHousingFundRate?: number;
   socialSecurityFee?: number;
   housingFundFee?: number;
   personalTax?: number;
@@ -114,6 +122,8 @@ export interface BatchUpdateEmployeeBaseConfigRequest {
     employeeNo: string;
     socialInsuranceBase?: number;
     housingFundBase?: number;
+    supplementaryHousingFundBase?: number;
+    supplementaryHousingFundRate?: number;
     effectiveDate: string;
   }[];
   companyNo: string;
