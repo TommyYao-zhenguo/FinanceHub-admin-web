@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import {
   Users,
-  Save,
   Edit,
   ChevronLeft,
   ChevronRight,
@@ -16,6 +15,7 @@ import {
   BackendEmployeeData,
 } from "../types/employeeBaseConfig";
 import CompanyListStep from "./CompanyListStep";
+import EmployeeBaseConfigModal from "./EmployeeBaseConfigModal";
 
 interface EmployeeWithConfig extends Employee {
   baseConfig?: EmployeeBaseConfig;
@@ -33,14 +33,10 @@ export default function EmployeeBaseConfigView() {
   const [employees, setEmployees] = useState<EmployeeWithConfig[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchEmployeeName, setSearchEmployeeName] = useState<string>("");
-  const [editingEmployeeId, setEditingEmployeeId] = useState<string | null>(
-    null
-  );
-  const [editingData, setEditingData] = useState<{
-    socialInsuranceBase?: number;
-    housingFundBase?: number;
-    effectiveDate: string;
-  }>({ effectiveDate: new Date().toISOString().split("T")[0] });
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedEmployee, setSelectedEmployee] = useState<EmployeeWithConfig | null>(null);
+  
+  
 
   // 分页状态
   const [pagination, setPagination] = useState({
@@ -123,7 +119,8 @@ export default function EmployeeBaseConfigView() {
     setSelectedCompanyName("");
     setEmployees([]);
     setSearchEmployeeName("");
-    setEditingEmployeeId(null);
+    setModalOpen(false);
+    setSelectedEmployee(null);
   };
 
   // 搜索员工
@@ -132,43 +129,21 @@ export default function EmployeeBaseConfigView() {
     loadEmployeesWithConfig();
   };
 
-  // 开始编辑
-  const handleEdit = (employee: EmployeeWithConfig) => {
-    setEditingEmployeeId(employee.employeeNo);
-    setEditingData({
-      socialInsuranceBase: employee.socialInsuranceBase || undefined,
-      housingFundBase: employee.housingFundBase || undefined,
-      effectiveDate:
-        employee.effectiveDate || new Date().toISOString().split("T")[0],
-    });
+  // 打开配置弹窗
+  const handleOpenModal = (employee: EmployeeWithConfig) => {
+    setSelectedEmployee(employee);
+    setModalOpen(true);
   };
 
-  // 取消编辑
-  const handleCancelEdit = () => {
-    setEditingEmployeeId(null);
-    setEditingData({ effectiveDate: new Date().toISOString().split("T")[0] });
+  // 关闭配置弹窗
+  const handleCloseModal = () => {
+    setModalOpen(false);
+    setSelectedEmployee(null);
   };
 
-  // 保存配置
-  const handleSave = async (employee: EmployeeWithConfig) => {
-    try {
-      // 直接使用新的员工基数更新接口
-      await EmployeeBaseConfigService.updateEmployeeBase(
-        parseInt(employee.id), // 转换为数字ID
-        {
-          socialSecurityBase: editingData.socialInsuranceBase || 0,
-          housingFundBase: editingData.housingFundBase || 0,
-          effectiveDate: editingData.effectiveDate,
-        }
-      );
-
-      toast.success("保存成功");
-      handleCancelEdit();
-      loadEmployeesWithConfig();
-    } catch (error) {
-      console.error("保存失败:", error);
-      toast.error("保存失败");
-    }
+  // 保存成功后的回调
+  const handleSaveSuccess = () => {
+    loadEmployeesWithConfig();
   };
 
   // 分页变化
@@ -314,88 +289,30 @@ export default function EmployeeBaseConfigView() {
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        {editingEmployeeId === employee.employeeNo ? (
-                          <div className="flex items-center space-x-2">
-                            <input
-                              value={editingData.socialInsuranceBase || 0}
-                              onChange={(e) =>
-                                setEditingData({
-                                  ...editingData,
-                                  socialInsuranceBase: e.target.value
-                                    ? Number(e.target.value)
-                                    : undefined,
-                                })
-                              }
-                              className="w-24 px-2 py-1 border border-gray-300 rounded text-sm  focus:ring-blue-500 focus:border-transparent"
-                              placeholder="基数"
-                            />
-                          </div>
-                        ) : (
-                          <div className="flex items-center space-x-2">
-                            <span className="text-sm text-gray-900">
-                              {employee.socialInsuranceBase !== null &&
-                              employee.socialInsuranceBase !== undefined
-                                ? `${employee.socialInsuranceBase.toLocaleString()}`
-                                : "未配置"}
-                            </span>
-                          </div>
-                        )}
+                        <div className="text-sm text-gray-900">
+                          {employee.socialInsuranceBase !== null &&
+                          employee.socialInsuranceBase !== undefined
+                            ? `${employee.socialInsuranceBase.toLocaleString()}`
+                            : "未配置"}
+                        </div>
                       </td>
                       <td className="px-6 py-4">
-                        {editingEmployeeId === employee.employeeNo ? (
-                          <div className="flex items-center space-x-2">
-                            <input
-                              value={editingData.housingFundBase || 0}
-                              onChange={(e) =>
-                                setEditingData({
-                                  ...editingData,
-                                  housingFundBase: e.target.value
-                                    ? Number(e.target.value)
-                                    : undefined,
-                                })
-                              }
-                              className="w-24 px-2 py-1 border border-gray-300 rounded text-sm  focus:ring-blue-500 focus:border-transparent"
-                              placeholder="基数"
-                            />
-                          </div>
-                        ) : (
-                          <div className="flex items-center space-x-2">
-                            <span className="text-sm text-gray-900">
-                              {employee.housingFundBase !== null &&
-                              employee.housingFundBase !== undefined
-                                ? `${employee.housingFundBase.toLocaleString()}`
-                                : "未配置"}
-                            </span>
-                          </div>
-                        )}
+                        <div className="text-sm text-gray-900">
+                          {employee.housingFundBase !== null &&
+                          employee.housingFundBase !== undefined
+                            ? `${employee.housingFundBase.toLocaleString()}`
+                            : "未配置"}
+                        </div>
                       </td>
 
                       <td className="px-6 py-4">
-                        {editingEmployeeId === employee.employeeNo ? (
-                          <div className="flex items-center space-x-2">
-                            <button
-                              onClick={() => handleSave(employee)}
-                              className="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none   focus:ring-offset-2 focus:ring-green-500"
-                            >
-                              <Save className="h-4 w-4 mr-1" />
-                              保存
-                            </button>
-                            <button
-                              onClick={handleCancelEdit}
-                              className="inline-flex items-center px-3 py-1 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none   focus:ring-offset-2 focus:ring-blue-500"
-                            >
-                              取消
-                            </button>
-                          </div>
-                        ) : (
-                          <button
-                            onClick={() => handleEdit(employee)}
-                            className="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-blue-600 bg-blue-100 hover:bg-blue-200 focus:outline-none  focus:ring-offset-2 focus:ring-blue-500"
-                          >
-                            <Edit className="h-4 w-4 mr-1" />
-                            编辑
-                          </button>
-                        )}
+                        <button
+                          onClick={() => handleOpenModal(employee)}
+                          className="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-blue-600 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-offset-2 focus:ring-blue-500"
+                        >
+                          <Edit className="h-4 w-4 mr-1" />
+                          配置
+                        </button>
                       </td>
                     </tr>
                   ))
@@ -439,9 +356,17 @@ export default function EmployeeBaseConfigView() {
                 </div>
               </div>
             </div>
-          )}
+          )})
         </div>
       )}
+      
+      {/* 配置弹窗 */}
+      <EmployeeBaseConfigModal
+        isOpen={modalOpen}
+        onClose={handleCloseModal}
+        employee={selectedEmployee}
+        onSaveSuccess={handleSaveSuccess}
+      />
     </div>
   );
 }
