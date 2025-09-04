@@ -19,8 +19,8 @@ import CompanyListStep from "./CompanyListStep";
 
 interface EmployeeWithConfig extends Employee {
   baseConfig?: EmployeeBaseConfig;
-  socialInsuranceBase?: number;
-  housingFundBase?: number;
+  socialInsuranceBase: number;
+  housingFundBase: number;
   effectiveDate?: string;
 }
 
@@ -85,8 +85,8 @@ export default function EmployeeBaseConfigView() {
             createTime: employee.createTime,
             updateTime: employee.updateTime,
             basicSalary: employee.basicSalary,
-            socialInsuranceBase: employee.socialSecurityBase || 0,
-            housingFundBase: employee.housingFundBase || 0,
+            socialInsuranceBase: employee.socialSecurityBase,
+            housingFundBase: employee.housingFundBase,
             effectiveDate: new Date().toISOString().split("T")[0], // 默认当前日期
           };
         }
@@ -333,7 +333,8 @@ export default function EmployeeBaseConfigView() {
                         ) : (
                           <div className="flex items-center space-x-2">
                             <span className="text-sm text-gray-900">
-                              {employee.socialInsuranceBase
+                              {employee.socialInsuranceBase !== null &&
+                              employee.socialInsuranceBase !== undefined
                                 ? `${employee.socialInsuranceBase.toLocaleString()}`
                                 : "未配置"}
                             </span>
@@ -360,7 +361,8 @@ export default function EmployeeBaseConfigView() {
                         ) : (
                           <div className="flex items-center space-x-2">
                             <span className="text-sm text-gray-900">
-                              {employee.housingFundBase
+                              {employee.housingFundBase !== null &&
+                              employee.housingFundBase !== undefined
                                 ? `${employee.housingFundBase.toLocaleString()}`
                                 : "未配置"}
                             </span>
