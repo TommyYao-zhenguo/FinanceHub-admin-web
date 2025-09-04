@@ -12,6 +12,7 @@ import {
   Upload,
   Paperclip,
   X,
+  ArrowRight,
 } from "lucide-react";
 import {
   CustomerServiceService,
@@ -963,6 +964,9 @@ export default function CustomerServiceView() {
                                 <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                   基本工资
                                 </th>
+                                <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                  {/* 空表头，不显示文字 */}
+                                </th>
                                 <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                   确认工资
                                 </th>
@@ -994,6 +998,11 @@ export default function CustomerServiceView() {
                                       }`}
                                     >
                                       ¥{employee.basicSalary.toLocaleString()}
+                                    </td>
+                                    <td className="px-4 py-2 whitespace-nowrap text-center">
+                                      {isDifferent && (
+                                        <ArrowRight className="w-4 h-4 text-red-500 mx-auto" />
+                                      )}
                                     </td>
                                     <td
                                       className={`px-4 py-2 whitespace-nowrap text-sm ${
