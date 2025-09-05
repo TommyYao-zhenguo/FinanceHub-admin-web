@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { X, Save, Calendar } from "lucide-react";
+import { X, Save } from "lucide-react";
 import toast from "react-hot-toast";
 import { EmployeeBaseConfigService } from "../utils/employeeBaseConfigService";
+import MonthPicker from "./MonthPicker";
 
 interface Employee {
   id: string;
@@ -131,18 +132,23 @@ export default function EmployeeBaseConfigModal({
           {/* 归属期选择 */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              <Calendar className="inline h-4 w-4 mr-1" />
               归属期月份
             </label>
-            <input
-              type="month"
+            <MonthPicker
               value={formData.effectiveMonth}
-              onChange={(e) =>
-                setFormData({ ...formData, effectiveMonth: e.target.value })
+              onChange={(value: string) =>
+                setFormData({ ...formData, effectiveMonth: value })
               }
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
               disabled={loading}
+              placeholder="选择归属期月份"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
+            <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-sm text-blue-800">
+                <span className="font-medium">提示：</span>
+                选择该月份后，系统将自动重新计算该员工从所选月份到当前月份的每个月份的社保、公积金费用。
+              </p>
+            </div>
           </div>
 
           {/* 基数配置 - 两列布局 */}
