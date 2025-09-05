@@ -413,26 +413,6 @@ export default function CustomerServiceView() {
     }
   };
 
-  // 获取文件图标
-  const getFileIcon = (fileName: string) => {
-    const extension = fileName.split(".").pop()?.toLowerCase();
-    switch (extension) {
-      case "pdf":
-        return <span className="text-red-500">📄</span>;
-      case "doc":
-      case "docx":
-        return <span className="text-blue-500">📝</span>;
-      case "jpg":
-      case "jpeg":
-      case "png":
-        return <span className="text-green-500">🖼️</span>;
-      case "txt":
-        return <span className="text-gray-500">📋</span>;
-      default:
-        return <span className="text-gray-500">📎</span>;
-    }
-  };
-
   // 加载现有附件
   const loadExistingAttachments = async (taskId: number) => {
     try {
@@ -1053,7 +1033,6 @@ export default function CustomerServiceView() {
                               className="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg"
                             >
                               <div className="flex items-center space-x-3">
-                                {getFileIcon(attachment.fileName)}
                                 <div>
                                   <span className="text-sm font-medium text-gray-800">
                                     {attachment.fileName}
@@ -1245,7 +1224,6 @@ export default function CustomerServiceView() {
                         className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-lg"
                       >
                         <div className="flex items-center space-x-3">
-                          {getFileIcon(attachment.originalFileName)}
                           <div>
                             <span className="text-sm font-medium text-green-800">
                               {attachment.originalFileName}
@@ -1313,7 +1291,6 @@ export default function CustomerServiceView() {
                           className="flex items-center justify-between bg-gray-50 p-3 rounded-lg border"
                         >
                           <div className="flex items-center space-x-3">
-                            {getFileIcon(file.name)}
                             <div>
                               <span className="text-sm font-medium text-gray-700">
                                 {file.name}
