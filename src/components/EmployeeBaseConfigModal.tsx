@@ -50,8 +50,10 @@ export default function EmployeeBaseConfigModal({
       setFormData({
         socialInsuranceBase: employee.socialInsuranceBase || 0,
         housingFundBase: employee.housingFundBase || 0,
-        supplementaryHousingFundBase: employee.supplementaryHousingFundBase || 0,
-        supplementaryHousingFundRate: employee.supplementaryHousingFundRate || 0,
+        supplementaryHousingFundBase:
+          employee.supplementaryHousingFundBase || 0,
+        supplementaryHousingFundRate:
+          employee.supplementaryHousingFundRate || 0,
         effectiveMonth: getCurrentMonth(),
       });
     }
@@ -63,10 +65,10 @@ export default function EmployeeBaseConfigModal({
 
     try {
       setLoading(true);
-      
+
       // 将归属期月份转换为日期格式 (YYYY-MM-01)
       const effectiveDate = `${formData.effectiveMonth}-01`;
-      
+
       // 调用更新接口
       await EmployeeBaseConfigService.updateEmployeeBase(
         parseInt(employee.id),
@@ -101,7 +103,7 @@ export default function EmployeeBaseConfigModal({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl mx-4">
         {/* 头部 */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <h3 className="text-lg font-semibold text-gray-900">
@@ -117,10 +119,9 @@ export default function EmployeeBaseConfigModal({
         </div>
 
         {/* 内容 */}
-        <div className="p-6 space-y-4">
+        <div className="p-6 space-y-6">
           {/* 员工信息 */}
           <div className="bg-gray-50 p-4 rounded-lg">
-            <h4 className="text-sm font-medium text-gray-900 mb-2">员工信息</h4>
             <div className="space-y-1 text-sm text-gray-600">
               <div>姓名：{employee.employeeName}</div>
               <div>身份证：{employee.idCard}</div>
@@ -144,85 +145,104 @@ export default function EmployeeBaseConfigModal({
             />
           </div>
 
-          {/* 社保基数 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              社保基数
-            </label>
-            <input
-              min="0"
-              value={formData.socialInsuranceBase}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  socialInsuranceBase: parseFloat(e.target.value) || 0,
-                })
-              }
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
-              placeholder="请输入社保基数"
-              disabled={loading}
-            />
-          </div>
+          {/* 基数配置 - 两列布局 */}
+          <div className="space-y-4">
+            <h4 className="text-sm font-medium text-gray-900 border-b border-gray-200 pb-2">
+              基数配置
+            </h4>
 
-          {/* 公积金基数 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              公积金基数
-            </label>
-            <input
-              min="0"
-              value={formData.housingFundBase}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  housingFundBase: parseFloat(e.target.value) || 0,
-                })
-              }
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
-              placeholder="请输入公积金基数"
-              disabled={loading}
-            />
-          </div>
+            {/* 第一行：社保基数 + 公积金基数 */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  社保基数
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={formData.socialInsuranceBase}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      socialInsuranceBase: parseFloat(e.target.value) || 0,
+                    })
+                  }
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  placeholder="请输入社保基数"
+                  disabled={loading}
+                />
+              </div>
 
-          {/* 补充公积金基数 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              补充公积金基数
-            </label>
-            <input
-              min="0"
-              value={formData.supplementaryHousingFundBase}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  supplementaryHousingFundBase: parseFloat(e.target.value) || 0,
-                })
-              }
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
-              placeholder="请输入补充公积金基数"
-              disabled={loading}
-            />
-          </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  公积金基数
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={formData.housingFundBase}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      housingFundBase: parseFloat(e.target.value) || 0,
+                    })
+                  }
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  placeholder="请输入公积金基数"
+                  disabled={loading}
+                />
+              </div>
+            </div>
 
-          {/* 补充公积金比例 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              补充公积金比例 (%)
-            </label>
-            <input
-              min="0"
-              max="100"
-              value={formData.supplementaryHousingFundRate}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  supplementaryHousingFundRate: parseFloat(e.target.value) || 0,
-                })
-              }
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
-              placeholder="请输入补充公积金比例"
-              disabled={loading}
-            />
+            {/* 第二行：补充公积金基数 + 补充公积金比例 */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  补充公积金基数
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={formData.supplementaryHousingFundBase}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      supplementaryHousingFundBase:
+                        parseFloat(e.target.value) || 0,
+                    })
+                  }
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  placeholder="请输入补充公积金基数"
+                  disabled={loading}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  补充公积金比例 (%)
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  max="100"
+                  step="0.01"
+                  value={formData.supplementaryHousingFundRate}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      supplementaryHousingFundRate:
+                        parseFloat(e.target.value) || 0,
+                    })
+                  }
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  placeholder="请输入补充公积金比例"
+                  disabled={loading}
+                />
+              </div>
+            </div>
           </div>
         </div>
 

@@ -240,6 +240,13 @@ export default function EmployeeBaseConfigView() {
                   </th>
 
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    是否缴纳社保
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    是否缴纳公积金
+                  </th>
+
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     社保基数
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -251,12 +258,7 @@ export default function EmployeeBaseConfigView() {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     补充公积金比例
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    是否缴纳社保
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    是否缴纳公积金
-                  </th>
+
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     操作
                   </th>
@@ -302,6 +304,34 @@ export default function EmployeeBaseConfigView() {
                             : "0"}
                         </div>
                       </td>
+                      {/* 是否缴纳社保 */}
+                      <td className="px-6 py-4">
+                        <div className="text-sm">
+                          <span
+                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                              employee.socialInsurance
+                                ? "bg-green-100 text-green-800"
+                                : "bg-red-100 text-red-800"
+                            }`}
+                          >
+                            {employee.socialInsurance ? "是" : "否"}
+                          </span>
+                        </div>
+                      </td>
+                      {/* 是否缴纳公积金 */}
+                      <td className="px-6 py-4">
+                        <div className="text-sm">
+                          <span
+                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                              employee.housingFund
+                                ? "bg-green-100 text-green-800"
+                                : "bg-red-100 text-red-800"
+                            }`}
+                          >
+                            {employee.housingFund ? "是" : "否"}
+                          </span>
+                        </div>
+                      </td>
                       <td className="px-6 py-4">
                         <div className="text-sm text-gray-900">
                           {employee.socialInsuranceBase !== null &&
@@ -334,48 +364,6 @@ export default function EmployeeBaseConfigView() {
                             : "未配置"}
                         </div>
                       </td>
-                      {/* 是否缴纳社保 */}
-                      <td className="px-6 py-4">
-                        <div className="text-sm">
-                          {employee.socialInsurance !== null &&
-                          employee.socialInsurance !== undefined ? (
-                            <span
-                              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                employee.socialInsurance
-                                  ? "bg-green-100 text-green-800"
-                                  : "bg-red-100 text-red-800"
-                              }`}
-                            >
-                              {employee.socialInsurance ? "是" : "否"}
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                              未设置
-                            </span>
-                          )}
-                        </div>
-                      </td>
-                      {/* 是否缴纳公积金 */}
-                      <td className="px-6 py-4">
-                        <div className="text-sm">
-                          {employee.housingFund !== null &&
-                          employee.housingFund !== undefined ? (
-                            <span
-                              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                employee.housingFund
-                                  ? "bg-green-100 text-green-800"
-                                  : "bg-red-100 text-red-800"
-                              }`}
-                            >
-                              {employee.housingFund ? "是" : "否"}
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                              未设置
-                            </span>
-                          )}
-                        </div>
-                      </td>
 
                       <td className="px-6 py-4">
                         <button
@@ -383,7 +371,6 @@ export default function EmployeeBaseConfigView() {
                           className="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-blue-600 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-offset-2 focus:ring-blue-500"
                         >
                           <Edit className="h-4 w-4 mr-1" />
-                          配置
                         </button>
                       </td>
                     </tr>
