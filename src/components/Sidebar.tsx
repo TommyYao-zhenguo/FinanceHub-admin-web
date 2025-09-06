@@ -26,11 +26,6 @@ const menuItems = [
   { id: "customer-service", label: "客服中心", icon: HelpCircle },
 ];
 
-const bottomItems = [
-  { id: "settings", label: "设置", icon: Settings },
-  { id: "support", label: "帮助支持", icon: HelpCircle },
-];
-
 export default function Sidebar({
   isOpen,
   activeTab,
@@ -230,28 +225,6 @@ export default function Sidebar({
 
             {/* 分隔线 */}
             <div className="border-t border-gray-700 my-4"></div>
-
-            {/* 底部菜单项：设置、帮助支持 */}
-            {bottomItems.map((item) => {
-              const Icon = item.icon;
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => onTabChange(item.id)}
-                  className={`
-                    w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-colors
-                    ${
-                      activeTab === item.id
-                        ? "bg-orange-600 text-white shadow-lg"
-                        : "text-gray-300 hover:text-white hover:bg-gray-700"
-                    }
-                  `}
-                >
-                  <Icon className="h-5 w-5 flex-shrink-0" />
-                  <span className="font-medium">{item.label}</span>
-                </button>
-              );
-            })}
           </div>
         </div>
       </aside>

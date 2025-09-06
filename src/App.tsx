@@ -41,8 +41,6 @@ const routeMap: Record<string, string> = {
   "/housing-fund-config": "housing-fund-config",
   "/tax-upload": "tax-upload",
   "/invoice-type-management": "invoice-type-management",
-  "/settings": "settings",
-  "/support": "support",
 };
 
 // tab到路由的映射
@@ -57,8 +55,6 @@ const tabToRouteMap: Record<string, string> = {
   "housing-fund-config": "/housing-fund-config",
   "tax-upload": "/tax-upload",
   "invoice-type-management": "/invoice-type-management",
-  settings: "/settings",
-  support: "/support",
 };
 
 // 创建一个内部组件来使用UserContext和Router hooks

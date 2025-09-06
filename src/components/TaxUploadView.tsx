@@ -1,7 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import {
-  Upload,
-} from "lucide-react";
+import { Upload } from "lucide-react";
 import toast from "react-hot-toast";
 import { TaxService, TaxUploadRecord } from "../services/taxService";
 
@@ -16,7 +14,7 @@ export default function TaxUploadView() {
     current: 1,
     size: 10,
     total: 0,
-    pages: 0
+    pages: 0,
   });
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -24,13 +22,17 @@ export default function TaxUploadView() {
   const fetchUploadRecords = async (page: number = 1) => {
     try {
       setLoading(true);
-      const data = await TaxService.getUploadRecords(selectedPeriod, page, pagination.size);
+      const data = await TaxService.getUploadRecords(
+        selectedPeriod,
+        page,
+        pagination.size
+      );
       setRecords(data.records);
       setPagination({
         current: data.current,
         size: data.size,
         total: data.total,
-        pages: data.pages
+        pages: data.pages,
       });
     } catch (error) {
       console.error("获取上传记录失败:", error);
@@ -206,7 +208,7 @@ export default function TaxUploadView() {
       {/* 文件列表 */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200">
         <div className="p-6 border-b border-gray-200 flex justify-between items-center">
-          <h3 className="text-lg font-semibold text-gray-900">已上传文件</h3>
+          <h3 className="text-lg font-semibold text-gray-900">税费明细列表</h3>
           <div className="flex items-center space-x-2">
             <label className="text-sm font-medium text-gray-700">期间:</label>
             <input
@@ -234,7 +236,6 @@ export default function TaxUploadView() {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   金额
                 </th>
-               
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -249,7 +250,10 @@ export default function TaxUploadView() {
                 </tr>
               ) : (
                 records.map((record, index) => (
-                  <tr key={`${record.companyNo}-${record.taxType}-${index}`} className="hover:bg-gray-50">
+                  <tr
+                    key={`${record.companyNo}-${record.taxType}-${index}`}
+                    className="hover:bg-gray-50"
+                  >
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">
                         {record.companyName}
@@ -270,19 +274,19 @@ export default function TaxUploadView() {
                         {formatAmount(record.amount)}
                       </div>
                     </td>
-                    
                   </tr>
                 ))
               )}
             </tbody>
           </table>
         </div>
-        
+
         {/* 分页控件 */}
         {pagination.total > 0 && (
           <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
             <div className="text-sm text-gray-700">
-              共 {pagination.total} 条记录，第 {pagination.current} / {pagination.pages} 页
+              共 {pagination.total} 条记录，第 {pagination.current} /{" "}
+              {pagination.pages} 页
             </div>
             <div className="flex space-x-2">
               <button
