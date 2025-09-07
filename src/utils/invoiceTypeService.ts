@@ -30,11 +30,11 @@ export interface UpdateInvoiceTypeRequest {
 
 // 发票类型列表响应
 export interface InvoiceTypePageResponse {
-  content: InvoiceType[];
-  totalElements: number;
-  totalPages: number;
+  records: InvoiceType[];
+  total: number;
+  pages: number;
   size: number;
-  number: number;
+  current: number;
 }
 
 // 发票类型服务
@@ -44,14 +44,13 @@ export const InvoiceTypeService = {
     current: number = 1,
     size: number = 10,
     name?: string,
-    status?: string,
     companyNo?: string
   ): Promise<InvoiceTypePageResponse> {
     const params = new URLSearchParams();
     params.append('current', current.toString());
     params.append('size', size.toString());
     if (name) params.append('name', name);
-    if (status) params.append('status', status);
+
     if (companyNo) params.append('companyNo', companyNo);
 
     const response = await httpClient.get(

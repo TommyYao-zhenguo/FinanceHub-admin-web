@@ -118,9 +118,9 @@ export default function InvoiceTypeManagementView() {
           queryParams.companyNo
         );
 
-      setInvoiceTypes(response.content || []);
-      setTotalElements(response.totalElements || 0);
-      setTotalPages(response.totalPages || 0);
+      setInvoiceTypes(response.records || []);
+      setTotalElements(response.total || 0);
+      setTotalPages(response.pages || 0);
     } catch (error) {
       console.error("加载发票类型列表失败:", error);
       toast.error("加载发票类型列表失败");

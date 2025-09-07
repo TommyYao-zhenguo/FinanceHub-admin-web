@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Upload } from "lucide-react";
+import { Upload, Download } from "lucide-react";
 import toast from "react-hot-toast";
+import { utils, writeFile } from "xlsx";
 import { TaxService, TaxUploadRecord } from "../services/taxService";
 
 export default function TaxUploadView() {
@@ -46,6 +47,55 @@ export default function TaxUploadView() {
   useEffect(() => {
     fetchUploadRecords();
   }, [selectedPeriod]);
+
+  // 下载Excel模板
+  // 所属期	统一信用代码	客户名称	税种	金额
+  //   2025-09	123	测试的公司的的0902	增值税	0
+  const downloadExcelTemplate = () => {
+    // 创建Excel模板数据
+    const templateData = [
+      ["所属期", "统一社会信用代码", "客户名称", "税种", "金额"],
+      [
+        "2025-09",
+        "91110000000000000X",
+        "测试的公司的的0902",
+        "增值税",
+        "1000.00",
+      ],
+      [
+        "2025-09",
+        "91110000000000000X",
+        "测试的公司的的0902",
+        "企业所得税",
+        "123.56",
+      ],
+      [
+        "2025-09",
+        "91110000000000000X",
+        "测试的公司的的0902",
+        "个人所得税",
+        "225.74",
+      ],
+    ];
+
+    // 创建工作簿
+    const ws = utils.aoa_to_sheet(templateData);
+    const wb = utils.book_new();
+    utils.book_append_sheet(wb, ws, "税费上传模板");
+
+    // 设置列宽
+    ws["!cols"] = [
+      { wch: 15 }, // 所属期
+      { wch: 25 }, // 统一社会信用代码
+      { wch: 20 }, // 客户名称
+      { wch: 15 }, // 税种
+      { wch: 15 }, // 金额
+    ];
+
+    // 下载文件
+    writeFile(wb, "税费上传模板.xlsx");
+    toast.success("Excel模板下载成功");
+  };
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
@@ -150,11 +200,20 @@ export default function TaxUploadView() {
 
       {/* 文件上传区域 */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200">
-        <div className="p-6 border-b border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900">文件上传</h3>
-          <p className="text-sm text-gray-600 mt-1">
-            支持 Excel、CSV、PDF 格式，单个文件不超过 10MB
-          </p>
+        <div className="p-6 border-b border-gray-200 flex justify-between items-center">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900">文件上传</h3>
+            <p className="text-sm text-gray-600 mt-1">
+              支持 Excel、CSV、PDF 格式，单个文件不超过 10MB
+            </p>
+          </div>
+          <button
+            onClick={downloadExcelTemplate}
+            className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+          >
+            <Download className="h-4 w-4" />
+            <span>下载Excel模板</span>
+          </button>
         </div>
 
         <div className="p-6">
