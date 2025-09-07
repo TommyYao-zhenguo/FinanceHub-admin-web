@@ -73,6 +73,7 @@ export default function EmployeeBaseConfigView() {
                 ? "ACTIVE"
                 : ("INACTIVE" as "ACTIVE" | "INACTIVE"),
             hireDate: employee.hireDate,
+            remarks: employee.remarks,
             phone: employee.phone,
             idCard: employee.idCard,
             createTime: employee.createTime,
@@ -234,6 +235,10 @@ export default function EmployeeBaseConfigView() {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     身份证号码
                   </th>
+                  {/* 入职日期 */}
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    入职日期
+                  </th>
                   {/* 基本工资 */}
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     基本工资
@@ -244,6 +249,11 @@ export default function EmployeeBaseConfigView() {
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     是否缴纳公积金
+                  </th>
+
+                  {/* remarks */}
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    备注
                   </th>
 
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -260,7 +270,7 @@ export default function EmployeeBaseConfigView() {
                   </th>
 
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    操作
+                    配置基数
                   </th>
                 </tr>
               </thead>
@@ -294,6 +304,12 @@ export default function EmployeeBaseConfigView() {
                       <td className="px-6 py-4">
                         <div className="text-sm text-gray-900">
                           {employee.idCard}
+                        </div>
+                      </td>
+                      {/* 入职日期 */}
+                      <td className="px-6 py-4">
+                        <div className="text-sm text-gray-900">
+                          {employee.hireDate ? employee.hireDate : ""}
                         </div>
                       </td>
                       {/* 基本工资 */}
@@ -330,6 +346,12 @@ export default function EmployeeBaseConfigView() {
                           >
                             {employee.housingFund ? "是" : "否"}
                           </span>
+                        </div>
+                      </td>
+                      {/* remarks */}
+                      <td className="px-6 py-4">
+                        <div className="text-sm text-gray-900">
+                          {employee.remarks ? employee.remarks : ""}
                         </div>
                       </td>
                       <td className="px-6 py-4">

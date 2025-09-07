@@ -136,12 +136,11 @@ export default function EmployeeBaseConfigModal({
             </label>
             <MonthPicker
               value={formData.effectiveMonth}
-              onChange={(value: string) =>
+              onChange={(value) =>
                 setFormData({ ...formData, effectiveMonth: value })
               }
               disabled={loading}
               placeholder="选择归属期月份"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
               <p className="text-sm text-blue-800">
@@ -165,15 +164,15 @@ export default function EmployeeBaseConfigModal({
                 </label>
                 <input
                   type="number"
-                  min="0"
                   step="0.01"
-                  value={formData.socialInsuranceBase}
-                  onChange={(e) =>
+                  value={formData.socialInsuranceBase?.toString() || ''}
+                  onChange={(e) => {
+                    const value = e.target.value;
                     setFormData({
                       ...formData,
-                      socialInsuranceBase: parseFloat(e.target.value) || 0,
-                    })
-                  }
+                      socialInsuranceBase: value === '' ? 0 : (isNaN(parseFloat(value)) ? 0 : parseFloat(value)),
+                    });
+                  }}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition-colors"
                   placeholder="请输入社保基数"
                   disabled={loading}
@@ -186,15 +185,15 @@ export default function EmployeeBaseConfigModal({
                 </label>
                 <input
                   type="number"
-                  min="0"
                   step="0.01"
-                  value={formData.housingFundBase}
-                  onChange={(e) =>
+                  value={formData.housingFundBase?.toString() || ''}
+                  onChange={(e) => {
+                    const value = e.target.value;
                     setFormData({
                       ...formData,
-                      housingFundBase: parseFloat(e.target.value) || 0,
-                    })
-                  }
+                      housingFundBase: value === '' ? 0 : (isNaN(parseFloat(value)) ? 0 : parseFloat(value)),
+                    });
+                  }}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition-colors"
                   placeholder="请输入公积金基数"
                   disabled={loading}
@@ -210,16 +209,16 @@ export default function EmployeeBaseConfigModal({
                 </label>
                 <input
                   type="number"
-                  min="0"
                   step="0.01"
-                  value={formData.supplementaryHousingFundBase}
-                  onChange={(e) =>
+                  value={formData.supplementaryHousingFundBase?.toString() || ''}
+                  onChange={(e) => {
+                    const value = e.target.value;
                     setFormData({
                       ...formData,
                       supplementaryHousingFundBase:
-                        parseFloat(e.target.value) || 0,
-                    })
-                  }
+                        value === '' ? 0 : (isNaN(parseFloat(value)) ? 0 : parseFloat(value)),
+                    });
+                  }}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition-colors"
                   placeholder="请输入补充公积金基数"
                   disabled={loading}
@@ -232,17 +231,16 @@ export default function EmployeeBaseConfigModal({
                 </label>
                 <input
                   type="number"
-                  min="0"
-                  max="100"
                   step="0.01"
-                  value={formData.supplementaryHousingFundRate}
-                  onChange={(e) =>
+                  value={formData.supplementaryHousingFundRate?.toString() || ''}
+                  onChange={(e) => {
+                    const value = e.target.value;
                     setFormData({
                       ...formData,
                       supplementaryHousingFundRate:
-                        parseFloat(e.target.value) || 0,
-                    })
-                  }
+                        value === '' ? 0 : (isNaN(parseFloat(value)) ? 0 : parseFloat(value)),
+                    });
+                  }}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition-colors"
                   placeholder="请输入补充公积金比例"
                   disabled={loading}

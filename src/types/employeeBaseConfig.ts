@@ -29,6 +29,7 @@ export interface Employee {
   phone?: string;
   idCard?: string;
   email?: string;
+  remarks?: string;
   createTime?: string;
   updateTime?: string;
 }
@@ -102,6 +103,7 @@ export interface BackendEmployeeData {
   idCard: string;
   phone: string;
   hireDate: string;
+  remarks?: string;
   basicSalary: number;
   socialSecurityBase: number;
   housingFundBase: number;
