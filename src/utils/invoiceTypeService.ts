@@ -7,8 +7,6 @@ export interface InvoiceType {
   companyNo: string;
   name: string;
   description?: string;
-  status: 'ACTIVE' | 'INACTIVE';
-  sortOrder: number;
   createTime?: string;
   updateTime?: string;
   createTimeStr?: string;
@@ -20,8 +18,6 @@ export interface CreateInvoiceTypeRequest {
   companyNo: string;
   name: string;
   description?: string;
-  status: 'ACTIVE' | 'INACTIVE';
-  sortOrder: number;
 }
 
 // 更新发票类型请求
@@ -30,8 +26,6 @@ export interface UpdateInvoiceTypeRequest {
   companyNo: string;
   name: string;
   description?: string;
-  status: 'ACTIVE' | 'INACTIVE';
-  sortOrder: number;
 }
 
 // 发票类型列表响应
