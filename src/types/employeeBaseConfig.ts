@@ -9,6 +9,7 @@ export interface EmployeeBaseConfig {
   housingFundBase?: number; // 公积金基数
   supplementaryHousingFundBase?: number; // 补充公积金基数
   supplementaryHousingFundRate?: number; // 补充公积金比例
+  supplementaryHousingFundPersonalRate?: number; // 补充公积金个人缴纳比例
   effectiveDate: string; // 生效日期
   status: "ACTIVE" | "INACTIVE";
   createTime?: string;
@@ -42,6 +43,7 @@ export interface CreateEmployeeBaseConfigRequest {
   housingFundBase?: number;
   supplementaryHousingFundBase?: number;
   supplementaryHousingFundRate?: number;
+  supplementaryHousingFundPersonalRate?: number;
   effectiveDate: string;
 }
 
@@ -51,6 +53,7 @@ export interface UpdateEmployeeBaseConfigRequest {
   housingFundBase?: number;
   supplementaryHousingFundBase?: number;
   supplementaryHousingFundRate?: number;
+  supplementaryHousingFundPersonalRate?: number;
   effectiveDate: string;
 }
 
@@ -109,6 +112,7 @@ export interface BackendEmployeeData {
   housingFundBase: number;
   supplementaryHousingFundBase?: number;
   supplementaryHousingFundRate?: number;
+  supplementaryHousingFundPersonalRate?: number; // 补充公积金个人缴纳比例
   socialInsurance?: boolean; // 是否缴纳社保
   housingFund?: boolean; // 是否缴纳公积金
   socialSecurityFee?: number;
@@ -128,6 +132,7 @@ export interface BatchUpdateEmployeeBaseConfigRequest {
     housingFundBase?: number;
     supplementaryHousingFundBase?: number;
     supplementaryHousingFundRate?: number;
+    supplementaryHousingFundPersonalRate?: number;
     effectiveDate: string;
   }[];
   companyNo: string;

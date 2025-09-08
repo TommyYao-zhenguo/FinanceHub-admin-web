@@ -105,6 +105,7 @@ export class EmployeeBaseConfigService {
       housingFundBase: number;
       supplementaryHousingFundBase?: number;
       supplementaryHousingFundRate?: number;
+      supplementaryHousingFundPersonalRate?: number;
       effectiveDate?: string;
     }
   ): Promise<void> {

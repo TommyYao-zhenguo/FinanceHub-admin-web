@@ -17,6 +17,7 @@ interface EmployeeWithConfig extends Employee {
   housingFundBase: number;
   supplementaryHousingFundBase?: number;
   supplementaryHousingFundRate?: number;
+  supplementaryHousingFundPersonalRate?: number; // 补充公积金个人缴纳比例
   socialInsurance?: boolean;
   housingFund?: boolean;
   effectiveDate?: string;
@@ -87,6 +88,8 @@ export default function EmployeeBaseConfigView() {
               employee.supplementaryHousingFundBase || 0,
             supplementaryHousingFundRate:
               employee.supplementaryHousingFundRate || 0,
+            supplementaryHousingFundPersonalRate:
+              employee.supplementaryHousingFundPersonalRate || 0,
             effectiveDate: new Date().toISOString().split("T")[0], // 默认当前日期
           };
         }
@@ -268,6 +271,9 @@ export default function EmployeeBaseConfigView() {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     补充公积金比例
                   </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    补充公积金个人缴纳比例
+                  </th>
 
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     配置基数
@@ -278,7 +284,7 @@ export default function EmployeeBaseConfigView() {
                 {loading ? (
                   <tr>
                     <td
-                      colSpan={9}
+                      colSpan={13}
                       className="px-6 py-12 text-center text-gray-500"
                     >
                       加载中...
@@ -287,7 +293,7 @@ export default function EmployeeBaseConfigView() {
                 ) : employees.length === 0 ? (
                   <tr>
                     <td
-                      colSpan={9}
+                      colSpan={13}
                       className="px-6 py-12 text-center text-gray-500"
                     >
                       暂无员工数据
@@ -383,6 +389,14 @@ export default function EmployeeBaseConfigView() {
                           {employee.supplementaryHousingFundRate !== null &&
                           employee.supplementaryHousingFundRate !== undefined
                             ? `${employee.supplementaryHousingFundRate}%`
+                            : "未配置"}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="text-sm text-gray-900">
+                          {employee.supplementaryHousingFundPersonalRate !== null &&
+                          employee.supplementaryHousingFundPersonalRate !== undefined
+                            ? `${employee.supplementaryHousingFundPersonalRate}%`
                             : "未配置"}
                         </div>
                       </td>

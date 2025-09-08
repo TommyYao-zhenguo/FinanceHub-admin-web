@@ -13,6 +13,7 @@ interface Employee {
   housingFundBase?: number;
   supplementaryHousingFundBase?: number;
   supplementaryHousingFundRate?: number;
+  supplementaryHousingFundPersonalRate?: number;
 }
 
 interface EmployeeBaseConfigModalProps {
@@ -41,6 +42,7 @@ export default function EmployeeBaseConfigModal({
     housingFundBase: 0,
     supplementaryHousingFundBase: 0,
     supplementaryHousingFundRate: 0,
+    supplementaryHousingFundPersonalRate: 0,
     effectiveMonth: getCurrentMonth(),
   });
   const [loading, setLoading] = useState(false);
@@ -55,6 +57,8 @@ export default function EmployeeBaseConfigModal({
           employee.supplementaryHousingFundBase || 0,
         supplementaryHousingFundRate:
           employee.supplementaryHousingFundRate || 0,
+        supplementaryHousingFundPersonalRate:
+          employee.supplementaryHousingFundPersonalRate || 0,
         effectiveMonth: getCurrentMonth(),
       });
     }
@@ -78,6 +82,7 @@ export default function EmployeeBaseConfigModal({
           housingFundBase: formData.housingFundBase,
           supplementaryHousingFundBase: formData.supplementaryHousingFundBase,
           supplementaryHousingFundRate: formData.supplementaryHousingFundRate,
+          supplementaryHousingFundPersonalRate: formData.supplementaryHousingFundPersonalRate,
           effectiveDate: effectiveDate,
         }
       );
@@ -201,7 +206,7 @@ export default function EmployeeBaseConfigModal({
               </div>
             </div>
 
-            {/* 第二行：补充公积金基数 + 补充公积金比例 */}
+            {/* 第二行：补充公积金基数 + 补充公积金企业比例 */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -227,7 +232,7 @@ export default function EmployeeBaseConfigModal({
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  补充公积金比例 (%)
+                  补充公积金企业比例 (%)
                 </label>
                 <input
                   type="number"
@@ -242,10 +247,36 @@ export default function EmployeeBaseConfigModal({
                     });
                   }}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                  placeholder="请输入补充公积金比例"
+                  placeholder="请输入补充公积金企业比例"
                   disabled={loading}
                 />
               </div>
+            </div>
+
+            {/* 第三行：补充公积金个人比例 */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  补充公积金个人比例 (%)
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={formData.supplementaryHousingFundPersonalRate?.toString() || ''}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setFormData({
+                      ...formData,
+                      supplementaryHousingFundPersonalRate:
+                        value === '' ? 0 : (isNaN(parseFloat(value)) ? 0 : parseFloat(value)),
+                    });
+                  }}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  placeholder="请输入补充公积金个人比例"
+                  disabled={loading}
+                />
+              </div>
+              <div></div>
             </div>
           </div>
         </div>
