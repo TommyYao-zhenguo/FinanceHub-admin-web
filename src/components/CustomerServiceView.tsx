@@ -655,116 +655,169 @@ export default function CustomerServiceView() {
 
 
 
-        {/* 请求列表 */}
-        <div className="flex-1 overflow-y-auto">
+        {/* 内容区域 */}
+        <div className="flex-1 flex flex-col min-h-0">
           {loading ? (
-            <div className="flex items-center justify-center h-32">
+            <div className="flex-1 flex items-center justify-center">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
             </div>
           ) : sortedAndFilteredRequests.length === 0 ? (
-            <div className="flex items-center justify-center h-32 text-gray-500">
-              暂无任务需要处理。
-            </div>
-          ) : (
-            <div className="divide-y divide-gray-200">
-              {sortedAndFilteredRequests.map((request) => (
-                <div
-                  key={request.id}
-                  onClick={() => handleMessageSelect(request)}
-                  className={`p-4 cursor-pointer transition-colors hover:bg-gray-50 ${
-                    selectedMessage?.id === request.id
-                      ? "bg-blue-50 border-r-2 border-blue-500"
-                      : ""
-                  }`}
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center space-x-2 mb-1">
-                        <h3 className="text-sm font-medium text-gray-900 truncate">
-                          {request.customerName}
-                        </h3>
-                        <span className="text-xs text-gray-500">
-                          {request.companyName}
-                        </span>
-                      </div>
-                      <p className="text-sm text-gray-600 mb-2 line-clamp-2">
-                        {request.requestTitle}
-                      </p>
-                      <div className="flex items-center space-x-2">
-                        <span
-                          className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
-                            request.status
-                          )}`}
-                        >
-                          {getStatusText(request.status)}
-                        </span>
-                        <span
-                          className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getTaskTypeColor(
-                            request.taskType
-                          )}`}
-                        >
-                          {getTaskTypeText(request.taskType)}
-                        </span>
-                      </div>
+            <div className="flex-1 flex flex-col items-center justify-center text-gray-500">
+              <div className="mb-8">暂无任务需要处理。</div>
+              {/* 无内容时分页组件居中显示 */}
+              {pagination.total > 0 && (
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm text-gray-700">
+                      显示{" "}
+                      {Math.min(
+                        (pagination.current - 1) * pagination.size + 1,
+                        pagination.total
+                      )}{" "}
+                      -{" "}
+                      {Math.min(pagination.current * pagination.size, pagination.total)}{" "}
+                      条，共 {pagination.total} 条
                     </div>
-                    <div className="flex flex-col items-end space-y-1">
-                      <span className="text-xs text-gray-500">
-                        {request.createTime}
+                    <div className="flex items-center space-x-2">
+                      <button
+                        onClick={() =>
+                          setPagination((prev) => ({
+                            ...prev,
+                            current: Math.max(1, prev.current - 1),
+                          }))
+                        }
+                        disabled={pagination.current <= 1}
+                        className="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        上一页
+                      </button>
+                      <span className="text-sm text-gray-700">
+                        第 {pagination.current} / {pagination.pages} 页
                       </span>
-                      {request.actionRequired && (
-                        <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                      )}
+                      <button
+                        onClick={() =>
+                          setPagination((prev) => ({
+                            ...prev,
+                            current: Math.min(prev.pages, prev.current + 1),
+                          }))
+                        }
+                        disabled={pagination.current >= pagination.pages}
+                        className="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        下一页
+                      </button>
                     </div>
                   </div>
                 </div>
-              ))}
+              )}
             </div>
+          ) : (
+            <>
+              {/* 请求列表 */}
+              <div className="flex-1 overflow-y-auto">
+                <div className="divide-y divide-gray-200">
+                  {sortedAndFilteredRequests.map((request) => (
+                    <div
+                      key={request.id}
+                      onClick={() => handleMessageSelect(request)}
+                      className={`p-4 cursor-pointer transition-colors hover:bg-gray-50 ${
+                        selectedMessage?.id === request.id
+                          ? "bg-blue-50 border-r-2 border-blue-500"
+                          : ""
+                      }`}
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center space-x-2 mb-1">
+                            <h3 className="text-sm font-medium text-gray-900 truncate">
+                              {request.customerName}
+                            </h3>
+                            <span className="text-xs text-gray-500">
+                              {request.companyName}
+                            </span>
+                          </div>
+                          <p className="text-sm text-gray-600 mb-2 line-clamp-2">
+                            {request.requestTitle}
+                          </p>
+                          <div className="flex items-center space-x-2">
+                            <span
+                              className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
+                                request.status
+                              )}`}
+                            >
+                              {getStatusText(request.status)}
+                            </span>
+                            <span
+                              className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getTaskTypeColor(
+                                request.taskType
+                              )}`}
+                            >
+                              {getTaskTypeText(request.taskType)}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex flex-col items-end space-y-1">
+                          <span className="text-xs text-gray-500">
+                            {request.createTime}
+                          </span>
+                          {request.actionRequired && (
+                            <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              
+              {/* 有内容时分页组件显示在列表下方 */}
+              {pagination.total > 0 && (
+                <div className="p-4 border-t border-gray-200 bg-white">
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm text-gray-700">
+                      显示{" "}
+                      {Math.min(
+                        (pagination.current - 1) * pagination.size + 1,
+                        pagination.total
+                      )}{" "}
+                      -{" "}
+                      {Math.min(pagination.current * pagination.size, pagination.total)}{" "}
+                      条，共 {pagination.total} 条
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <button
+                        onClick={() =>
+                          setPagination((prev) => ({
+                            ...prev,
+                            current: Math.max(1, prev.current - 1),
+                          }))
+                        }
+                        disabled={pagination.current <= 1}
+                        className="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        上一页
+                      </button>
+                      <span className="text-sm text-gray-700">
+                        第 {pagination.current} / {pagination.pages} 页
+                      </span>
+                      <button
+                        onClick={() =>
+                          setPagination((prev) => ({
+                            ...prev,
+                            current: Math.min(prev.pages, prev.current + 1),
+                          }))
+                        }
+                        disabled={pagination.current >= pagination.pages}
+                        className="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        下一页
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </>
           )}
-        </div>
-
-        {/* 分页控件 */}
-        <div className="p-4 border-t border-gray-200">
-          <div className="flex items-center justify-between">
-            <div className="text-sm text-gray-700">
-              显示{" "}
-              {Math.min(
-                (pagination.current - 1) * pagination.size + 1,
-                pagination.total
-              )}{" "}
-              -{" "}
-              {Math.min(pagination.current * pagination.size, pagination.total)}{" "}
-              条，共 {pagination.total} 条
-            </div>
-            <div className="flex items-center space-x-2">
-              <button
-                onClick={() =>
-                  setPagination((prev) => ({
-                    ...prev,
-                    current: Math.max(1, prev.current - 1),
-                  }))
-                }
-                disabled={pagination.current <= 1}
-                className="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                上一页
-              </button>
-              <span className="text-sm text-gray-700">
-                第 {pagination.current} / {pagination.pages} 页
-              </span>
-              <button
-                onClick={() =>
-                  setPagination((prev) => ({
-                    ...prev,
-                    current: Math.min(prev.pages, prev.current + 1),
-                  }))
-                }
-                disabled={pagination.current >= pagination.pages}
-                className="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                下一页
-              </button>
-            </div>
-          </div>
         </div>
       </div>
 
