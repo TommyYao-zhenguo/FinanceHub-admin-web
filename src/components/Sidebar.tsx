@@ -114,6 +114,11 @@ export default function Sidebar({
         icon: Building2,
       });
       items.push({
+        id: "company-social-insurance-list",
+        label: "公司社保明细",
+        icon: Shield,
+      });
+      items.push({
         id: "employee-base-config",
         label: "社保和公积金基数配置",
         icon: Calculator,
