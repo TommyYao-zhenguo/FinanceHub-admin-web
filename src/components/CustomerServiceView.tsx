@@ -611,48 +611,49 @@ export default function CustomerServiceView() {
             </button>
           </div>
           <div className="grid grid-cols-3 gap-3">
-            <div className="bg-red-50 p-3 rounded-lg">
+            <button
+              onClick={() => setSelectedCategory("PENDING")}
+              className={`p-3 rounded-lg transition-all duration-200 text-left ${
+                selectedCategory === "PENDING"
+                  ? "bg-red-100 border-2 border-red-300 shadow-md transform scale-105"
+                  : "bg-red-50 hover:bg-red-100 hover:shadow-sm"
+              }`}
+            >
               <div className="text-2xl font-bold text-red-600">
                 {statistics.PENDING ? statistics.PENDING : 0}
               </div>
               <div className="text-sm text-red-600">待处理</div>
-            </div>
-            <div className="bg-yellow-50 p-3 rounded-lg">
+            </button>
+            <button
+              onClick={() => setSelectedCategory("PROCESSING")}
+              className={`p-3 rounded-lg transition-all duration-200 text-left ${
+                selectedCategory === "PROCESSING"
+                  ? "bg-yellow-100 border-2 border-yellow-300 shadow-md transform scale-105"
+                  : "bg-yellow-50 hover:bg-yellow-100 hover:shadow-sm"
+              }`}
+            >
               <div className="text-2xl font-bold text-yellow-600">
                 {statistics.PROCESSING ? statistics.PROCESSING : 0}
               </div>
               <div className="text-sm text-yellow-600">处理中</div>
-            </div>
-            <div className="bg-green-50 p-3 rounded-lg">
+            </button>
+            <button
+              onClick={() => setSelectedCategory("COMPLETED")}
+              className={`p-3 rounded-lg transition-all duration-200 text-left ${
+                selectedCategory === "COMPLETED"
+                  ? "bg-green-100 border-2 border-green-300 shadow-md transform scale-105"
+                  : "bg-green-50 hover:bg-green-100 hover:shadow-sm"
+              }`}
+            >
               <div className="text-2xl font-bold text-green-600">
                 {statistics.COMPLETED ? statistics.COMPLETED : 0}
               </div>
               <div className="text-sm text-green-600">已完成</div>
-            </div>
+            </button>
           </div>
         </div>
 
-        {/* 分类筛选 */}
-        <div className="p-4 border-b border-gray-200">
-          <div className="flex space-x-2 overflow-x-auto">
-            {messageCategories.map((category) => (
-              <button
-                key={category.id}
-                onClick={() => setSelectedCategory(category.id)}
-                className={`flex items-center space-x-2 px-3 py-2 rounded-lg whitespace-nowrap transition-colors ${
-                  selectedCategory === category.id
-                    ? "bg-blue-100 text-blue-700 border border-blue-200"
-                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                }`}
-              >
-                <span>{category.label}</span>
-                <span className="bg-white px-2 py-1 rounded-full text-xs font-medium">
-                  {category.count ? category.count : 0}
-                </span>
-              </button>
-            ))}
-          </div>
-        </div>
+
 
         {/* 请求列表 */}
         <div className="flex-1 overflow-y-auto">
