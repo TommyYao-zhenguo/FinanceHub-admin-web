@@ -295,6 +295,8 @@ export default function CustomerServiceView() {
     switch (taskType) {
       case "INVOICE_APPLICATION":
         return "申请开票";
+      case "RED_INVOICE_APPLICATION":
+        return "红冲开票";
       case "EMPLOYEE_REMOVE":
         return "员工离职";
       case "EMPLOYEE_DELETE":
@@ -307,6 +309,7 @@ export default function CustomerServiceView() {
         return "新增公司";
       case "CONFIRM_SALARY":
         return "月度工资确认";
+      
       default:
         return taskType;
     }
