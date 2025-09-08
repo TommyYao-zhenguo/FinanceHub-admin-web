@@ -52,7 +52,7 @@ export default function CustomerServiceView() {
   const [selectedMessage, setSelectedMessage] = useState<DisplayRequest | null>(
     null
   );
-  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [selectedCategory, setSelectedCategory] = useState("PENDING");
   const [searchTerm, setSearchTerm] = useState("");
   const [lastRefreshTime, setLastRefreshTime] = useState<Date | null>(null);
   const [invoiceAttachments, setInvoiceAttachments] = useState<
@@ -175,23 +175,21 @@ export default function CustomerServiceView() {
     const timer = setTimeout(() => {
       if (searchTerm !== undefined) {
         setPagination((prev) => ({ ...prev, current: 1 }));
-        loadData();
       }
     }, 500);
 
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
-  // 分类变化时重新加载
+  // 分类变化时重置分页
   useEffect(() => {
     setPagination((prev) => ({ ...prev, current: 1 }));
-    loadData();
   }, [selectedCategory]);
 
-  // 分页变化时重新加载
+  // 分页变化时重新加载数据
   useEffect(() => {
     loadData();
-  }, [pagination.current, pagination.size]);
+  }, [pagination.current, pagination.size, selectedCategory, searchTerm]);
 
   // 初始加载
   useEffect(() => {
@@ -229,13 +227,6 @@ export default function CustomerServiceView() {
   }, [uploadedFiles]);
 
   const messageCategories = [
-    {
-      id: "all",
-      label: "全部",
-      count: statistics
-        ? statistics.PENDING + statistics.PROCESSING + statistics.COMPLETED
-        : 0,
-    },
     {
       id: "PENDING",
       label: "待处理",
@@ -577,7 +568,6 @@ export default function CustomerServiceView() {
 
   const sortedAndFilteredRequests = requests
     .filter((request) => {
-      if (selectedCategory === "all") return true;
       return request.status === selectedCategory;
     })
     .sort((a, b) => {
@@ -639,20 +629,6 @@ export default function CustomerServiceView() {
               </div>
               <div className="text-sm text-green-600">已完成</div>
             </div>
-          </div>
-        </div>
-
-        {/* 搜索框 */}
-        <div className="p-4 border-b border-gray-200">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-            <input
-              type="text"
-              placeholder="搜索客户姓名、公司或请求标题..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
           </div>
         </div>
 
