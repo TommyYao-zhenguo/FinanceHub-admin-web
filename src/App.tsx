@@ -21,9 +21,10 @@ import HousingFundConfigView from "./components/HousingFundConfigView";
 import TaxUploadView from "./components/TaxUploadView";
 import EmployeeBaseConfigView from "./components/EmployeeBaseConfigView";
 import InvoiceTypeManagementView from "./components/InvoiceTypeManagementView";
+import CompanySocialInsuranceListView from "./components/CompanySocialInsuranceListView";
+import CompanySocialInsuranceDetailView from "./components/CompanySocialInsuranceDetailView";
 import CompanyHousingFundListView from "./components/CompanyHousingFundListView";
 import CompanyHousingFundDetailView from "./components/CompanyHousingFundDetailView";
-import CompanySocialInsuranceListView from "./components/CompanySocialInsuranceListView";
 
 import {
   AdminUserProvider,
@@ -44,6 +45,7 @@ const routeMap: Record<string, string> = {
   "/housing-fund-config": "housing-fund-config",
   "/company-housing-fund-list": "company-housing-fund-list",
   "/company-social-insurance-list": "company-social-insurance-list",
+  "/social-insurance-detail": "company-social-insurance-detail",
   "/tax-upload": "tax-upload",
   "/invoice-type-management": "invoice-type-management",
 };
@@ -60,6 +62,7 @@ const tabToRouteMap: Record<string, string> = {
   "housing-fund-config": "/housing-fund-config",
   "company-housing-fund-list": "/company-housing-fund-list",
   "company-social-insurance-list": "/company-social-insurance-list",
+  "company-social-insurance-detail": "/social-insurance-detail",
   "tax-upload": "/tax-upload",
   "invoice-type-management": "/invoice-type-management",
 };
@@ -236,10 +239,22 @@ function AppContent() {
               path="/company-social-insurance-list"
               element={<CompanySocialInsuranceListView />}
             />
+            <Route
+              path="/company-social-insurance-detail"
+              element={<CompanySocialInsuranceDetailView />}
+            />
             <Route path="/tax-upload" element={<TaxUploadView />} />
             <Route
               path="/invoice-type-management"
               element={<InvoiceTypeManagementView />}
+            />
+            <Route
+              path="/company-social-insurance"
+              element={<CompanySocialInsuranceListView />}
+            />
+            <Route
+              path="/social-insurance-detail/:companyNo"
+              element={<CompanySocialInsuranceDetailView />}
             />
             <Route
               path="/settings"

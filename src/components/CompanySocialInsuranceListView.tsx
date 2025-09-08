@@ -1,13 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { Shield, Search, Eye, Building2, Calendar, User, DollarSign, FileText } from "lucide-react";
+import { Shield, Search, Eye, Building2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { CompanyService } from "../utils/companyService";
 import { Company, CompanyQueryParams, CompanyListResponse } from "../types/company";
-import { 
-  getSocialInsuranceDetailPage, 
-  updateSocialInsuranceStatus,
-  SocialInsuranceDetailResponse,
-  SocialInsuranceDetailQueryParams 
-} from "../services/socialInsuranceDetailService";
 import toast from "react-hot-toast";
 
 export default function CompanySocialInsuranceListView() {
@@ -21,13 +16,7 @@ export default function CompanySocialInsuranceListView() {
   const [totalPages, setTotalPages] = useState(0);
   const [searchName, setSearchName] = useState("");
   
-  // 社保明细相关状态
-  const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
-  const [socialInsuranceData, setSocialInsuranceData] = useState<SocialInsuranceDetailResponse[]>([]);
-  const [socialInsuranceLoading, setSocialInsuranceLoading] = useState(false);
-  const [selectedPeriod, setSelectedPeriod] = useState<string>('2024-01');
-  const [employeeSearchText, setEmployeeSearchText] = useState('');
-  const [showDetailModal, setShowDetailModal] = useState(false);
+  const navigate = useNavigate();
 
   // 获取公司列表
   const fetchCompanies = async () => {
@@ -76,54 +65,11 @@ export default function CompanySocialInsuranceListView() {
     });
   };
 
-  // 获取社保明细数据
-  const fetchSocialInsuranceDetail = async (companyNo: string) => {
-    try {
-      setSocialInsuranceLoading(true);
-      const queryParams: SocialInsuranceDetailQueryParams = {
-        companyNo,
-        period: selectedPeriod,
-        employeeName: employeeSearchText.trim() || undefined,
-        current: 1,
-        size: 50
-      };
-      const response = await getSocialInsuranceDetailPage(queryParams);
-      setSocialInsuranceData(response.records || []);
-    } catch (error) {
-      console.error('获取社保明细失败:', error);
-      toast.error('获取社保明细失败');
-    } finally {
-      setSocialInsuranceLoading(false);
-    }
-  };
-
   // 查看社保明细
   const handleViewDetail = (company: Company) => {
-    setSelectedCompany(company);
-    setShowDetailModal(true);
-    if (company.companyNo) {
-      fetchSocialInsuranceDetail(company.companyNo);
-    }
-  };
-
-  // 查看详细信息
-  const handleViewDetailInfo = (detail: SocialInsuranceDetailResponse) => {
-    // 可以在这里添加详细信息展示逻辑
-    console.log('查看详细信息:', detail);
-  };
-
-  // 更新社保状态
-  const handleUpdateStatus = async (detailId: number, status: string) => {
-    try {
-      await updateSocialInsuranceStatus(detailId, status);
-      toast.success('状态更新成功');
-      if (selectedCompany?.companyNo) {
-        fetchSocialInsuranceDetail(selectedCompany.companyNo);
-      }
-    } catch (error) {
-      console.error('更新状态失败:', error);
-      toast.error('更新状态失败');
-    }
+    navigate(`/social-insurance-detail/${company.companyNo}`, {
+      state: { companyName: company.companyName }
+    });
   };
 
   // 生成分页按钮
@@ -341,159 +287,7 @@ export default function CompanySocialInsuranceListView() {
         )}
       </div>
 
-      {/* 社保明细弹窗 */}
-      {showDetailModal && selectedCompany && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl shadow-xl max-w-6xl w-full mx-4 max-h-[90vh] overflow-hidden">
-            <div className="p-6 border-b border-gray-200 flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <Shield className="h-6 w-6 text-blue-600" />
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900">
-                    {selectedCompany.companyName} - 社保明细
-                  </h3>
-                  <p className="text-sm text-gray-600">公司编号: {selectedCompany.companyNo}</p>
-                </div>
-              </div>
-              <button
-                onClick={() => setShowDetailModal(false)}
-                className="text-gray-400 hover:text-gray-600"
-              >
-                ✕
-              </button>
-            </div>
 
-            <div className="p-6">
-              {/* 筛选条件 */}
-              <div className="mb-6 flex items-center space-x-4">
-                <div className="flex items-center space-x-2">
-                  <Calendar className="h-4 w-4 text-gray-500" />
-                  <select
-                    value={selectedPeriod}
-                    onChange={(e) => {
-                       setSelectedPeriod(e.target.value);
-                       if (selectedCompany.companyNo) {
-                         fetchSocialInsuranceDetail(selectedCompany.companyNo);
-                       }
-                     }}
-                    className="border border-gray-300 rounded-lg px-3 py-2 text-sm"
-                  >
-                    <option value="2024-01">2024年1月</option>
-                    <option value="2024-02">2024年2月</option>
-                    <option value="2024-03">2024年3月</option>
-                    <option value="2024-04">2024年4月</option>
-                    <option value="2024-05">2024年5月</option>
-                    <option value="2024-06">2024年6月</option>
-                  </select>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <User className="h-4 w-4 text-gray-500" />
-                  <input
-                    type="text"
-                    placeholder="搜索员工姓名"
-                    value={employeeSearchText}
-                    onChange={(e) => setEmployeeSearchText(e.target.value)}
-                    onKeyPress={(e) => {
-                       if (e.key === 'Enter' && selectedCompany.companyNo) {
-                         fetchSocialInsuranceDetail(selectedCompany.companyNo);
-                       }
-                     }}
-                    className="border border-gray-300 rounded-lg px-3 py-2 text-sm w-48"
-                  />
-                </div>
-                <button
-                  onClick={() => {
-                     if (selectedCompany.companyNo) {
-                       fetchSocialInsuranceDetail(selectedCompany.companyNo);
-                     }
-                   }}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
-                >
-                  搜索
-                </button>
-              </div>
-
-              {/* 社保明细列表 */}
-              <div className="max-h-96 overflow-y-auto">
-                {socialInsuranceLoading ? (
-                  <div className="text-center py-8">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                    <p className="text-gray-600">加载中...</p>
-                  </div>
-                ) : socialInsuranceData.length === 0 ? (
-                  <div className="text-center py-8">
-                    <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-600">暂无社保明细数据</p>
-                  </div>
-                ) : (
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200">
-                      <thead className="bg-gray-50">
-                        <tr>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">员工信息</th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">缴费基数</th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">个人缴费</th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">公司缴费</th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">状态</th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">操作</th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
-                        {socialInsuranceData.map((detail) => (
-                          <tr key={detail.id} className="hover:bg-gray-50">
-                            <td className="px-4 py-4 whitespace-nowrap">
-                              <div className="text-sm font-medium text-gray-900">{detail.employeeName}</div>
-                              <div className="text-sm text-gray-500">{detail.employeeNo}</div>
-                            </td>
-                            <td className="px-4 py-4 whitespace-nowrap">
-                               <div className="flex items-center text-sm text-gray-900">
-                                 <DollarSign className="h-4 w-4 text-gray-400 mr-1" />
-                                 ¥{detail.socialSecurityBase?.toLocaleString() || 0}
-                               </div>
-                             </td>
-                             <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                               ¥{detail.totalPersonalAmount?.toLocaleString() || 0}
-                             </td>
-                             <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                               ¥{detail.totalCompanyAmount?.toLocaleString() || 0}
-                             </td>
-                            <td className="px-4 py-4 whitespace-nowrap">
-                              <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                                detail.status === 'PAID' ? 'bg-green-100 text-green-800' :
-                                detail.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
-                                'bg-red-100 text-red-800'
-                              }`}>
-                                {detail.status === 'PAID' ? '已缴费' :
-                                 detail.status === 'PENDING' ? '待缴费' : '异常'}
-                              </span>
-                            </td>
-                            <td className="px-4 py-4 whitespace-nowrap text-sm font-medium">
-                              <button
-                                onClick={() => handleViewDetailInfo(detail)}
-                                className="text-blue-600 hover:text-blue-900 mr-3"
-                              >
-                                详情
-                              </button>
-                              {detail.status === 'PENDING' && (
-                                <button
-                                  onClick={() => handleUpdateStatus(detail.id, 'PAID')}
-                                  className="text-green-600 hover:text-green-900"
-                                >
-                                  标记已缴费
-                                </button>
-                              )}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
