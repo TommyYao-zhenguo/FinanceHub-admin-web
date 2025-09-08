@@ -14,7 +14,7 @@ import LoginPage from "./components/LoginPage";
 
 import CompanyManagementView from "./components/client/CompanyManagementView";
 import UserManagementView from "./components/client/UserManagementView";
-import InvoiceQuotaManagementView from "./components/client/InvoiceQuotaManagementView";
+import InvoiceQuotaManagementView from "./components/InvoiceQuotaManagementView";
 import CustomerServiceManagementView from "./components/CustomerServiceManagementView";
 import CustomerServiceView from "./components/CustomerServiceView";
 import SocialInsuranceConfigView from "./components/SocialInsuranceConfigView";

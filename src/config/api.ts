@@ -80,7 +80,7 @@ export const API_ENDPOINTS = {
     DELETE: "/api/v1/admin/housing-fund/configs",
   },
 
-  // 发票类型管理相关接口
+  // 发票类型相关接口
   INVOICE_TYPE: {
     LIST: "/api/v1/invoice-type/page",
     CREATE: "/api/v1/invoice-type",
@@ -88,6 +88,15 @@ export const API_ENDPOINTS = {
     DELETE: "/api/v1/invoice-type",
     DETAIL: "/api/v1/invoice-type",
     ACTIVE: "/api/v1/invoice-type/active",
+  },
+
+  // 开票额度相关接口
+  INVOICE_QUOTA: {
+    LIST: "/api/v1/admin/invoice-quota/page",
+    CREATE: "/api/v1/admin/invoice-quota",
+    UPDATE: "/api/v1/admin/invoice-quota",
+    DELETE: "/api/v1/admin/invoice-quota",
+    DETAIL: "/api/v1/admin/invoice-quota",
   },
 };
 
