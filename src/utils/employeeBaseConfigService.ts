@@ -26,7 +26,7 @@ export class EmployeeBaseConfigService {
       queryParams.append("employeeName", params.employeeName);
     if (params.status) queryParams.append("status", params.status);
 
-    const url = `/api/v1/employee/active/page?${queryParams.toString()}`;
+    const url = `/api/v1/admin/employee/active/page?${queryParams.toString()}`;
     const response = await httpClient.get<EmployeeListResponse>(url);
     return response;
   }
@@ -86,7 +86,7 @@ export class EmployeeBaseConfigService {
     data: UpdateEmployeeBaseConfigRequest
   ): Promise<EmployeeBaseConfig> {
     const response = await httpClient.put<EmployeeBaseConfig>(
-      `/api/v1/employee-base-config/${data.id}`,
+      `/api/v1/admin/employee-base-config/${data.id}`,
       data
     );
     return response;
@@ -109,7 +109,7 @@ export class EmployeeBaseConfigService {
     }
   ): Promise<void> {
     await httpClient.put<void>(
-      `/api/v1/employee/update-base/${employeeId}`,
+      `/api/v1/admin/employee/update-base/${employeeId}`,
       data
     );
   }
@@ -183,7 +183,7 @@ export class EmployeeBaseConfigService {
     itemDesc: string;
     itemHasConfig: boolean;
   }> {
-    const url = `/api/v1/employee/check-rate-configed?companyNo=${companyNo}`;
+    const url = `/api/v1/admin/employee/check-rate-configed?companyNo=${companyNo}`;
     const response = await httpClient.get<{
       itemDesc: string;
       itemHasConfig: boolean;
