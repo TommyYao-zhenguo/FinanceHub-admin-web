@@ -1,12 +1,12 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Upload, Download } from "lucide-react";
 import toast from "react-hot-toast";
-import { utils, writeFile } from "xlsx";
+import * as XLSX from "xlsx";
 import { TaxService, TaxUploadRecord } from "../services/taxService";
 
 export default function TaxUploadView() {
   const [records, setRecords] = useState<TaxUploadRecord[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const [selectedPeriod, setSelectedPeriod] = useState(
     new Date().toISOString().slice(0, 7)
@@ -22,7 +22,6 @@ export default function TaxUploadView() {
   // 获取上传记录
   const fetchUploadRecords = async (page: number = 1) => {
     try {
-      setLoading(true);
       const data = await TaxService.getUploadRecords(
         selectedPeriod,
         page,
@@ -38,8 +37,6 @@ export default function TaxUploadView() {
     } catch (error) {
       console.error("获取上传记录失败:", error);
       toast.error("获取上传记录失败");
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -79,9 +76,9 @@ export default function TaxUploadView() {
     ];
 
     // 创建工作簿
-    const ws = utils.aoa_to_sheet(templateData);
-    const wb = utils.book_new();
-    utils.book_append_sheet(wb, ws, "税费上传模板");
+    const ws = XLSX.utils.aoa_to_sheet(templateData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "税费上传模板");
 
     // 设置列宽
     ws["!cols"] = [
@@ -93,7 +90,7 @@ export default function TaxUploadView() {
     ];
 
     // 下载文件
-    writeFile(wb, "税费上传模板.xlsx");
+    XLSX.writeFile(wb, "税费上传模板.xlsx");
     toast.success("Excel模板下载成功");
   };
 
@@ -149,7 +146,7 @@ export default function TaxUploadView() {
 
     if (validFiles.length === 0) return;
 
-    setLoading(true);
+    setUploading(true);
 
     try {
       // 逐个上传文件
@@ -164,7 +161,7 @@ export default function TaxUploadView() {
       console.error("文件上传失败:", error);
       toast.error("文件上传失败");
     } finally {
-      setLoading(false);
+      setUploading(false);
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
@@ -234,7 +231,7 @@ export default function TaxUploadView() {
               className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
               onChange={handleChange}
               accept=".xlsx,.xls,.csv,.pdf"
-              disabled={loading}
+              disabled={uploading}
             />
 
             <div className="space-y-4">
@@ -244,14 +241,14 @@ export default function TaxUploadView() {
 
               <div>
                 <p className="text-lg font-medium text-gray-900">
-                  {loading ? "上传中..." : "拖拽文件到此处或点击选择文件"}
+                  {uploading ? "上传中..." : "拖拽文件到此处或点击选择文件"}
                 </p>
                 <p className="text-sm text-gray-500 mt-1">
                   支持 .xlsx, .xls, .csv, .pdf 格式
                 </p>
               </div>
 
-              {loading && (
+              {uploading && (
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <div
                     className="bg-purple-600 h-2 rounded-full animate-pulse"
