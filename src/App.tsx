@@ -21,6 +21,8 @@ import HousingFundConfigView from "./components/HousingFundConfigView";
 import TaxUploadView from "./components/TaxUploadView";
 import EmployeeBaseConfigView from "./components/EmployeeBaseConfigView";
 import InvoiceTypeManagementView from "./components/InvoiceTypeManagementView";
+import CompanyHousingFundListView from "./components/CompanyHousingFundListView";
+import CompanyHousingFundDetailView from "./components/CompanyHousingFundDetailView";
 
 import {
   AdminUserProvider,
@@ -39,6 +41,7 @@ const routeMap: Record<string, string> = {
   "/employee-base-config": "employee-base-config",
   "/social-insurance-config": "social-insurance-config",
   "/housing-fund-config": "housing-fund-config",
+  "/company-housing-fund-list": "company-housing-fund-list",
   "/tax-upload": "tax-upload",
   "/invoice-type-management": "invoice-type-management",
 };
@@ -53,6 +56,7 @@ const tabToRouteMap: Record<string, string> = {
   "employee-base-config": "/employee-base-config",
   "social-insurance-config": "/social-insurance-config",
   "housing-fund-config": "/housing-fund-config",
+  "company-housing-fund-list": "/company-housing-fund-list",
   "tax-upload": "/tax-upload",
   "invoice-type-management": "/invoice-type-management",
 };
@@ -216,6 +220,14 @@ function AppContent() {
             <Route
               path="/housing-fund-config"
               element={<HousingFundConfigView />}
+            />
+            <Route
+              path="/company-housing-fund-list"
+              element={<CompanyHousingFundListView />}
+            />
+            <Route
+              path="/company-housing-fund-detail/:companyNo"
+              element={<CompanyHousingFundDetailView />}
             />
             <Route path="/tax-upload" element={<TaxUploadView />} />
             <Route

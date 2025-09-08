@@ -109,6 +109,11 @@ export default function Sidebar({
         icon: Home,
       });
       items.push({
+        id: "company-housing-fund-list",
+        label: "公司公积金明细",
+        icon: Building2,
+      });
+      items.push({
         id: "employee-base-config",
         label: "社保和公积金基数配置",
         icon: Calculator,
