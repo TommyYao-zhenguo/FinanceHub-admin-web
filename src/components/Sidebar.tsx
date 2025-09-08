@@ -12,6 +12,7 @@ import {
   Upload,
   Calculator,
   FileText,
+  Receipt,
 } from "lucide-react";
 import { useAdminUserContext } from "../contexts/AdminUserContext";
 
@@ -95,7 +96,6 @@ export default function Sidebar({
         icon: UserCog,
       });
     }
-
     // 添加新的子菜单项
     if (isCustomerServiceUser()) {
       items.push({
@@ -132,6 +132,11 @@ export default function Sidebar({
         id: "invoice-type-management",
         label: "发票类型管理",
         icon: FileText,
+      });
+      items.push({
+        id: "invoice-quota-management",
+        label: "开票额度管理",
+        icon: Receipt,
       });
     }
 

@@ -14,6 +14,7 @@ import LoginPage from "./components/LoginPage";
 
 import CompanyManagementView from "./components/client/CompanyManagementView";
 import UserManagementView from "./components/client/UserManagementView";
+import InvoiceQuotaManagementView from "./components/client/InvoiceQuotaManagementView";
 import CustomerServiceManagementView from "./components/CustomerServiceManagementView";
 import CustomerServiceView from "./components/CustomerServiceView";
 import SocialInsuranceConfigView from "./components/SocialInsuranceConfigView";
@@ -40,6 +41,7 @@ const routeMap: Record<string, string> = {
   "/customer-service": "customer-service",
   "/client/company-management": "company-management",
   "/client/user-management": "user-management",
+  "/client/invoice-quota-management": "invoice-quota-management",
   "/employee-base-config": "employee-base-config",
   "/social-insurance-config": "social-insurance-config",
   "/housing-fund-config": "housing-fund-config",
@@ -57,6 +59,7 @@ const tabToRouteMap: Record<string, string> = {
   "customer-service": "/customer-service",
   "company-management": "/client/company-management",
   "user-management": "/client/user-management",
+  "invoice-quota-management": "/client/invoice-quota-management",
   "employee-base-config": "/employee-base-config",
   "social-insurance-config": "/social-insurance-config",
   "housing-fund-config": "/housing-fund-config",
@@ -214,6 +217,10 @@ function AppContent() {
             <Route
               path="/client/user-management"
               element={<UserManagementView />}
+            />
+            <Route
+              path="/client/invoice-quota-management"
+              element={<InvoiceQuotaManagementView />}
             />
             <Route
               path="/employee-base-config"
