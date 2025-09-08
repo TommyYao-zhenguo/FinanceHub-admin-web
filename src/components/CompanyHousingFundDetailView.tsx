@@ -129,11 +129,6 @@ export default function CompanyHousingFundDetailView() {
     navigate(-1);
   };
 
-  // 导出数据
-  const handleExport = () => {
-    toast.success("导出功能开发中...");
-  };
-
   // 格式化状态显示
   const getStatusDisplay = (status: string) => {
     switch (status) {
@@ -188,13 +183,7 @@ export default function CompanyHousingFundDetailView() {
             <p className="text-sm text-gray-500">公积金明细 ({companyNo})</p>
           </div>
         </div>
-        <button
-          onClick={handleExport}
-          className="flex items-center space-x-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
-        >
-          <Download className="w-4 h-4" />
-          <span>导出数据</span>
-        </button>
+        
       </div>
 
       {/* 搜索和筛选 */}
