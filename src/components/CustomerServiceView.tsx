@@ -1056,7 +1056,7 @@ export default function CustomerServiceView() {
                                     <td
                                       className={`px-4 py-2 whitespace-nowrap text-sm ${
                                         isDifferent
-                                          ? "text-red-600 font-medium"
+                                          ? "text-green-600 font-medium"
                                           : "text-gray-900"
                                       }`}
                                     >
@@ -1070,7 +1070,7 @@ export default function CustomerServiceView() {
                                     <td
                                       className={`px-4 py-2 whitespace-nowrap text-sm ${
                                         isDifferent
-                                          ? "text-green-600 font-medium"
+                                          ? "text-red-600 font-medium"
                                           : "text-gray-900"
                                       }`}
                                     >
