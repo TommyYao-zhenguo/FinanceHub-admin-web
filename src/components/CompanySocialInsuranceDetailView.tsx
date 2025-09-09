@@ -28,7 +28,12 @@ export default function CompanySocialInsuranceDetailView() {
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [searchName, setSearchName] = useState("");
-  const [searchPeriod, setSearchPeriod] = useState("");
+  const [searchPeriod, setSearchPeriod] = useState(() => {
+    const now = new Date();
+    return `${now.getFullYear()}-${(now.getMonth() + 1)
+      .toString()
+      .padStart(2, "0")}`;
+  });
   
   const navigate = useNavigate();
   const { companyNo } = useParams<{ companyNo: string }>();
@@ -44,7 +49,7 @@ export default function CompanySocialInsuranceDetailView() {
       
       const requestParams: SocialInsuranceDetailQueryParams = {
         companyNo,
-        period: queryParams.period || "2024-01",
+        period: queryParams.period || searchPeriod,
         employeeName: queryParams.employeeName || "",
         current: queryParams.current,
         size: queryParams.size
@@ -190,12 +195,34 @@ export default function CompanySocialInsuranceDetailView() {
                 className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-transparent appearance-none bg-white"
               >
                 <option value="">选择期间</option>
-                <option value="2024-01">2024年1月</option>
-                <option value="2024-02">2024年2月</option>
-                <option value="2024-03">2024年3月</option>
-                <option value="2024-04">2024年4月</option>
-                <option value="2024-05">2024年5月</option>
-                <option value="2024-06">2024年6月</option>
+                {(() => {
+                  const options = [];
+                  const currentDate = new Date();
+                  const currentYear = currentDate.getFullYear();
+                  const currentMonth = currentDate.getMonth() + 1;
+                  
+                  // 生成当前年份的所有月份
+                  for (let month = 1; month <= 12; month++) {
+                    const value = `${currentYear}-${month.toString().padStart(2, '0')}`;
+                    const label = `${currentYear}年${month}月`;
+                    options.push(
+                      <option key={value} value={value}>{label}</option>
+                    );
+                  }
+                  
+                  // 如果当前不是1月，也添加去年的月份
+                  if (currentMonth > 1) {
+                    for (let month = 1; month <= 12; month++) {
+                      const value = `${currentYear - 1}-${month.toString().padStart(2, '0')}`;
+                      const label = `${currentYear - 1}年${month}月`;
+                      options.unshift(
+                        <option key={value} value={value}>{label}</option>
+                      );
+                    }
+                  }
+                  
+                  return options;
+                })()}
               </select>
             </div>
           </div>
@@ -292,7 +319,6 @@ export default function CompanySocialInsuranceDetailView() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center text-sm text-gray-900">
-                      <DollarSign className="h-4 w-4 text-gray-400 mr-1" />
                       {formatAmount(detail.socialSecurityBase || 0)}
                     </div>
                   </td>

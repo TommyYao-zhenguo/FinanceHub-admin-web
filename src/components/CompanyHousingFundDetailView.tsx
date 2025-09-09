@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { ArrowLeft, Building2, User, Download, Search } from "lucide-react";
+import { ArrowLeft, Building2, User, Search } from "lucide-react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import toast from "react-hot-toast";
 import { HousingFundService, HousingFundEmployee } from "../services/housingFundService";
@@ -42,7 +42,12 @@ export default function CompanyHousingFundDetailView() {
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [searchName, setSearchName] = useState("");
-  const [searchMonth, setSearchMonth] = useState("");
+  const [searchMonth, setSearchMonth] = useState(() => {
+    const now = new Date();
+    return `${now.getFullYear()}-${(now.getMonth() + 1)
+      .toString()
+      .padStart(2, "0")}`;
+  });
   
   const navigate = useNavigate();
   const { companyNo } = useParams<{ companyNo: string }>();
@@ -59,7 +64,7 @@ export default function CompanyHousingFundDetailView() {
       // 调用真实的API接口
       const response = await HousingFundService.getHousingFundListWithPage(
         companyNo,
-        queryParams.month || "2024-01", // 默认期间
+        queryParams.month || searchMonth, // 使用当前月份作为默认期间
         queryParams.employeeName || "",
         queryParams.current,
         queryParams.size
