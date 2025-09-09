@@ -42,6 +42,7 @@ export default function CustomerServiceView() {
     COMPLETED: 0,
     PENDING: 0,
     PROCESSING: 0,
+    INVALID: 0,
     urgentRequests: 0,
     highPriorityRequests: 0,
     requestsByType: {},
@@ -242,6 +243,11 @@ export default function CustomerServiceView() {
       label: "已完成",
       count: statistics.COMPLETED ? statistics.COMPLETED : 0,
     },
+    {
+      id: "INVALID",
+      label: "已作废",
+      count: statistics.INVALID ? statistics.INVALID : 0,
+    },
   ];
 
   const getStatusColor = (status: string) => {
@@ -252,6 +258,8 @@ export default function CustomerServiceView() {
         return "bg-yellow-100 text-yellow-800";
       case "COMPLETED":
         return "bg-green-100 text-green-800";
+      case "INVALID":
+        return "bg-gray-100 text-gray-800";
       default:
         return "bg-gray-100 text-gray-800";
     }
@@ -286,6 +294,8 @@ export default function CustomerServiceView() {
         return "处理中";
       case "COMPLETED":
         return "已完成";
+      case "INVALID":
+        return "已作废";
       default:
         return status;
     }
@@ -489,6 +499,30 @@ export default function CustomerServiceView() {
 
   // 处理消息选择
   const handleMessageSelect = async (request: DisplayRequest) => {
+    const selectMessage = async () => {
+      // 如果是作废状态的消息，重新从服务器获取最新详情
+      if (request.status === "INVALID") {
+        try {
+          const latestRequest = await CustomerServiceService.getRequest(request.id);
+          const updatedRequest: DisplayRequest = {
+            ...latestRequest,
+            messageType: getMessageTypeFromTaskType(latestRequest.taskType),
+            actionRequired: latestRequest.status === "PENDING",
+          };
+          setSelectedMessage(updatedRequest);
+          await loadMessageDetails(updatedRequest);
+        } catch (error) {
+          console.error("获取作废消息详情失败:", error);
+          toast.error("获取消息详情失败，请重试");
+          setSelectedMessage(request);
+          await loadMessageDetails(request);
+        }
+      } else {
+        setSelectedMessage(request);
+        await loadMessageDetails(request);
+      }
+    };
+
     if (uploadedFiles.length > 0) {
       Modal.confirm({
         title: "切换消息确认",
@@ -497,13 +531,11 @@ export default function CustomerServiceView() {
         cancelText: "取消",
         onOk: async () => {
           setUploadedFiles([]);
-          setSelectedMessage(request);
-          await loadMessageDetails(request);
+          await selectMessage();
         },
       });
     } else {
-      setSelectedMessage(request);
-      await loadMessageDetails(request);
+      await selectMessage();
     }
   };
 
@@ -613,7 +645,7 @@ export default function CustomerServiceView() {
               <RefreshCw className="h-5 w-5 flex-shrink-0" />
             </button>
           </div>
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-4 gap-3">
             <button
               onClick={() => setSelectedCategory("PENDING")}
               className={`p-3 rounded-lg transition-all duration-200 text-left ${
@@ -652,6 +684,19 @@ export default function CustomerServiceView() {
                 {statistics.COMPLETED ? statistics.COMPLETED : 0}
               </div>
               <div className="text-sm text-green-600">已完成</div>
+            </button>
+            <button
+              onClick={() => setSelectedCategory("INVALID")}
+              className={`p-3 rounded-lg transition-all duration-200 text-left ${
+                selectedCategory === "INVALID"
+                  ? "bg-gray-100 border-2 border-gray-300 shadow-md transform scale-105"
+                  : "bg-gray-50 hover:bg-gray-100 hover:shadow-sm"
+              }`}
+            >
+              <div className="text-2xl font-bold text-gray-600">
+                {statistics.INVALID ? statistics.INVALID : 0}
+              </div>
+              <div className="text-sm text-gray-600">已作废</div>
             </button>
           </div>
         </div>
@@ -758,6 +803,13 @@ export default function CustomerServiceView() {
                               {getTaskTypeText(request.taskType)}
                             </span>
                           </div>
+                          {request.status === "INVALID" && (
+                            <div className="mt-1">
+                              <span className="text-xs text-gray-500 italic">
+                                该任务因关联发票申请被修改而作废
+                              </span>
+                            </div>
+                          )}
                         </div>
                         <div className="flex flex-col items-end space-y-1">
                           <span className="text-xs text-gray-500">

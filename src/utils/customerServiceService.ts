@@ -54,6 +54,7 @@ export interface CustomerServiceStatistics {
   COMPLETED: number;
   PENDING: number;
   PROCESSING: number;
+  INVALID: number;
   urgentRequests: number;
   highPriorityRequests: number;
   requestsByType: Record<string, number>;
