@@ -185,7 +185,7 @@ export default function CompanyManagementView() {
     }
 
     if (!formData.taxNumber.trim()) {
-      errors.taxNumber = "公司税号不能为空";
+      errors.taxNumber = "统一社会信用代码不能为空";
     }
 
     setFormErrors(errors);
@@ -331,7 +331,7 @@ export default function CompanyManagementView() {
                     公司名称
                   </th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-gray-900">
-                    公司税号
+                    统一社会信用代码
                   </th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-gray-900">
                     类型
@@ -489,7 +489,7 @@ export default function CompanyManagementView() {
 
               <div className="col-span-6 sm:col-span-3">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  公司税号 <span className="text-red-500">*</span>
+                  统一社会信用代码 <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -500,7 +500,7 @@ export default function CompanyManagementView() {
                   className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none ${
                     formErrors.taxNumber ? "border-red-500" : "border-gray-300"
                   }`}
-                  placeholder="请输入公司税号"
+                  placeholder="请输入统一社会信用代码"
                   autoFocus
                 />
 

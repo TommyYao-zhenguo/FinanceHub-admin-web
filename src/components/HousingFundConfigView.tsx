@@ -293,7 +293,7 @@ export default function HousingFundConfigView() {
                   公司名称
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  税号
+                  统一社会信用代码
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   公司比例

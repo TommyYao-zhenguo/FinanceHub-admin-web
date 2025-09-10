@@ -469,8 +469,7 @@ export default function SocialInsuranceConfigView() {
                             {group.companyInfo.companyName || "未知公司"}
                           </h3>
                           <p className="text-sm text-gray-600">
-                            税号: {group.companyInfo.taxNumber || "-"} | 公司编号:{" "}
-                            {group.companyInfo.companyNo || "-"}
+                            统一社会信用代码: {group.companyInfo.taxNumber || "-"}
                           </p>
                         </div>
                         <div className="flex items-center space-x-4">
@@ -770,12 +769,10 @@ export default function SocialInsuranceConfigView() {
                 {editingConfig ? (
                   <div className="p-3 bg-gray-50 rounded-lg">
                     <div className="font-medium">{editingConfig.companyName}</div>
-                    <div className="text-sm text-gray-600">
-                      公司编号: {editingConfig.companyNo}
-                    </div>
+                    
                     {editingConfig.taxNumber && (
                       <div className="text-sm text-gray-600">
-                        税号: {editingConfig.taxNumber}
+                        统一社会信用代码: {editingConfig.taxNumber}
                       </div>
                     )}
                   </div>

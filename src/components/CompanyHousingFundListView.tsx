@@ -144,7 +144,7 @@ export default function CompanyHousingFundListView() {
                 公司信息
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                税号
+                统一社会信用代码
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 客服
@@ -193,9 +193,7 @@ export default function CompanyHousingFundListView() {
                         <div className="text-sm font-medium text-gray-900">
                           {company.companyName}
                         </div>
-                        <div className="text-sm text-gray-500">
-                          {company.companyNo}
-                        </div>
+                     
                       </div>
                     </div>
                   </td>

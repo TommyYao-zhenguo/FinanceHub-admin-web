@@ -331,7 +331,7 @@ export default function InvoiceTypeManagementView() {
                       {company.companyName}
                     </h3>
                     <p className="text-sm text-gray-500">
-                      税号: {company.taxNumber}
+                      统一社会信用代码: {company.taxNumber}
                     </p>
                     <div className="flex items-center mt-1">
                       <span

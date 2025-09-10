@@ -3,7 +3,7 @@ export interface HousingFundConfig {
   id?: string;
   companyNo: string; // 公司编号
   companyName?: string; // 公司名称
-  taxNumber?: string; // 税号
+  taxNumber?: string; // 统一社会信用代码
   companyRate: number; // 公司缴存比例
   personalRate: number; // 个人缴存比例
   minBase: number; // 最低缴存基数

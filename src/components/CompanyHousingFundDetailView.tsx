@@ -2,7 +2,10 @@ import React, { useState, useEffect } from "react";
 import { ArrowLeft, Building2, User, Search } from "lucide-react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import toast from "react-hot-toast";
-import { HousingFundService, HousingFundEmployee } from "../services/housingFundService";
+import {
+  HousingFundService,
+  HousingFundEmployee,
+} from "../services/housingFundService";
 
 // 公积金明细数据类型
 interface HousingFundDetail {
@@ -30,8 +33,6 @@ interface QueryParams {
   month?: string;
 }
 
-
-
 export default function CompanyHousingFundDetailView() {
   const [details, setDetails] = useState<HousingFundDetail[]>([]);
   const [loading, setLoading] = useState(false);
@@ -48,7 +49,7 @@ export default function CompanyHousingFundDetailView() {
       .toString()
       .padStart(2, "0")}`;
   });
-  
+
   const navigate = useNavigate();
   const { companyNo } = useParams<{ companyNo: string }>();
   const location = useLocation();
@@ -57,10 +58,10 @@ export default function CompanyHousingFundDetailView() {
   // 获取公积金明细列表
   const fetchHousingFundDetails = async () => {
     if (!companyNo) return;
-    
+
     try {
       setLoading(true);
-      
+
       // 调用真实的API接口
       const response = await HousingFundService.getHousingFundListWithPage(
         companyNo,
@@ -69,24 +70,26 @@ export default function CompanyHousingFundDetailView() {
         queryParams.current,
         queryParams.size
       );
-      
+
       // 将API返回的数据转换为组件需要的格式
-       const transformedRecords: HousingFundDetail[] = response.records.map((item: HousingFundEmployee) => ({
-        id: item.id,
-        employeeName: item.employeeName,
-        employeeNo: item.employeeNo,
-        idCard: item.employeeId, // 使用employeeId作为身份证号
-        month: item.period,
-        personalAmount: item.personalAmount,
-        companyAmount: item.companyAmount,
-        totalAmount: item.totalAmount,
-        personalRatio: item.personalRate,
-        companyRatio: item.companyRate,
-        baseSalary: item.fundBase, // 使用fundBase作为基数工资
-        status: item.status,
-        createTime: item.createTime
-      }));
-      
+      const transformedRecords: HousingFundDetail[] = response.records.map(
+        (item: HousingFundEmployee) => ({
+          id: item.id,
+          employeeName: item.employeeName,
+          employeeNo: item.employeeNo,
+          idCard: item.employeeId, // 使用employeeId作为身份证号
+          month: item.period,
+          personalAmount: item.personalAmount,
+          companyAmount: item.companyAmount,
+          totalAmount: item.totalAmount,
+          personalRatio: item.personalRate,
+          companyRatio: item.companyRate,
+          baseSalary: item.fundBase, // 使用fundBase作为基数工资
+          status: item.status,
+          createTime: item.createTime,
+        })
+      );
+
       setDetails(transformedRecords);
       setTotal(response.total);
       setTotalPages(response.pages);
@@ -134,39 +137,9 @@ export default function CompanyHousingFundDetailView() {
     navigate(-1);
   };
 
-  // 格式化状态显示
-  const getStatusDisplay = (status: string) => {
-    switch (status) {
-      case "PAID":
-        return (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-            已缴费
-          </span>
-        );
-      case "UNPAID":
-        return (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-            未缴费
-          </span>
-        );
-      case "PENDING":
-        return (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-            待处理
-          </span>
-        );
-      default:
-        return (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-            未知
-          </span>
-        );
-    }
-  };
-
   // 格式化金额显示
   const formatAmount = (amount: number) => {
-    return `¥${amount.toLocaleString('zh-CN', { minimumFractionDigits: 2 })}`;
+    return `¥${amount.toLocaleString("zh-CN", { minimumFractionDigits: 2 })}`;
   };
 
   return (
@@ -185,10 +158,9 @@ export default function CompanyHousingFundDetailView() {
           <Building2 className="w-6 h-6 text-blue-600" />
           <div>
             <h2 className="text-2xl font-bold text-gray-900">{companyName}</h2>
-            <p className="text-sm text-gray-500">公积金明细 ({companyNo})</p>
+            <p className="text-sm text-gray-500">公积金明细 </p>
           </div>
         </div>
-        
       </div>
 
       {/* 搜索和筛选 */}
@@ -232,8 +204,6 @@ export default function CompanyHousingFundDetailView() {
         </div>
       </div>
 
-
-
       {/* 明细列表 */}
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
@@ -256,9 +226,6 @@ export default function CompanyHousingFundDetailView() {
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 合计金额
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                状态
               </th>
             </tr>
           </thead>
@@ -295,9 +262,6 @@ export default function CompanyHousingFundDetailView() {
                         <div className="text-sm font-medium text-gray-900">
                           {detail.employeeName}
                         </div>
-                        <div className="text-sm text-gray-500">
-                          {detail.employeeNo}
-                        </div>
                       </div>
                     </div>
                   </td>
@@ -305,27 +269,30 @@ export default function CompanyHousingFundDetailView() {
                     <div className="text-sm text-gray-900">{detail.month}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{formatAmount(detail.baseSalary)}</div>
+                    <div className="text-sm text-gray-900">
+                      {formatAmount(detail.baseSalary)}
+                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-900">
                       {formatAmount(detail.personalAmount)}
-                      <span className="text-xs text-gray-500 ml-1">({detail.personalRatio}%)</span>
+                      <span className="text-xs text-gray-500 ml-1">
+                        ({detail.personalRatio}%)
+                      </span>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-900">
                       {formatAmount(detail.companyAmount)}
-                      <span className="text-xs text-gray-500 ml-1">({detail.companyRatio}%)</span>
+                      <span className="text-xs text-gray-500 ml-1">
+                        ({detail.companyRatio}%)
+                      </span>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm font-medium text-gray-900">
                       {formatAmount(detail.totalAmount)}
                     </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {getStatusDisplay(detail.status)}
                   </td>
                 </tr>
               ))
@@ -348,10 +315,12 @@ export default function CompanyHousingFundDetailView() {
             >
               上一页
             </button>
-            
+
             {/* 页码显示 */}
             {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-              const page = Math.max(1, Math.min(totalPages - 4, queryParams.current - 2)) + i;
+              const page =
+                Math.max(1, Math.min(totalPages - 4, queryParams.current - 2)) +
+                i;
               if (page > totalPages) return null;
               return (
                 <button
@@ -367,7 +336,7 @@ export default function CompanyHousingFundDetailView() {
                 </button>
               );
             })}
-            
+
             <button
               onClick={() => handlePageChange(queryParams.current + 1)}
               disabled={queryParams.current === totalPages}
