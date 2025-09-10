@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Receipt, Plus, Edit, Search, X, Calendar } from "lucide-react";
 import { Company } from "../../types/company";
 import { CompanyService } from "../../utils/companyService";
+import { InvoiceQuotaService, CompanyQuotaQueryParams } from "../../utils/invoiceQuotaService";
 import toast from "react-hot-toast";
 
 // 开票额度接口定义
@@ -66,48 +67,44 @@ export default function InvoiceQuotaManagementView() {
     }
   };
 
-  // 加载开票额度列表 (模拟数据，实际需要调用API)
+  // 加载开票额度列表（使用真实API）
   const loadQuotas = async () => {
     try {
       setLoading(true);
-      // TODO: 实际调用API
-      // const response = await InvoiceQuotaService.getQuotaList(searchParams);
       
-      // 模拟数据
-      const mockData: InvoiceQuota[] = [
-        {
-          id: 1,
-          companyId: "COMP001",
-          companyName: "测试公司A",
-          year: 2024,
-          month: 12,
-          maxAmount: 1000000,
-          usedAmount: 350000,
-          remainingAmount: 650000,
-          createTime: "2024-12-01 10:00:00",
-          updateTime: "2024-12-15 14:30:00",
-        },
-        {
-          id: 2,
-          companyId: "COMP002",
-          companyName: "测试公司B",
-          year: 2024,
-          month: 12,
-          maxAmount: 500000,
-          usedAmount: 200000,
-          remainingAmount: 300000,
-          createTime: "2024-12-01 10:00:00",
-          updateTime: "2024-12-10 16:20:00",
-        },
-      ];
+      // 调用真实API获取公司和额度关联数据
+      const queryParams: CompanyQuotaQueryParams = {
+        current: 1,
+        size: 100, // 获取所有数据用于前端过滤
+        companyName: searchParams.companyName || undefined,
+      };
       
-      // 根据搜索条件过滤
-      const filteredData = mockData.filter(quota => {
-        const matchCompany = !searchParams.companyName || 
-          quota.companyName.toLowerCase().includes(searchParams.companyName.toLowerCase());
+      const response = await InvoiceQuotaService.getAllCompaniesWithQuota(queryParams);
+      
+      // 转换数据格式以匹配前端接口
+      const transformedData: InvoiceQuota[] = response.records.map(record => {
+        // 解析统计日期 (YYYY-MM 格式)
+        const [year, month] = record.statsDate ? record.statsDate.split('-').map(Number) : [0, 0];
+        
+        return {
+          id: record.id,
+          companyId: record.companyNo || '',
+          companyName: record.companyName || '未知公司',
+          year: year || new Date().getFullYear(),
+          month: month || new Date().getMonth() + 1,
+          maxAmount: record.maxAmount || 0,
+          usedAmount: 0, // 后端暂未提供已使用额度
+          remainingAmount: record.maxAmount || 0, // 暂时等于最大额度
+          createTime: record.createTime,
+          updateTime: record.updateTime,
+        };
+      });
+      
+      // 根据年月搜索条件过滤
+      const filteredData = transformedData.filter(quota => {
         const matchYear = quota.year === searchParams.year;
         const matchMonth = quota.month === searchParams.month;
-        return matchCompany && matchYear && matchMonth;
+        return matchYear && matchMonth;
       });
       
       setQuotas(filteredData);

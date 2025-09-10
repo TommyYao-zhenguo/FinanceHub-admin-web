@@ -4,7 +4,8 @@ import { API_ENDPOINTS } from "../config/api";
 // 开票额度接口定义
 export interface InvoiceQuota {
   id: number;
-  companyNo: string;
+  companyNo?: string;
+  taxNumber: string;
   companyName?: string;
   statsDate: string; // 统计日期，格式：YYYY-MM
   maxAmount: number;
@@ -15,6 +16,7 @@ export interface InvoiceQuota {
 // 创建开票额度请求
 export interface CreateInvoiceQuotaRequest {
   companyNo: string;
+  taxNumber: string;
   statsDate: string;
   maxAmount: number;
 }
@@ -24,6 +26,12 @@ export interface UpdateInvoiceQuotaRequest {
   id: number;
   companyNo: string;
   statsDate: string;
+  maxAmount: number;
+}
+
+// 简化的更新开票额度请求（仅更新额度）
+export interface UpdateInvoiceQuotaAmountRequest {
+  id: number;
   maxAmount: number;
 }
 
@@ -42,6 +50,13 @@ export interface InvoiceQuotaQueryParams {
   size?: number;
   companyNo?: string;
   statsDate?: string;
+}
+
+// 公司和额度关联查询参数
+export interface CompanyQuotaQueryParams {
+  current?: number;
+  size?: number;
+  companyName?: string;
 }
 
 export class InvoiceQuotaService {
@@ -84,6 +99,16 @@ export class InvoiceQuotaService {
     );
   }
 
+  // 更新开票额度（仅更新maxAmount）
+  static async updateInvoiceQuotaAmount(
+    data: UpdateInvoiceQuotaAmountRequest
+  ): Promise<InvoiceQuota> {
+    return await httpClient.put<InvoiceQuota>(
+      `${API_ENDPOINTS.INVOICE_QUOTA.UPDATE_AMOUNT}/${data.id}`,
+      { maxAmount: data.maxAmount }
+    );
+  }
+
   // 删除开票额度
   static async deleteInvoiceQuota(id: number): Promise<void> {
     return await httpClient.delete<void>(
@@ -96,5 +121,22 @@ export class InvoiceQuotaService {
     return await httpClient.get<InvoiceQuota>(
       `${API_ENDPOINTS.INVOICE_QUOTA.DETAIL}/${id}`
     );
+  }
+
+  // 获取所有公司及其开票额度（左连接查询）
+  static async getAllCompaniesWithQuota(
+    params: CompanyQuotaQueryParams = {}
+  ): Promise<InvoiceQuotaPageResponse> {
+    const queryParams = new URLSearchParams();
+
+    if (params.current !== undefined)
+      queryParams.append("current", params.current.toString());
+    if (params.size !== undefined)
+      queryParams.append("size", params.size.toString());
+    if (params.companyName)
+      queryParams.append("companyName", params.companyName);
+
+    const url = `${API_ENDPOINTS.INVOICE_QUOTA.ALL_COMPANIES}?${queryParams.toString()}`;
+    return await httpClient.get<InvoiceQuotaPageResponse>(url);
   }
 }

@@ -93,8 +93,10 @@ export const API_ENDPOINTS = {
   // 开票额度相关接口
   INVOICE_QUOTA: {
     LIST: "/api/v1/admin/invoice-quota/page",
+    ALL_COMPANIES: "/api/v1/admin/invoice-quota/all-companies",
     CREATE: "/api/v1/admin/invoice-quota",
     UPDATE: "/api/v1/admin/invoice-quota",
+    UPDATE_AMOUNT: "/api/v1/admin/invoice-quota",
     DELETE: "/api/v1/admin/invoice-quota",
     DETAIL: "/api/v1/admin/invoice-quota",
   },
