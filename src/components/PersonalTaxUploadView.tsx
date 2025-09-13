@@ -324,7 +324,7 @@ export default function PersonalTaxUploadView() {
               {records.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={4}
+                    colSpan={6}
                     className="px-6 py-8 text-center text-gray-500"
                   >
                     暂无上传记录
@@ -333,9 +333,19 @@ export default function PersonalTaxUploadView() {
               ) : (
                 records.map((record, index) => (
                   <tr
-                    key={`${record.companyNo}-${record.taxType}-${index}`}
+                    key={`${record.employeeName}-${record.idCard}-${index}`}
                     className="hover:bg-gray-50"
                   >
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">
+                        {record.employeeName}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">
+                        {record.idCard}
+                      </div>
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">
                         {record.companyName}
@@ -343,7 +353,7 @@ export default function PersonalTaxUploadView() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">
-                        {record.taxName}
+                        {record.creditCode}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">

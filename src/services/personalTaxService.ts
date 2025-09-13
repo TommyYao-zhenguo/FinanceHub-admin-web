@@ -3,11 +3,10 @@ import { httpClient } from "../utils/http";
 // 个税上传记录接口
 export interface PersonalTaxUploadRecord {
   period: string;
-  companyNo: string;
+  employeeName: string;
+  idCard: string;
   companyName: string;
   creditCode: string;
-  taxType: string;
-  taxName: string;
   amount: number;
 }
 
