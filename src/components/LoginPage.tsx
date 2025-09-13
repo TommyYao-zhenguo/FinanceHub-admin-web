@@ -178,7 +178,6 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-slate-900 to-black relative overflow-hidden">
-      // 在应用根组件添加
       <Toaster position="top-right" />
       {/* 动态背景粒子 */}
       <div className="absolute inset-0">

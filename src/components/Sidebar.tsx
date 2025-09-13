@@ -129,6 +129,11 @@ export default function Sidebar({
         icon: Upload,
       });
       items.push({
+        id: "personal-tax-upload",
+        label: "个税上传",
+        icon: Upload,
+      });
+      items.push({
         id: "invoice-type-management",
         label: "发票类型管理",
         icon: FileText,

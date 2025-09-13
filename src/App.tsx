@@ -20,6 +20,7 @@ import CustomerServiceView from "./components/CustomerServiceView";
 import SocialInsuranceConfigView from "./components/SocialInsuranceConfigView";
 import HousingFundConfigView from "./components/HousingFundConfigView";
 import TaxUploadView from "./components/TaxUploadView";
+import PersonalTaxUploadView from "./components/PersonalTaxUploadView";
 import EmployeeBaseConfigView from "./components/EmployeeBaseConfigView";
 import InvoiceTypeManagementView from "./components/InvoiceTypeManagementView";
 import CompanySocialInsuranceListView from "./components/CompanySocialInsuranceListView";
@@ -67,6 +68,7 @@ const tabToRouteMap: Record<string, string> = {
   "company-social-insurance-list": "/company-social-insurance-list",
   "company-social-insurance-detail": "/social-insurance-detail",
   "tax-upload": "/tax-upload",
+  "personal-tax-upload": "/personal-tax-upload",
   "invoice-type-management": "/invoice-type-management",
 };
 
@@ -251,6 +253,7 @@ function AppContent() {
               element={<CompanySocialInsuranceDetailView />}
             />
             <Route path="/tax-upload" element={<TaxUploadView />} />
+            <Route path="/personal-tax-upload" element={<PersonalTaxUploadView />} />
             <Route
               path="/invoice-type-management"
               element={<InvoiceTypeManagementView />}
