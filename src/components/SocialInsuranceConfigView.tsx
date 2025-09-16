@@ -11,9 +11,7 @@ import {
 import toast from "react-hot-toast";
 import { SocialInsuranceConfigService } from "../utils/socialInsuranceConfigService";
 import type { SocialInsuranceDetailConfig } from "../types/socialInsuranceConfig";
-import {
-  SocialInsuranceConfig,
-} from "../types/socialInsuranceConfig";
+import { SocialInsuranceConfig } from "../types/socialInsuranceConfig";
 import CompanySelector from "./CompanySelector";
 
 // 定义公司配置数据类型
@@ -35,13 +33,17 @@ const INSURANCE_TYPES = [
 
 export default function SocialInsuranceConfigView() {
   const [configuredData, setConfiguredData] = useState<CompanyConfigData[]>([]);
-  const [unconfiguredData, setUnconfiguredData] = useState<CompanyConfigData[]>([]);
+  const [unconfiguredData, setUnconfiguredData] = useState<CompanyConfigData[]>(
+    []
+  );
   const [loading, setLoading] = useState(true);
   const [searchCompanyName, setSearchCompanyName] = useState<string>("");
   const [showForm, setShowForm] = useState(false);
   const [editingConfig, setEditingConfig] =
     useState<SocialInsuranceConfig | null>(null);
-  const [activeTab, setActiveTab] = useState<'configured' | 'unconfigured'>('configured');
+  const [activeTab, setActiveTab] = useState<"configured" | "unconfigured">(
+    "configured"
+  );
 
   // 已配置公司的分页状态
   const [configuredPagination, setConfiguredPagination] = useState({
@@ -78,8 +80,15 @@ export default function SocialInsuranceConfigView() {
 
   // 当分页改变时重新加载数据
   useEffect(() => {
-    if (configuredPagination.current > 1 || unconfiguredPagination.current > 1) {
-      loadAllData(searchCompanyName || undefined, configuredPagination.current, unconfiguredPagination.current);
+    if (
+      configuredPagination.current > 1 ||
+      unconfiguredPagination.current > 1
+    ) {
+      loadAllData(
+        searchCompanyName || undefined,
+        configuredPagination.current,
+        unconfiguredPagination.current
+      );
     }
   }, [configuredPagination.current, unconfiguredPagination.current]);
 
@@ -102,7 +111,7 @@ export default function SocialInsuranceConfigView() {
         const insuranceType = config.insuranceType;
         if (
           updatedBatchFormData.configs[
-          insuranceType as keyof typeof updatedBatchFormData.configs
+            insuranceType as keyof typeof updatedBatchFormData.configs
           ]
         ) {
           updatedBatchFormData.configs[
@@ -120,10 +129,14 @@ export default function SocialInsuranceConfigView() {
   };
 
   // 加载所有数据并分离已配置和未配置
-  const loadAllData = async (companyName?: string, configuredPage?: number, unconfiguredPage?: number) => {
+  const loadAllData = async (
+    companyName?: string,
+    configuredPage?: number,
+    unconfiguredPage?: number
+  ) => {
     try {
       setLoading(true);
-      
+
       // 获取足够大的页面来包含所有数据，然后在前端分离
       const params = {
         current: 1,
@@ -144,24 +157,36 @@ export default function SocialInsuranceConfigView() {
       );
 
       // 分离已配置和未配置的公司
-      const configured = transformedRecords.filter(company => 
-        company.configs && company.configs.length > 0
+      const configured = transformedRecords.filter(
+        (company) => company.configs && company.configs.length > 0
       );
-      const unconfigured = transformedRecords.filter(company => 
-        !company.configs || company.configs.length === 0
+      const unconfigured = transformedRecords.filter(
+        (company) => !company.configs || company.configs.length === 0
       );
 
       // 实现前端分页
-      const configuredCurrentPage = configuredPage || configuredPagination.current;
-      const unconfiguredCurrentPage = unconfiguredPage || unconfiguredPagination.current;
-      
-      const configuredStartIndex = (configuredCurrentPage - 1) * configuredPagination.size;
-      const configuredEndIndex = configuredStartIndex + configuredPagination.size;
-      const configuredPageData = configured.slice(configuredStartIndex, configuredEndIndex);
-      
-      const unconfiguredStartIndex = (unconfiguredCurrentPage - 1) * unconfiguredPagination.size;
-      const unconfiguredEndIndex = unconfiguredStartIndex + unconfiguredPagination.size;
-      const unconfiguredPageData = unconfigured.slice(unconfiguredStartIndex, unconfiguredEndIndex);
+      const configuredCurrentPage =
+        configuredPage || configuredPagination.current;
+      const unconfiguredCurrentPage =
+        unconfiguredPage || unconfiguredPagination.current;
+
+      const configuredStartIndex =
+        (configuredCurrentPage - 1) * configuredPagination.size;
+      const configuredEndIndex =
+        configuredStartIndex + configuredPagination.size;
+      const configuredPageData = configured.slice(
+        configuredStartIndex,
+        configuredEndIndex
+      );
+
+      const unconfiguredStartIndex =
+        (unconfiguredCurrentPage - 1) * unconfiguredPagination.size;
+      const unconfiguredEndIndex =
+        unconfiguredStartIndex + unconfiguredPagination.size;
+      const unconfiguredPageData = unconfigured.slice(
+        unconfiguredStartIndex,
+        unconfiguredEndIndex
+      );
 
       setConfiguredData(configuredPageData);
       setConfiguredPagination((prev) => ({
@@ -184,8 +209,6 @@ export default function SocialInsuranceConfigView() {
       setLoading(false);
     }
   };
-
-
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -221,7 +244,11 @@ export default function SocialInsuranceConfigView() {
       setEditingConfig(null);
       resetForm();
       // 重新加载数据
-      loadAllData(searchCompanyName || undefined, configuredPagination.current, unconfiguredPagination.current);
+      loadAllData(
+        searchCompanyName || undefined,
+        configuredPagination.current,
+        unconfiguredPagination.current
+      );
     } catch {
       toast.error("配置保存失败");
     } finally {
@@ -246,7 +273,9 @@ export default function SocialInsuranceConfigView() {
     personalRate: number,
     companyRate: number
   ): string => {
-    return (personalRate + companyRate).toFixed(1);
+    const safePersonalRate = personalRate || 0;
+    const safeCompanyRate = companyRate || 0;
+    return (safePersonalRate + safeCompanyRate).toFixed(2);
   };
 
   // 更新险种比例
@@ -325,7 +354,11 @@ export default function SocialInsuranceConfigView() {
       await SocialInsuranceConfigService.deleteConfig(configId);
       toast.success("删除成功");
       // 重新加载数据
-      loadAllData(searchCompanyName || undefined, configuredPagination.current, unconfiguredPagination.current);
+      loadAllData(
+        searchCompanyName || undefined,
+        configuredPagination.current,
+        unconfiguredPagination.current
+      );
     } catch (error) {
       console.error("删除失败:", error);
       toast.error("删除失败，请重试");
@@ -365,7 +398,7 @@ export default function SocialInsuranceConfigView() {
                 setSearchCompanyName(e.target.value);
               }}
               onKeyPress={(e) => {
-                if (e.key === 'Enter') {
+                if (e.key === "Enter") {
                   handleSearch();
                 }
               }}
@@ -376,8 +409,18 @@ export default function SocialInsuranceConfigView() {
             onClick={handleSearch}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200 flex items-center space-x-2"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
             </svg>
             <span>搜索</span>
           </button>
@@ -392,15 +435,15 @@ export default function SocialInsuranceConfigView() {
               社保配置列表
             </h3>
           </div>
-          
+
           {/* Tab 导航 */}
           <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg">
             <button
-              onClick={() => setActiveTab('configured')}
+              onClick={() => setActiveTab("configured")}
               className={`flex-1 px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-                activeTab === 'configured'
-                  ? 'bg-white text-blue-700 shadow-sm'
-                  : 'text-gray-500 hover:text-gray-700'
+                activeTab === "configured"
+                  ? "bg-white text-blue-700 shadow-sm"
+                  : "text-gray-500 hover:text-gray-700"
               }`}
             >
               已配置公司
@@ -409,11 +452,11 @@ export default function SocialInsuranceConfigView() {
               </span>
             </button>
             <button
-              onClick={() => setActiveTab('unconfigured')}
+              onClick={() => setActiveTab("unconfigured")}
               className={`flex-1 px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-                activeTab === 'unconfigured'
-                  ? 'bg-white text-blue-700 shadow-sm'
-                  : 'text-gray-500 hover:text-gray-700'
+                activeTab === "unconfigured"
+                  ? "bg-white text-blue-700 shadow-sm"
+                  : "text-gray-500 hover:text-gray-700"
               }`}
             >
               未配置公司
@@ -427,314 +470,395 @@ export default function SocialInsuranceConfigView() {
         {/* 配置列表 */}
         <div className="p-6">
           {loading ? (
-            <div className="p-12 text-center text-gray-500">
-              加载中...
-            </div>
-          ) : (() => {
-            const currentData = activeTab === 'configured' ? configuredData : unconfiguredData;
-            
-            if (currentData.length === 0) {
+            <div className="p-12 text-center text-gray-500">加载中...</div>
+          ) : (
+            (() => {
+              const currentData =
+                activeTab === "configured" ? configuredData : unconfiguredData;
+
+              if (currentData.length === 0) {
+                return (
+                  <div className="p-12 text-center text-gray-500">
+                    {activeTab === "configured"
+                      ? "暂无已配置的公司"
+                      : "暂无未配置的公司"}
+                  </div>
+                );
+              }
+
+              const filteredGroupedConfigs = currentData.reduce(
+                (acc, company) => {
+                  const key = company.companyNo || "unknown";
+                  acc[key] = {
+                    companyInfo: {
+                      companyNo: company.companyNo || "",
+                      companyName: company.companyName || "",
+                      taxNumber: company.taxNumber || "",
+                    },
+                    configs: company.configs || [],
+                  };
+                  return acc;
+                },
+                {} as Record<
+                  string,
+                  {
+                    companyInfo: {
+                      companyNo: string;
+                      companyName: string;
+                      taxNumber: string;
+                    };
+                    configs: SocialInsuranceDetailConfig[];
+                  }
+                >
+              );
+
               return (
-                <div className="p-12 text-center text-gray-500">
-                  {activeTab === 'configured' ? '暂无已配置的公司' : '暂无未配置的公司'}
+                <div className="space-y-6">
+                  {Object.entries(filteredGroupedConfigs).map(
+                    ([companyNo, group]) => (
+                      <div
+                        key={companyNo}
+                        className="bg-white rounded-xl shadow-sm border border-gray-200"
+                      >
+                        {/* 公司信息头部 */}
+                        <div className="p-6 border-b border-gray-200 bg-gray-50 rounded-t-xl">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <h3 className="text-lg font-semibold text-gray-900">
+                                {group.companyInfo.companyName || "未知公司"}
+                              </h3>
+                              <p className="text-sm text-gray-600">
+                                统一社会信用代码:{" "}
+                                {group.companyInfo.taxNumber || "-"}
+                              </p>
+                            </div>
+                            <div className="flex items-center space-x-4">
+                              <div className="text-sm text-gray-500">
+                                {group.configs.length} 个险种配置
+                              </div>
+                              {group.configs.length > 0 ? (
+                                <button
+                                  onClick={() =>
+                                    handleEdit({
+                                      companyNo:
+                                        group.companyInfo.companyNo || "",
+                                      companyName:
+                                        group.companyInfo.companyName || "",
+                                      taxNumber: group.companyInfo.taxNumber,
+                                      configs: group.configs,
+                                    })
+                                  }
+                                  className="flex items-center space-x-2 px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                                  title="编辑该公司的社保配置"
+                                >
+                                  <Edit className="h-4 w-4" />
+                                  <span>编辑配置</span>
+                                </button>
+                              ) : (
+                                <button
+                                  onClick={() => {
+                                    setEditingConfig(null);
+                                    setBatchFormData({
+                                      companyNo:
+                                        group.companyInfo.companyNo || "",
+                                      companyName:
+                                        group.companyInfo.companyName || "",
+                                      configs: {
+                                        pension: {
+                                          personalRate: 8,
+                                          companyRate: 16,
+                                        },
+                                        medical: {
+                                          personalRate: 2,
+                                          companyRate: 8,
+                                        },
+                                        unemployment: {
+                                          personalRate: 0.5,
+                                          companyRate: 0.5,
+                                        },
+                                        injury: {
+                                          personalRate: 0,
+                                          companyRate: 0.2,
+                                        },
+                                        maternity: {
+                                          personalRate: 0,
+                                          companyRate: 0.8,
+                                        },
+                                      },
+                                    });
+                                    setShowForm(true);
+                                  }}
+                                  className="flex items-center space-x-2 px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                                >
+                                  <Plus className="h-4 w-4" />
+                                  <span>去配置</span>
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* 险种配置表格 */}
+                        {group.configs.length === 0 ? (
+                          <div className="p-12 text-center">
+                            <div className="text-gray-500 mb-4">
+                              该公司尚未配置任何险种
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="overflow-x-auto">
+                            <table className="min-w-full divide-y divide-gray-200">
+                              <thead className="bg-gray-50">
+                                <tr>
+                                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    险种名称
+                                  </th>
+                                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    个人缴费比例 (%)
+                                  </th>
+                                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    公司缴费比例 (%)
+                                  </th>
+                                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    合计缴费比例 (%)
+                                  </th>
+                                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    状态
+                                  </th>
+                                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    操作
+                                  </th>
+                                </tr>
+                              </thead>
+                              <tbody className="bg-white divide-y divide-gray-200">
+                                {group.configs.map((config) => (
+                                  <tr
+                                    key={config.id}
+                                    className="hover:bg-gray-50"
+                                  >
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                      <div className="flex items-center">
+                                        <div
+                                          className={`w-3 h-3 rounded-full mr-2 ${getInsuranceTypeColor(
+                                            config.insuranceType
+                                          )}`}
+                                        ></div>
+                                        <div className="text-sm font-medium text-gray-900">
+                                          {getInsuranceTypeLabel(
+                                            config.insuranceType
+                                          )}
+                                        </div>
+                                      </div>
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                      <div className="text-sm text-gray-900">
+                                        {config.personalRate}%
+                                      </div>
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                      <div className="text-sm text-gray-900">
+                                        {config.companyRate}%
+                                      </div>
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                      <div className="text-sm font-medium text-blue-600">
+                                        {(
+                                          config.personalRate +
+                                          config.companyRate
+                                        ).toFixed(2)}
+                                        %
+                                      </div>
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                      <span
+                                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                                          config.isActive
+                                            ? "bg-green-100 text-green-800"
+                                            : "bg-red-100 text-red-800"
+                                        }`}
+                                      >
+                                        {config.isActive ? "启用" : "禁用"}
+                                      </span>
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                      <div className="flex items-center space-x-2">
+                                        <button
+                                          onClick={() =>
+                                            handleDelete(config.id!)
+                                          }
+                                          className="text-red-600 hover:text-red-900 p-1 rounded transition-colors"
+                                          title="删除"
+                                        >
+                                          <Trash2 className="h-4 w-4" />
+                                        </button>
+                                      </div>
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        )}
+                      </div>
+                    )
+                  )}
                 </div>
               );
-            }
-            
-            const filteredGroupedConfigs = currentData.reduce((acc, company) => {
-              const key = company.companyNo || "unknown";
-              acc[key] = {
-                companyInfo: {
-                  companyNo: company.companyNo || "",
-                  companyName: company.companyName || "",
-                  taxNumber: company.taxNumber || "",
-                },
-                configs: company.configs || [],
-              };
-              return acc;
-            }, {} as Record<string, { companyInfo: { companyNo: string; companyName: string; taxNumber: string }; configs: SocialInsuranceDetailConfig[] }>);
-            
-            return (
-              <div className="space-y-6">
-                {Object.entries(filteredGroupedConfigs).map(([companyNo, group]) => (
-                  <div
-                    key={companyNo}
-                    className="bg-white rounded-xl shadow-sm border border-gray-200"
-                  >
-                    {/* 公司信息头部 */}
-                    <div className="p-6 border-b border-gray-200 bg-gray-50 rounded-t-xl">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h3 className="text-lg font-semibold text-gray-900">
-                            {group.companyInfo.companyName || "未知公司"}
-                          </h3>
-                          <p className="text-sm text-gray-600">
-                            统一社会信用代码: {group.companyInfo.taxNumber || "-"}
-                          </p>
-                        </div>
-                        <div className="flex items-center space-x-4">
-                          <div className="text-sm text-gray-500">
-                            {group.configs.length} 个险种配置
-                          </div>
-                          {group.configs.length > 0 ? (
-                            <button
-                              onClick={() =>
-                                handleEdit({
-                                  companyNo: group.companyInfo.companyNo || "",
-                                  companyName: group.companyInfo.companyName || "",
-                                  taxNumber: group.companyInfo.taxNumber,
-                                  configs: group.configs,
-                                })
-                              }
-                              className="flex items-center space-x-2 px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                              title="编辑该公司的社保配置"
-                            >
-                              <Edit className="h-4 w-4" />
-                              <span>编辑配置</span>
-                            </button>
-                          ) : (
-                            <button
-                              onClick={() => {
-                                setEditingConfig(null);
-                                setBatchFormData({
-                                  companyNo: group.companyInfo.companyNo || "",
-                                  companyName: group.companyInfo.companyName || "",
-                                  configs: {
-                                    pension: { personalRate: 8, companyRate: 16 },
-                                    medical: { personalRate: 2, companyRate: 8 },
-                                    unemployment: {
-                                      personalRate: 0.5,
-                                      companyRate: 0.5,
-                                    },
-                                    injury: { personalRate: 0, companyRate: 0.2 },
-                                    maternity: { personalRate: 0, companyRate: 0.8 },
-                                  },
-                                });
-                                setShowForm(true);
-                              }}
-                              className="flex items-center space-x-2 px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                            >
-                              <Plus className="h-4 w-4" />
-                              <span>去配置</span>
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* 险种配置表格 */}
-                    {group.configs.length === 0 ? (
-                      <div className="p-12 text-center">
-                        <div className="text-gray-500 mb-4">
-                          该公司尚未配置任何险种
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-gray-200">
-                          <thead className="bg-gray-50">
-                            <tr>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                险种名称
-                              </th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                个人缴费比例 (%)
-                              </th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                公司缴费比例 (%)
-                              </th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                合计缴费比例 (%)
-                              </th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                状态
-                              </th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                操作
-                              </th>
-                            </tr>
-                          </thead>
-                          <tbody className="bg-white divide-y divide-gray-200">
-                            {group.configs.map((config) => (
-                              <tr key={config.id} className="hover:bg-gray-50">
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                  <div className="flex items-center">
-                                    <div
-                                      className={`w-3 h-3 rounded-full mr-2 ${
-                                        getInsuranceTypeColor(config.insuranceType)
-                                      }`}
-                                    ></div>
-                                    <div className="text-sm font-medium text-gray-900">
-                                      {getInsuranceTypeLabel(config.insuranceType)}
-                                    </div>
-                                  </div>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                  <div className="text-sm text-gray-900">
-                                    {config.personalRate}%
-                                  </div>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                  <div className="text-sm text-gray-900">
-                                    {config.companyRate}%
-                                  </div>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                  <div className="text-sm font-medium text-blue-600">
-                                    {
-                                      (
-                                        config.personalRate +
-                                        config.companyRate
-                                      ).toFixed(1)
-                                    }
-                                    %
-                                  </div>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                  <span
-                                    className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                                      config.isActive
-                                        ? "bg-green-100 text-green-800"
-                                        : "bg-red-100 text-red-800"
-                                    }`}
-                                  >
-                                    {config.isActive ? "启用" : "禁用"}
-                                  </span>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                  <div className="flex items-center space-x-2">
-                                    <button
-                                      onClick={() => handleDelete(config.id!)}
-                                      className="text-red-600 hover:text-red-900 p-1 rounded transition-colors"
-                                      title="删除"
-                                    >
-                                      <Trash2 className="h-4 w-4" />
-                                    </button>
-                                  </div>
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            );
-          })()}
+            })()
+          )}
         </div>
       </div>
 
       {/* 分页组件 */}
       {(() => {
-        const currentPagination = activeTab === 'configured' ? configuredPagination : unconfiguredPagination;
-        return currentPagination.total > 0 && (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 mt-4">
-            <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
-              <div className="flex items-center justify-between">
-                <div className="text-sm text-gray-700">
-                  显示第 {(currentPagination.current - 1) * currentPagination.size + 1} 到{" "}
-                  {Math.min(
-                    currentPagination.current * currentPagination.size,
-                    currentPagination.total
-                  )}{" "}
-                  条， 共 {currentPagination.total} 条记录
-                </div>
-                <div className="flex items-center space-x-2">
-                  <button
-                    onClick={() => {
-                      const newPage = currentPagination.current - 1;
-                      if (activeTab === 'configured') {
-                        setConfiguredPagination((prev) => ({ ...prev, current: newPage }));
-                        loadAllData(searchCompanyName || undefined, newPage, unconfiguredPagination.current);
-                      } else {
-                        setUnconfiguredPagination((prev) => ({ ...prev, current: newPage }));
-                        loadAllData(searchCompanyName || undefined, configuredPagination.current, newPage);
-                      }
-                    }}
-                    disabled={currentPagination.current <= 1}
-                    className="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-1"
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                    <span>上一页</span>
-                  </button>
-
-                  <div className="flex items-center space-x-1">
-                    {Array.from(
-                      { length: Math.min(5, currentPagination.pages) },
-                      (_, i) => {
-                        let pageNum;
-                        if (currentPagination.pages <= 5) {
-                          pageNum = i + 1;
-                        } else if (currentPagination.current <= 3) {
-                          pageNum = i + 1;
-                        } else if (currentPagination.current >= currentPagination.pages - 2) {
-                          pageNum = currentPagination.pages - 4 + i;
-                        } else {
-                          pageNum = currentPagination.current - 2 + i;
-                        }
-
-                        return (
-                          <button
-                            key={pageNum}
-                            onClick={() => {
-                              if (activeTab === 'configured') {
-                                setConfiguredPagination((prev) => ({
-                                  ...prev,
-                                  current: pageNum,
-                                }));
-                                loadAllData(
-                                  searchCompanyName || undefined,
-                                  pageNum,
-                                  unconfiguredPagination.current
-                                );
-                              } else {
-                                setUnconfiguredPagination((prev) => ({
-                                  ...prev,
-                                  current: pageNum,
-                                }));
-                                loadAllData(
-                                  searchCompanyName || undefined,
-                                  configuredPagination.current,
-                                  pageNum
-                                );
-                              }
-                            }}
-                            className={`px-3 py-1 text-sm border rounded-md ${
-                              currentPagination.current === pageNum
-                                ? "bg-blue-600 text-white border-blue-600"
-                                : "border-gray-300 hover:bg-gray-100"
-                            }`}
-                          >
-                            {pageNum}
-                          </button>
-                        );
-                      }
-                    )}
+        const currentPagination =
+          activeTab === "configured"
+            ? configuredPagination
+            : unconfiguredPagination;
+        return (
+          currentPagination.total > 0 && (
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 mt-4">
+              <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
+                <div className="flex items-center justify-between">
+                  <div className="text-sm text-gray-700">
+                    显示第{" "}
+                    {(currentPagination.current - 1) * currentPagination.size +
+                      1}{" "}
+                    到{" "}
+                    {Math.min(
+                      currentPagination.current * currentPagination.size,
+                      currentPagination.total
+                    )}{" "}
+                    条， 共 {currentPagination.total} 条记录
                   </div>
+                  <div className="flex items-center space-x-2">
+                    <button
+                      onClick={() => {
+                        const newPage = currentPagination.current - 1;
+                        if (activeTab === "configured") {
+                          setConfiguredPagination((prev) => ({
+                            ...prev,
+                            current: newPage,
+                          }));
+                          loadAllData(
+                            searchCompanyName || undefined,
+                            newPage,
+                            unconfiguredPagination.current
+                          );
+                        } else {
+                          setUnconfiguredPagination((prev) => ({
+                            ...prev,
+                            current: newPage,
+                          }));
+                          loadAllData(
+                            searchCompanyName || undefined,
+                            configuredPagination.current,
+                            newPage
+                          );
+                        }
+                      }}
+                      disabled={currentPagination.current <= 1}
+                      className="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-1"
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                      <span>上一页</span>
+                    </button>
 
-                  <button
-                    onClick={() => {
-                      const newPage = currentPagination.current + 1;
-                      if (activeTab === 'configured') {
-                        setConfiguredPagination((prev) => ({ ...prev, current: newPage }));
-                        loadAllData(searchCompanyName || undefined, newPage, unconfiguredPagination.current);
-                      } else {
-                        setUnconfiguredPagination((prev) => ({ ...prev, current: newPage }));
-                        loadAllData(searchCompanyName || undefined, configuredPagination.current, newPage);
+                    <div className="flex items-center space-x-1">
+                      {Array.from(
+                        { length: Math.min(5, currentPagination.pages) },
+                        (_, i) => {
+                          let pageNum;
+                          if (currentPagination.pages <= 5) {
+                            pageNum = i + 1;
+                          } else if (currentPagination.current <= 3) {
+                            pageNum = i + 1;
+                          } else if (
+                            currentPagination.current >=
+                            currentPagination.pages - 2
+                          ) {
+                            pageNum = currentPagination.pages - 4 + i;
+                          } else {
+                            pageNum = currentPagination.current - 2 + i;
+                          }
+
+                          return (
+                            <button
+                              key={pageNum}
+                              onClick={() => {
+                                if (activeTab === "configured") {
+                                  setConfiguredPagination((prev) => ({
+                                    ...prev,
+                                    current: pageNum,
+                                  }));
+                                  loadAllData(
+                                    searchCompanyName || undefined,
+                                    pageNum,
+                                    unconfiguredPagination.current
+                                  );
+                                } else {
+                                  setUnconfiguredPagination((prev) => ({
+                                    ...prev,
+                                    current: pageNum,
+                                  }));
+                                  loadAllData(
+                                    searchCompanyName || undefined,
+                                    configuredPagination.current,
+                                    pageNum
+                                  );
+                                }
+                              }}
+                              className={`px-3 py-1 text-sm border rounded-md ${
+                                currentPagination.current === pageNum
+                                  ? "bg-blue-600 text-white border-blue-600"
+                                  : "border-gray-300 hover:bg-gray-100"
+                              }`}
+                            >
+                              {pageNum}
+                            </button>
+                          );
+                        }
+                      )}
+                    </div>
+
+                    <button
+                      onClick={() => {
+                        const newPage = currentPagination.current + 1;
+                        if (activeTab === "configured") {
+                          setConfiguredPagination((prev) => ({
+                            ...prev,
+                            current: newPage,
+                          }));
+                          loadAllData(
+                            searchCompanyName || undefined,
+                            newPage,
+                            unconfiguredPagination.current
+                          );
+                        } else {
+                          setUnconfiguredPagination((prev) => ({
+                            ...prev,
+                            current: newPage,
+                          }));
+                          loadAllData(
+                            searchCompanyName || undefined,
+                            configuredPagination.current,
+                            newPage
+                          );
+                        }
+                      }}
+                      disabled={
+                        currentPagination.current >= currentPagination.pages
                       }
-                    }}
-                    disabled={currentPagination.current >= currentPagination.pages}
-                    className="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-1"
-                  >
-                    <span>下一页</span>
-                    <ChevronRight className="h-4 w-4" />
-                  </button>
+                      className="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-1"
+                    >
+                      <span>下一页</span>
+                      <ChevronRight className="h-4 w-4" />
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          )
         );
       })()}
 
@@ -768,8 +892,10 @@ export default function SocialInsuranceConfigView() {
                 </label>
                 {editingConfig ? (
                   <div className="p-3 bg-gray-50 rounded-lg">
-                    <div className="font-medium">{editingConfig.companyName}</div>
-                    
+                    <div className="font-medium">
+                      {editingConfig.companyName}
+                    </div>
+
                     {editingConfig.taxNumber && (
                       <div className="text-sm text-gray-600">
                         统一社会信用代码: {editingConfig.taxNumber}
@@ -823,15 +949,13 @@ export default function SocialInsuranceConfigView() {
                             </label>
                             <input
                               type="number"
-                              step="0.1"
-                              min="0"
                               max="100"
                               value={config.personalRate}
                               onChange={(e) =>
                                 updateInsuranceRate(
                                   insuranceType.value,
                                   "personalRate",
-                                  parseFloat(e.target.value) || 0
+                                  parseFloat(e.target.value)
                                 )
                               }
                               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
@@ -843,15 +967,13 @@ export default function SocialInsuranceConfigView() {
                             </label>
                             <input
                               type="number"
-                              step="0.1"
-                              min="0"
                               max="100"
                               value={config.companyRate}
                               onChange={(e) =>
                                 updateInsuranceRate(
                                   insuranceType.value,
                                   "companyRate",
-                                  parseFloat(e.target.value) || 0
+                                  parseFloat(e.target.value)
                                 )
                               }
                               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
