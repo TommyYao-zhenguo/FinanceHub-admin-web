@@ -23,7 +23,8 @@ export interface CreateHousingFundConfigRequest {
 }
 
 // 更新公积金配置请求接口
-export interface UpdateHousingFundConfigRequest extends CreateHousingFundConfigRequest {
+export interface UpdateHousingFundConfigRequest
+  extends CreateHousingFundConfigRequest {
   id: string;
 }
 
@@ -33,6 +34,7 @@ export interface HousingFundConfigQueryParams {
   size?: number;
   isActive?: boolean;
   companyName?: string; // 公司名称搜索
+  configStatus?: number; // 配置状态：0=未配置，1=已配置
 }
 
 // 公积金配置列表响应接口
