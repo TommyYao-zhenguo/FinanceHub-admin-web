@@ -22,9 +22,9 @@ export default function EmployeeImportView() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // 下载模板
-  const handleDownloadTemplate = async () => {
+  const handleDownloadTemplate = () => {
     try {
-      await EmployeeImportService.downloadTemplate();
+      EmployeeImportService.downloadTemplate();
       toast.success("模板下载成功");
     } catch (error) {
       console.error("下载模板失败:", error);
@@ -126,7 +126,7 @@ export default function EmployeeImportView() {
                   下载导入模板
                 </h3>
                 <p className="text-gray-600">
-                  下载标准Excel模板，按照格式填写员工信息
+                  下载Excel模板，按照格式填写员工信息
                 </p>
               </div>
             </div>
@@ -235,6 +235,10 @@ export default function EmployeeImportView() {
             <p>
               <strong>注意事项：</strong>
               身份证号必须为18位有效身份证号，手机号必须为11位有效手机号
+            </p>
+            <p>
+              <strong>文件格式：</strong>
+              下载的是Excel模板，支持上传.xlsx或.xls格式
             </p>
           </div>
         </div>

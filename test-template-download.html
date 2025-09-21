@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>员工录入模板下载测试</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f5f5f5;
+      }
+      .container {
+        background: white;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      h1 {
+        color: #333;
+        text-align: center;
+      }
+      .download-btn {
+        background-color: #10b981;
+        color: white;
+        padding: 12px 24px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 16px;
+        margin: 20px 0;
+        display: block;
+        width: 200px;
+        margin: 20px auto;
+      }
+      .download-btn:hover {
+        background-color: #059669;
+      }
+      .instructions {
+        background: #f0f9ff;
+        padding: 20px;
+        border-radius: 6px;
+        border: 1px solid #0284c7;
+        margin: 20px 0;
+      }
+      .instructions h3 {
+        color: #0284c7;
+        margin-top: 0;
+      }
+      .sample-data {
+        background: #fffbeb;
+        padding: 15px;
+        border-radius: 6px;
+        border: 1px solid #f59e0b;
+        margin: 15px 0;
+      }
+      .sample-data h4 {
+        color: #d97706;
+        margin-top: 0;
+      }
+      code {
+        background: #f3f4f6;
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-family: Monaco, monospace;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>员工录入模板下载测试</h1>
+
+      <button class="download-btn" onclick="downloadTemplate()">
+        📥 下载员工导入模板
+      </button>
+
+      <div class="instructions">
+        <h3>使用说明</h3>
+        <ul>
+          <li>点击上方按钮下载CSV格式的员工导入模板</li>
+          <li>用Excel或其他表格软件打开模板文件</li>
+          <li>按照模板格式填写员工信息</li>
+          <li>保存为Excel或CSV格式上传到系统</li>
+        </ul>
+      </div>
+
+      <div class="sample-data">
+        <h4>模板包含的示例数据</h4>
+        <p><strong>示例员工1：</strong></p>
+        <ul>
+          <li>公司名称：启苑科技有限公司</li>
+          <li>统一信用代码：91110000123456789X</li>
+          <li>员工姓名：张三</li>
+          <li>身份证号：110101199001011234</li>
+          <li>入职时间：2024-01-15</li>
+          <li>手机号：13800138000</li>
+          <li>基本工资：8000</li>
+          <li>是否缴纳社保：是</li>
+          <li>是否缴纳公积金：是</li>
+          <li>备注：示例数据，请删除此行</li>
+        </ul>
+
+        <p><strong>示例员工2：</strong></p>
+        <ul>
+          <li>公司名称：启苑科技有限公司</li>
+          <li>统一信用代码：91110000123456789X</li>
+          <li>员工姓名：李四</li>
+          <li>身份证号：110101199002022345</li>
+          <li>入职时间：2024-02-01</li>
+          <li>手机号：13900139000</li>
+          <li>基本工资：9000</li>
+          <li>是否缴纳社保：否</li>
+          <li>是否缴纳公积金：是</li>
+          <li>备注：兼职员工</li>
+        </ul>
+      </div>
+
+      <div class="instructions">
+        <h3>字段要求</h3>
+        <p><strong>必填字段：</strong></p>
+        <ul>
+          <li>公司名称、统一信用代码、员工姓名、身份证号</li>
+          <li>入职时间（格式：<code>YYYY-MM-DD</code>）</li>
+          <li>手机号、基本工资</li>
+        </ul>
+        <p><strong>选填字段：</strong></p>
+        <ul>
+          <li>是否缴纳社保、是否缴纳公积金（填写：<code>是/否</code>）</li>
+          <li>备注</li>
+        </ul>
+      </div>
+    </div>
+
+    <script>
+      // 模板下载功能（与服务中的代码相同）
+      function downloadTemplate() {
+        try {
+          // 创建Excel模板数据
+          const templateData = [
+            [
+              "公司名称",
+              "公司统一信用代码",
+              "员工姓名",
+              "身份证号",
+              "入职时间",
+              "手机号",
+              "基本工资",
+              "是否缴纳社保",
+              "是否缴纳公积金",
+              "备注",
+            ],
+            [
+              "启苑科技有限公司",
+              "91110000123456789X",
+              "张三",
+              "110101199001011234",
+              "2024-01-15",
+              "13800138000",
+              "8000",
+              "是",
+              "是",
+              "示例数据，请删除此行",
+            ],
+            [
+              "启苑科技有限公司",
+              "91110000123456789X",
+              "李四",
+              "110101199002022345",
+              "2024-02-01",
+              "13900139000",
+              "9000",
+              "否",
+              "是",
+              "兼职员工",
+            ],
+          ];
+
+          // 生成CSV格式内容（Excel可以正确打开）
+          const csvContent =
+            "\uFEFF" +
+            templateData
+              .map((row) => row.map((cell) => `"${cell}"`).join(","))
+              .join("\n");
+
+          // 创建Blob对象
+          const blob = new Blob([csvContent], {
+            type: "text/csv;charset=utf-8;",
+          });
+
+          // 创建下载链接
+          const url = window.URL.createObjectURL(blob);
+          const link = document.createElement("a");
+          link.href = url;
+          link.download = "员工导入模板.csv";
+          document.body.appendChild(link);
+          link.click();
+
+          // 清理
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(url);
+
+          alert("模板下载成功！请用Excel打开文件查看格式。");
+        } catch (error) {
+          console.error("下载模板失败:", error);
+          alert("下载模板失败，请重试。");
+        }
+      }
+    </script>
+  </body>
+</html>
