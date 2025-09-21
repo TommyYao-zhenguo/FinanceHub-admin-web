@@ -1,5 +1,3 @@
-import * as XLSX from "xlsx";
-
 export interface EmployeeImportData {
   companyName: string;
   companyCreditCode: string;
@@ -15,77 +13,55 @@ export interface EmployeeImportData {
 
 export interface ImportResult {
   success: boolean;
-  total: number;
-  successCount: number;
-  failureCount: number;
-  errorDetails?: string[];
+  message: string;
 }
 
 export const EmployeeImportService = {
-  // 下载导入模板（使用XLSX库生成真正的Excel文件）
+  // 下载导入模板（使用后端API生成真正的Excel文件）
   async downloadTemplate(): Promise<void> {
     try {
-      // 创建Excel模板数据
-      const templateData = [
-        [
-          "公司名称",
-          "公司统一信用代码",
-          "员工姓名",
-          "身份证号",
-          "入职时间",
-          "手机号",
-          "基本工资",
-          "是否缴纳社保",
-          "是否缴纳公积金",
-          "备注",
-        ],
-        [
-          "启苑科技有限公司",
-          "91110000123456789X",
-          "张三",
-          "110101199001011234",
-          "2024-01-15",
-          "13800138000",
-          "8000",
-          "是",
-          "是",
-          "示例数据，请删除此行",
-        ],
-        [
-          "启苑科技有限公司",
-          "91110000123456789X",
-          "李四",
-          "110101199002022345",
-          "2024-02-01",
-          "13900139000",
-          "9000",
-          "否",
-          "是",
-          "兼职员工",
-        ],
-      ];
+      const response = await fetch(
+        `${
+          import.meta.env.VITE_API_BASE_URL
+        }/api/v1/admin/employee/import/template`,
+        {
+          method: "GET",
+          headers: {
+            token: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
 
-      // 创建工作簿
-      const ws = XLSX.utils.aoa_to_sheet(templateData);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "员工导入模板的的");
+      if (!response.ok) {
+        throw new Error(`模板下载失败: ${response.status}`);
+      }
 
-      // 设置列宽
-      ws["!cols"] = [
-        { wch: 20 }, // 公司名称
-        { wch: 25 }, // 公司统一信用代码
-        { wch: 15 }, // 员工姓名
-        { wch: 20 }, // 身份证号
-        { wch: 15 }, // 入职时间
-        { wch: 15 }, // 手机号
-        { wch: 15 }, // 基本工资
-        { wch: 18 }, // 是否缴纳社保
-        { wch: 18 }, // 是否缴纳公积金
-        { wch: 20 }, // 备注
-      ];
+      // 获取文件名
+      const contentDisposition = response.headers.get("Content-Disposition");
+      let filename = "员工导入模板.xlsx";
+      if (contentDisposition) {
+        const filenameMatch = contentDisposition.match(
+          /filename[^;=\n]*=(['"]?)([^'"\n]*?)\1/
+        );
+        if (filenameMatch && filenameMatch[2]) {
+          filename = decodeURIComponent(filenameMatch[2]);
+        }
+      }
 
-      // 下载文件
-      XLSX.writeFile(wb, "员工导入模板的.xlsx");
+      // 处理blob数据流
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+
+      // 创建下载链接
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+
+      // 清理
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error("下载模板失败:", error);
       throw error;
@@ -99,7 +75,7 @@ export const EmployeeImportService = {
       formData.append("file", file);
 
       const response = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL}/api/v1/employee/import`,
+        `${import.meta.env.VITE_API_BASE_URL}/api/v1/admin/employee/import`,
         {
           method: "POST",
           headers: {
@@ -109,12 +85,12 @@ export const EmployeeImportService = {
         }
       );
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`导入失败: ${response.status} - ${errorText}`);
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.message || `导入失败: ${response.status}`);
       }
 
-      const result = await response.json();
       return result;
     } catch (error) {
       console.error("导入员工信息失败:", error);

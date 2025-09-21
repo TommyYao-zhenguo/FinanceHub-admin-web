@@ -9,26 +9,26 @@ import {
   X,
 } from "lucide-react";
 import toast from "react-hot-toast";
-import {
-  EmployeeImportService,
-  ImportResult,
-} from "../services/employeeImportService";
+import { EmployeeImportService } from "../services/employeeImportService";
 
 export default function EmployeeImportView() {
   const [uploading, setUploading] = useState(false);
   const [importing, setImporting] = useState(false);
-  const [importResult, setImportResult] = useState<ImportResult | null>(null);
+  const [importResult, setImportResult] = useState<{
+    success: boolean;
+    message: string;
+  } | null>(null);
   const [showResult, setShowResult] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // 下载模板
-  const handleDownloadTemplate = () => {
+  const handleDownloadTemplate = async () => {
     try {
-      EmployeeImportService.downloadTemplate();
+      await EmployeeImportService.downloadTemplate();
       toast.success("模板下载成功");
     } catch (error) {
       console.error("下载模板失败:", error);
-      toast.error("下载模板失败");
+      toast.error("下载模板失败: " + (error as Error).message);
     }
   };
 
@@ -63,15 +63,19 @@ export default function EmployeeImportView() {
       setShowResult(true);
 
       if (result.success) {
-        toast.success(`员工导入成功！成功导入 ${result.successCount} 条记录`);
+        toast.success("员工导入成功！");
       } else {
-        toast.error(
-          `导入完成，但有部分失败。成功 ${result.successCount} 条，失败 ${result.failureCount} 条`
-        );
+        toast.error("导入失败：" + result.message);
       }
     } catch (error) {
       console.error("导入失败:", error);
-      toast.error("员工导入失败，请检查文件格式和内容");
+      const errorMessage =
+        (error as Error).message || "员工导入失败，请检查文件格式和内容";
+      toast.error(errorMessage);
+
+      // 显示错误结果
+      setImportResult({ success: false, message: errorMessage });
+      setShowResult(true);
     } finally {
       setUploading(false);
       setImporting(false);
@@ -266,60 +270,15 @@ export default function EmployeeImportView() {
                   {importResult.success ? (
                     <CheckCircle className="h-8 w-8 text-green-500" />
                   ) : (
-                    <AlertCircle className="h-8 w-8 text-yellow-500" />
+                    <AlertCircle className="h-8 w-8 text-red-500" />
                   )}
                   <div>
                     <p className="font-semibold text-gray-900">
-                      {importResult.success
-                        ? "导入成功！"
-                        : "导入完成（部分失败）"}
+                      {importResult.success ? "导入成功！" : "导入失败"}
                     </p>
-                    <p className="text-gray-600">
-                      共处理 {importResult.total} 条记录
-                    </p>
+                    <p className="text-gray-600">{importResult.message}</p>
                   </div>
                 </div>
-
-                <div className="bg-gray-50 rounded-lg p-4 space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">成功导入：</span>
-                    <span className="font-semibold text-green-600">
-                      {importResult.successCount} 条
-                    </span>
-                  </div>
-                  {importResult.failureCount > 0 && (
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">导入失败：</span>
-                      <span className="font-semibold text-red-600">
-                        {importResult.failureCount} 条
-                      </span>
-                    </div>
-                  )}
-                </div>
-
-                {importResult.errorDetails &&
-                  importResult.errorDetails.length > 0 && (
-                    <div>
-                      <p className="font-medium text-gray-900 mb-2">
-                        错误详情：
-                      </p>
-                      <div className="bg-red-50 border border-red-200 rounded-lg p-3 max-h-32 overflow-y-auto">
-                        <ul className="text-sm text-red-700 space-y-1">
-                          {importResult.errorDetails.map(
-                            (error: string, index: number) => (
-                              <li
-                                key={index}
-                                className="flex items-start space-x-1"
-                              >
-                                <span className="text-red-500">•</span>
-                                <span>{error}</span>
-                              </li>
-                            )
-                          )}
-                        </ul>
-                      </div>
-                    </div>
-                  )}
               </div>
 
               <div className="mt-6 flex justify-end">

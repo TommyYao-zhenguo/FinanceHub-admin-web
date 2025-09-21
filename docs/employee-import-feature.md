@@ -28,14 +28,14 @@
 
 ### 1. 下载模板功能
 
-- 前端生成 CSV 模板文件（含示例数据）
+- 后端生成 Excel 模板文件（含示例数据）
 - 支持中文显示，可用 Excel 正常打开
 - 模板包含所有必要字段的示例格式
 
 ### 2. 文件上传功能
 
 - 支持拖拽上传和点击选择文件
-- 支持.xlsx、.xls 和.csv 格式
+- 支持.xlsx 和.xls 格式
 - 文件大小限制 10MB
 - 实时上传进度显示
 
@@ -45,10 +45,16 @@
 - 后端完整业务逻辑验证
 - 详细的错误提示
 
-### 4. 导入结果展示
+### 4. 权限校验
 
-- 成功/失败统计
-- 详细错误信息列表
+- 参考税费上传的权限校验方式
+- 验证每条记录的统一信用代码权限
+- 无权限的记录会被拒绝并提示错误信息
+
+### 5. 导入结果展示
+
+- 成功/失败状态显示
+- 详细错误信息提示
 - 用户友好的结果反馈
 
 ## 导入字段
@@ -71,16 +77,16 @@
 
 ## API 接口
 
-### 1. 下载模板（前端生成）
+### 1. 下载模板
 
 ```
-不需要后端 API，直接下载 CSV 模板文件
+GET /api/v1/admin/employee/import/template
 ```
 
 ### 2. 批量导入员工
 
 ```
-POST /api/v1/employee/import
+POST /api/v1/admin/employee/import
 Content-Type: multipart/form-data
 Body: file (Excel文件)
 ```
@@ -90,10 +96,7 @@ Body: file (Excel文件)
 ```typescript
 interface ImportResult {
   success: boolean;
-  total: number;
-  successCount: number;
-  failureCount: number;
-  errorDetails?: string[];
+  message: string;
 }
 ```
 
@@ -105,10 +108,10 @@ interface ImportResult {
 
 ## 使用流程
 
-1. 点击侧边栏“客户管理” -> “员工录入”
-2. 下载 CSV 导入模板（前端生成）
+1. 点击侧边栏"客户管理" -> "员工录入"
+2. 点击"下载模板"按钮下载 Excel 模板文件
 3. 用 Excel 打开模板，按格式填写员工信息
-4. 保存为 Excel 或 CSV 格式上传
+4. 保存为 Excel 格式上传
 5. 查看导入结果和错误详情
 
 ## 错误处理
@@ -124,12 +127,14 @@ interface ImportResult {
 - 业务规则验证
 - 数据完整性检查
 - 重复数据检查
+- 权限验证（统一信用代码权限检查）
+- 公司存在性验证
 
 ### 用户反馈
 
 - Toast 消息提示
-- 详细的错误列表
-- 成功/失败统计
+- 详细的错误信息
+- 成功状态显示
 
 ## 技术栈
 
@@ -138,11 +143,13 @@ interface ImportResult {
 - React Hot Toast 消息提示
 - Tailwind CSS 样式
 - Vite 构建工具
+- EasyExcel（后端 Excel 处理）
 
 ## 注意事项
 
-1. 模板下载为前端生成，不需要后端 API 支持
-2. 导入功能需要后端 API 接口已实现
+1. 模板下载使用后端 API 生成真正的 Excel 文件
+2. 导入功能需要后端 API 接口支持
 3. 需要配置正确的 API 基础 URL
 4. 需要有效的认证 token
-5. 后端需要支持 Excel/CSV 文件解析
+5. 后端使用 EasyExcel 解析 Excel 文件
+6. 权限校验参考税费上传实现方式
