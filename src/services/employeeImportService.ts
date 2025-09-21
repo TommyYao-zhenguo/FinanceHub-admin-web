@@ -16,6 +16,30 @@ export interface ImportResult {
   message: string;
 }
 
+export interface EmployeeListItem {
+  id: number;
+  employeeNo: string;
+  employeeName: string;
+  idCard: string;
+  phone: string;
+  hireDate: string;
+  basicSalary: number;
+  companyName: string;
+  companyCreditCode: string;
+  socialInsurance: boolean;
+  housingFund: boolean;
+  createTime: string;
+  remarks?: string;
+}
+
+export interface EmployeeListResponse {
+  records: EmployeeListItem[];
+  total: number;
+  size: number;
+  current: number;
+  pages: number;
+}
+
 export const EmployeeImportService = {
   // 下载导入模板（使用后端API生成真正的Excel文件）
   async downloadTemplate(): Promise<void> {
@@ -94,6 +118,46 @@ export const EmployeeImportService = {
       return result;
     } catch (error) {
       console.error("导入员工信息失败:", error);
+      throw error;
+    }
+  },
+
+  // 查询当前用户录入的员工列表（分页）
+  async listEmployeesByCreator(params: {
+    current?: number;
+    size?: number;
+    employeeName?: string;
+  }): Promise<EmployeeListResponse> {
+    try {
+      const queryParams = new URLSearchParams();
+      if (params.current !== undefined)
+        queryParams.append("current", params.current.toString());
+      if (params.size !== undefined)
+        queryParams.append("size", params.size.toString());
+      if (params.employeeName)
+        queryParams.append("employeeName", params.employeeName);
+
+      const response = await fetch(
+        `${
+          import.meta.env.VITE_API_BASE_URL
+        }/api/v1/admin/employee/import/list?${queryParams.toString()}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            token: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`获取员工列表失败: ${response.status}`);
+      }
+
+      const result = await response.json();
+      return result;
+    } catch (error) {
+      console.error("获取员工列表失败:", error);
       throw error;
     }
   },

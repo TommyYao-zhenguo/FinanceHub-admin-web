@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   Upload,
   Users,
@@ -7,9 +7,10 @@ import {
   AlertCircle,
   CheckCircle,
   X,
+  Search,
 } from "lucide-react";
 import toast from "react-hot-toast";
-import { EmployeeImportService } from "../services/employeeImportService";
+import { EmployeeImportService, EmployeeListResponse } from "../services/employeeImportService";
 
 export default function EmployeeImportView() {
   const [uploading, setUploading] = useState(false);
@@ -20,6 +21,16 @@ export default function EmployeeImportView() {
   } | null>(null);
   const [showResult, setShowResult] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // 员工列表相关状态
+  const [employeeList, setEmployeeList] = useState<EmployeeListResponse | null>(null);
+  const [loadingList, setLoadingList] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [pagination, setPagination] = useState({
+    current: 1,
+    size: 10,
+    total: 0,
+  });
 
   // 下载模板
   const handleDownloadTemplate = async () => {
@@ -64,6 +75,8 @@ export default function EmployeeImportView() {
 
       if (result.success) {
         toast.success("员工导入成功！");
+        // 导入成功后刷新员工列表
+        loadEmployeeList();
       } else {
         toast.error("导入失败：" + result.message);
       }
@@ -103,6 +116,56 @@ export default function EmployeeImportView() {
   const handleCloseResult = () => {
     setShowResult(false);
     setImportResult(null);
+  };
+
+  // 加载员工列表
+  const loadEmployeeList = async () => {
+    try {
+      setLoadingList(true);
+      const result = await EmployeeImportService.listEmployeesByCreator({
+        current: pagination.current,
+        size: pagination.size,
+        employeeName: searchTerm || undefined,
+      });
+      setEmployeeList(result);
+      setPagination({
+        current: result.current,
+        size: result.size,
+        total: result.total,
+      });
+    } catch (error) {
+      console.error("加载员工列表失败:", error);
+      toast.error("加载员工列表失败");
+    } finally {
+      setLoadingList(false);
+    }
+  };
+
+  // 处理分页变化
+  const handlePageChange = (page: number) => {
+    setPagination({
+      ...pagination,
+      current: page,
+    });
+  };
+
+  // 处理搜索
+  const handleSearch = () => {
+    setPagination({
+      ...pagination,
+      current: 1, // 搜索时重置到第一页
+    });
+  };
+
+  // 监听分页和搜索条件变化，重新加载数据
+  useEffect(() => {
+    loadEmployeeList();
+  }, [pagination.current, pagination.size, searchTerm]);
+
+  // 格式化日期显示
+  const formatDate = (dateString: string) => {
+    if (!dateString) return "-";
+    return dateString.split(" ")[0]; // 只显示日期部分
   };
 
   return (
@@ -245,6 +308,164 @@ export default function EmployeeImportView() {
               下载的是Excel模板，支持上传.xlsx或.xls格式
             </p>
           </div>
+        </div>
+
+        {/* 员工列表 */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-gray-900">
+              已录入员工列表
+            </h3>
+            <div className="flex items-center space-x-2">
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="搜索员工姓名"
+                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onKeyPress={(e) => e.key === "Enter" && handleSearch()}
+                />
+                <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+              </div>
+              <button
+                onClick={loadEmployeeList}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+              >
+                搜索
+              </button>
+            </div>
+          </div>
+
+          {loadingList ? (
+            <div className="flex justify-center items-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              <span className="ml-2 text-gray-600">加载中...</span>
+            </div>
+          ) : employeeList && employeeList.records.length > 0 ? (
+            <>
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        员工姓名
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        身份证号
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        手机号
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        入职时间
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        基本工资
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        公司名称
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          是否缴纳社保
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          是否缴纳公积金
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          备注
+                        </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        录入时间
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {employeeList.records.map((employee) => (
+                      <tr key={employee.id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                          {employee.employeeName}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {employee.idCard}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {employee.phone}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {formatDate(employee.hireDate)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          ¥{employee.basicSalary.toFixed(2)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {employee.companyName}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {employee.socialInsurance ? '是' : '否'}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {employee.housingFund ? '是' : '否'}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {employee.remarks || '-'}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {formatDate(employee.createTime)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* 分页 */}
+              <div className="flex items-center justify-between mt-4">
+                <div className="text-sm text-gray-700">
+                  共 {employeeList.total} 条记录，第 {employeeList.current} 页
+                </div>
+                <div className="flex space-x-2">
+                  {Array.from(
+                    { length: Math.min(5, employeeList.pages) },
+                    (_, i) => {
+                      const page =
+                        employeeList.current <= 3
+                          ? i + 1
+                          : employeeList.current >= employeeList.pages - 2
+                          ? employeeList.pages - 4 + i
+                          : employeeList.current - 2 + i;
+
+                      if (page < 1 || page > employeeList.pages) return null;
+
+                      return (
+                        <button
+                          key={page}
+                          onClick={() => handlePageChange(page)}
+                          className={`px-3 py-1 rounded-md text-sm ${
+                            page === employeeList.current
+                              ? "bg-blue-600 text-white"
+                              : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                          }`}
+                        >
+                          {page}
+                        </button>
+                      );
+                    }
+                  )}
+                </div>
+              </div>
+            </>
+          ) : (
+            <div className="text-center py-8">
+              <Users className="mx-auto h-12 w-12 text-gray-400" />
+              <h3 className="mt-2 text-sm font-medium text-gray-900">
+                暂无员工数据
+              </h3>
+              <p className="mt-1 text-sm text-gray-500">
+                通过上方功能导入员工信息后，将在此处显示
+              </p>
+            </div>
+          )}
         </div>
       </div>
 
