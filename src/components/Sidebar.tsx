@@ -13,6 +13,7 @@ import {
   Calculator,
   FileText,
   Receipt,
+  UserPlus,
 } from "lucide-react";
 import { useAdminUserContext } from "../contexts/AdminUserContext";
 
@@ -98,6 +99,11 @@ export default function Sidebar({
     }
     // 添加新的子菜单项
     if (isCustomerServiceUser()) {
+      items.push({
+        id: "employee-import",
+        label: "员工录入",
+        icon: UserPlus,
+      });
       items.push({
         id: "social-insurance-config",
         label: "社保比例配置",

@@ -22,6 +22,7 @@ import HousingFundConfigView from "./components/HousingFundConfigView";
 import TaxUploadView from "./components/TaxUploadView";
 import PersonalTaxUploadView from "./components/PersonalTaxUploadView";
 import EmployeeBaseConfigView from "./components/EmployeeBaseConfigView";
+import EmployeeImportView from "./components/EmployeeImportView";
 import InvoiceTypeManagementView from "./components/InvoiceTypeManagementView";
 import CompanySocialInsuranceListView from "./components/CompanySocialInsuranceListView";
 import CompanySocialInsuranceDetailView from "./components/CompanySocialInsuranceDetailView";
@@ -44,6 +45,7 @@ const routeMap: Record<string, string> = {
   "/client/user-management": "user-management",
   "/client/invoice-quota-management": "invoice-quota-management",
   "/employee-base-config": "employee-base-config",
+  "/employee-import": "employee-import",
   "/social-insurance-config": "social-insurance-config",
   "/housing-fund-config": "housing-fund-config",
   "/company-housing-fund-list": "company-housing-fund-list",
@@ -62,6 +64,7 @@ const tabToRouteMap: Record<string, string> = {
   "user-management": "/client/user-management",
   "invoice-quota-management": "/client/invoice-quota-management",
   "employee-base-config": "/employee-base-config",
+  "employee-import": "/employee-import",
   "social-insurance-config": "/social-insurance-config",
   "housing-fund-config": "/housing-fund-config",
   "company-housing-fund-list": "/company-housing-fund-list",
@@ -228,6 +231,7 @@ function AppContent() {
               path="/employee-base-config"
               element={<EmployeeBaseConfigView />}
             />
+            <Route path="/employee-import" element={<EmployeeImportView />} />
             <Route
               path="/social-insurance-config"
               element={<SocialInsuranceConfigView />}
@@ -253,7 +257,10 @@ function AppContent() {
               element={<CompanySocialInsuranceDetailView />}
             />
             <Route path="/tax-upload" element={<TaxUploadView />} />
-            <Route path="/personal-tax-upload" element={<PersonalTaxUploadView />} />
+            <Route
+              path="/personal-tax-upload"
+              element={<PersonalTaxUploadView />}
+            />
             <Route
               path="/invoice-type-management"
               element={<InvoiceTypeManagementView />}
