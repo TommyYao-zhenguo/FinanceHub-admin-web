@@ -30,6 +30,11 @@ export interface EmployeeListItem {
   housingFund: boolean;
   createTime: string;
   remarks?: string;
+  socialSecurityBase?: number;
+  housingFundBase?: number;
+  supplementaryHousingFundBase?: number;
+  supplementaryHousingFundRate?: number;
+  supplementaryHousingFundPersonalRate?: number;
 }
 
 export interface EmployeeListResponse {

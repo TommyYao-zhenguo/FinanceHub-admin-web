@@ -10,7 +10,10 @@ import {
   Search,
 } from "lucide-react";
 import toast from "react-hot-toast";
-import { EmployeeImportService, EmployeeListResponse } from "../services/employeeImportService";
+import {
+  EmployeeImportService,
+  EmployeeListResponse,
+} from "../services/employeeImportService";
 
 export default function EmployeeImportView() {
   const [uploading, setUploading] = useState(false);
@@ -23,7 +26,9 @@ export default function EmployeeImportView() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // 员工列表相关状态
-  const [employeeList, setEmployeeList] = useState<EmployeeListResponse | null>(null);
+  const [employeeList, setEmployeeList] = useState<EmployeeListResponse | null>(
+    null
+  );
   const [loadingList, setLoadingList] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [pagination, setPagination] = useState({
@@ -296,6 +301,18 @@ export default function EmployeeImportView() {
               格式，如：2024-01-15
             </p>
             <p>
+              <strong>补充公积金基数：</strong>
+              补充公积金基数请填写数字，单位为元，如：10000
+            </p>
+            <p>
+              <strong>补充公积金企业缴纳比例：</strong>
+              补充公积金企业缴纳比例请填写数字，单位为%，如：10
+            </p>
+            <p>
+              <strong>补充公积金个人缴纳比例：</strong>
+              补充公积金个人缴纳比例请填写数字，单位为%，如：10
+            </p>
+            <p>
               <strong>布尔值格式：</strong>是否缴纳社保/公积金请填写：是/否 或
               true/false 或 1/0
             </p>
@@ -365,16 +382,38 @@ export default function EmployeeImportView() {
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         公司名称
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          是否缴纳社保
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          是否缴纳公积金
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          备注
-                        </th>
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        是否缴纳社保
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        是否缴纳公积金
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        备注
+                      </th>
+                      {/* 社保基数 */}
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        社保基数
+                      </th>
+                      {/* 公积金基数 */}
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        普通公积金基数
+                      </th>
+                      {/* 补充 */}
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        补充公积金基数
+                      </th>
+
+                      {/* 补充公积金企业缴纳比例 */}
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        补充公积金企业缴纳比例
+                      </th>
+                      {/* 补充公积金个人缴纳比例 */}
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        补充公积金个人缴纳比例
+                      </th>
+
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         录入时间
                       </th>
@@ -402,14 +441,44 @@ export default function EmployeeImportView() {
                           {employee.companyName}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {employee.socialInsurance ? '是' : '否'}
+                          {employee.socialInsurance ? "是" : "否"}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {employee.housingFund ? '是' : '否'}
+                          {employee.housingFund ? "是" : "否"}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {employee.remarks || '-'}
+                          {employee.remarks || "-"}
                         </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {employee.socialSecurityBase
+                            ? "¥" + employee.socialSecurityBase.toFixed(2)
+                            : "-"}
+                        </td>
+                        {/* 普通公积金基数 */}
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {employee.housingFundBase
+                            ? "¥" + employee.housingFundBase.toFixed(2)
+                            : "-"}
+                        </td>
+                        {/* 补充公积金基数 */}
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {employee.supplementaryHousingFundBase
+                            ? "¥" + employee.supplementaryHousingFundBase.toFixed(2)
+                            : "-"}
+                        </td>
+                        {/* 补充公积金企业缴纳比例 */}
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {employee.supplementaryHousingFundRate
+                            ? employee.supplementaryHousingFundRate.toFixed(2) + "%"
+                            : "-"}
+                        </td>
+                        {/* 补充公积金个人缴纳比例 */}
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {employee.supplementaryHousingFundPersonalRate
+                            ? employee.supplementaryHousingFundPersonalRate.toFixed(2) + "%"
+                            : "-"}
+                        </td>
+                        
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                           {formatDate(employee.createTime)}
                         </td>
