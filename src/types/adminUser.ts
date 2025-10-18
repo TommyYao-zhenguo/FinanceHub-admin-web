@@ -1,3 +1,4 @@
+import { Company } from './company';
 // 用户信息接口
 export interface AdminUserInfo {
   id: string;
@@ -53,6 +54,7 @@ export interface UserQueryParams {
   size?: number;
   username?: string;
   companyNo?: string;
+  companyName?: string;
   roleCode?: UserRole;
   status?: "ACTIVE" | "INACTIVE";
 }

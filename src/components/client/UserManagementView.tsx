@@ -38,7 +38,7 @@ export default function UserManagementView() {
   const [searchParams, setSearchParams] = useState<UserQueryParams>({
     current: 1,
     size: 10,
-    username: "",
+    companyName: "",
     companyNo: isSuperAdmin ? undefined : userInfo?.companyNo || undefined, // 非超级管理员默认使用自己的公司ID
     roleCode: isSuperAdmin ? UserRole.ADMIN : UserRole.EMPLOYEE,
     status: undefined,
@@ -73,7 +73,6 @@ export default function UserManagementView() {
         setSearchParams(params);
       }
       const response = await AdminUserService.getUserList(params);
-      console.log("dededededede加载用户列表成功:", response);
       setUsers(response.records);
       setTotalElements(response.total);
       setTotalPages(response.pages);
@@ -116,7 +115,7 @@ export default function UserManagementView() {
 
   // 搜索处理
   const handleSearch = () => {
-    setSearchParams({ ...searchParams, current: 1 });
+    loadUsers(true); // 重置页码并搜索
   };
 
   // 分页处理
@@ -274,10 +273,10 @@ export default function UserManagementView() {
         <div>
           <input
             type="text"
-            placeholder="搜索用户名"
-            value={searchParams.username}
+            placeholder="所属公司"
+            value={searchParams.companyName}
             onChange={(e) =>
-              setSearchParams({ ...searchParams, username: e.target.value })
+              setSearchParams({ ...searchParams, companyName: e.target.value })
             }
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-transparent"
           />

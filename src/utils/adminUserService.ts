@@ -19,7 +19,7 @@ export class AdminUserService {
       queryParams.append("current", params.current.toString());
     if (params.size !== undefined)
       queryParams.append("size", params.size.toString());
-    if (params.username) queryParams.append("username", params.username);
+    if (params.companyName) queryParams.append("companyName", params.companyName);
     if (params.roleCode) queryParams.append("roleCode", params.roleCode);
 
     if (params.status) queryParams.append("status", params.status);
