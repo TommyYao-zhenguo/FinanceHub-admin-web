@@ -55,6 +55,7 @@ export default function CustomerServiceView() {
   );
   const [selectedCategory, setSelectedCategory] = useState("PENDING");
   const [searchTerm, setSearchTerm] = useState("");
+  const [searchKeyword, setSearchKeyword] = useState(""); // 新增：用于存储搜索关键词
   const [lastRefreshTime, setLastRefreshTime] = useState<Date | null>(null);
   const [invoiceAttachments, setInvoiceAttachments] = useState<
     AttachmentUploadResponse[]
@@ -91,7 +92,7 @@ export default function CustomerServiceView() {
   };
 
   // 加载数据
-  const loadData = async () => {
+  const loadData = async (keyword?: string) => {
     try {
       setLoading(true);
 
@@ -99,7 +100,7 @@ export default function CustomerServiceView() {
       const queryParams = {
         page: pagination.current,
         size: pagination.size,
-        keyword: searchTerm || undefined,
+        keyword: keyword !== undefined ? keyword : (searchKeyword || undefined), // 优先使用传入的keyword参数
         status: selectedCategory !== "all" ? selectedCategory : undefined,
       };
 
@@ -165,32 +166,29 @@ export default function CustomerServiceView() {
     loadData();
   };
 
+  // 搜索处理函数
+  const handleSearch = () => {
+    setSearchKeyword(searchTerm);
+    setPagination((prev) => ({ ...prev, current: 1 }));
+    loadData(searchTerm); // 直接传入当前输入的搜索词
+  };
+
   // 每秒钟刷新一次
   useEffect(() => {
     const interval = setInterval(refreshData, 1000 * 60 * 5);
     return () => clearInterval(interval);
   }, []);
 
-  // 防抖搜索
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (searchTerm !== undefined) {
-        setPagination((prev) => ({ ...prev, current: 1 }));
-      }
-    }, 500);
-
-    return () => clearTimeout(timer);
-  }, [searchTerm]);
-
-  // 分类变化时重置分页
+  // 分类变化时重置分页并重新加载数据
   useEffect(() => {
     setPagination((prev) => ({ ...prev, current: 1 }));
+    loadData();
   }, [selectedCategory]);
 
   // 分页变化时重新加载数据
   useEffect(() => {
     loadData();
-  }, [pagination.current, pagination.size, selectedCategory, searchTerm]);
+  }, [pagination.current, pagination.size, selectedCategory]);
 
   // 初始加载
   useEffect(() => {
@@ -226,29 +224,6 @@ export default function CustomerServiceView() {
       });
     };
   }, [uploadedFiles]);
-
-  const messageCategories = [
-    {
-      id: "PENDING",
-      label: "待处理",
-      count: statistics.PENDING ? statistics.PENDING : 0,
-    },
-    {
-      id: "PROCESSING",
-      label: "处理中",
-      count: statistics.PROCESSING ? statistics.PROCESSING : 0,
-    },
-    {
-      id: "COMPLETED",
-      label: "已完成",
-      count: statistics.COMPLETED ? statistics.COMPLETED : 0,
-    },
-    {
-      id: "INVALID",
-      label: "已作废",
-      count: statistics.INVALID ? statistics.INVALID : 0,
-    },
-  ];
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -319,7 +294,7 @@ export default function CustomerServiceView() {
         return "新增公司";
       case "CONFIRM_SALARY":
         return "月度工资确认";
-      
+
       default:
         return taskType;
     }
@@ -503,7 +478,9 @@ export default function CustomerServiceView() {
       // 如果是作废状态的消息，重新从服务器获取最新详情
       if (request.status === "INVALID") {
         try {
-          const latestRequest = await CustomerServiceService.getRequest(request.id);
+          const latestRequest = await CustomerServiceService.getRequest(
+            request.id
+          );
           const updatedRequest: DisplayRequest = {
             ...latestRequest,
             messageType: getMessageTypeFromTaskType(latestRequest.taskType),
@@ -701,10 +678,25 @@ export default function CustomerServiceView() {
           </div>
         </div>
 
-
-
         {/* 内容区域 */}
         <div className="flex-1 flex flex-col min-h-0">
+          <div className="flex flex-col ml-3 mr-3">
+            <div className="flex gap-2 mb-4">
+              <input
+                className="flex-1 p-2 border border-gray-300 rounded-lg"
+                placeholder="搜索任务..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onKeyPress={(e) => e.key === "Enter" && handleSearch()}
+              />
+              <button
+                onClick={handleSearch}
+                className="flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                <Search className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
           {loading ? (
             <div className="flex-1 flex items-center justify-center">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
@@ -723,7 +715,10 @@ export default function CustomerServiceView() {
                         pagination.total
                       )}{" "}
                       -{" "}
-                      {Math.min(pagination.current * pagination.size, pagination.total)}{" "}
+                      {Math.min(
+                        pagination.current * pagination.size,
+                        pagination.total
+                      )}{" "}
                       条，共 {pagination.total} 条
                     </div>
                     <div className="flex items-center space-x-2">
@@ -824,7 +819,7 @@ export default function CustomerServiceView() {
                   ))}
                 </div>
               </div>
-              
+
               {/* 有内容时分页组件显示在列表下方 */}
               {pagination.total > 0 && (
                 <div className="p-4 border-t border-gray-200 bg-white">
@@ -836,7 +831,10 @@ export default function CustomerServiceView() {
                         pagination.total
                       )}{" "}
                       -{" "}
-                      {Math.min(pagination.current * pagination.size, pagination.total)}{" "}
+                      {Math.min(
+                        pagination.current * pagination.size,
+                        pagination.total
+                      )}{" "}
                       条，共 {pagination.total} 条
                     </div>
                     <div className="flex items-center space-x-2">
