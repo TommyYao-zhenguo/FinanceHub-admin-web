@@ -85,11 +85,11 @@ export default function EmployeeBaseConfigView() {
             socialInsuranceBase: employee.socialSecurityBase,
             housingFundBase: employee.housingFundBase,
             supplementaryHousingFundBase:
-              employee.supplementaryHousingFundBase || 0,
+              employee.supplementaryHousingFundBase,
             supplementaryHousingFundRate:
-              employee.supplementaryHousingFundRate || 0,
+              employee.supplementaryHousingFundRate,
             supplementaryHousingFundPersonalRate:
-              employee.supplementaryHousingFundPersonalRate || 0,
+              employee.supplementaryHousingFundPersonalRate,
             effectiveDate: new Date().toISOString().split("T")[0], // 默认当前日期
           };
         }
