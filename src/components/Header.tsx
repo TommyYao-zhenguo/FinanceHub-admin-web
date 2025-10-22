@@ -18,7 +18,7 @@ export default function Header({ onMenuToggle }: HeaderProps) {
 
   const getUserDisplayName = () => {
     if (!userInfo) return "用户";
-    return userInfo.username || "用户";
+    return userInfo.name || userInfo.username || "用户";
   };
 
   const getCompanyName = () => {
