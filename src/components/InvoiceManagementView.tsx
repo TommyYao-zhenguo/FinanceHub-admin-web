@@ -1,15 +1,10 @@
 import React, { useState, useRef } from "react";
-import {
-  Upload,
-  Download,
-  Receipt,
-  FileUp,
-  List,
-} from "lucide-react";
+import { Upload, Download, Receipt, FileUp, List } from "lucide-react";
 import { useAlert } from "../hooks/useAlert";
 import * as XLSX from "xlsx";
 import { InvoiceManagementService } from "../services/invoiceManagementService";
 import { InvoiceReceiptList } from "./InvoiceReceiptList";
+import { InvoiceIssueList } from "./InvoiceIssueList";
 
 type InvoiceType = "issued" | "received";
 
@@ -137,12 +132,21 @@ const InvoiceManagementView: React.FC = () => {
 
       for (const file of validFiles) {
         try {
-          const response = await InvoiceManagementService.uploadInvoiceFile({
-            file,
-            invoiceType: selectedInvoiceType,
-          });
+          if (selectedInvoiceType === "issued") {
+            // 开具发票上传
+            await InvoiceManagementService.uploadInvoiceFile({
+              file,
+              invoiceType: selectedInvoiceType,
+            });
+          } else {
+            // 取得发票上传
+            const response = await InvoiceManagementService.uploadInvoiceFile({
+              file,
+              invoiceType: selectedInvoiceType,
+            });
+            console.log("文件上传成功:", response);
+          }
 
-          console.log("文件上传成功:", response);
           showSuccess(`文件 ${file.name} 上传成功`);
         } catch (error) {
           console.error("文件上传失败:", error);
@@ -423,7 +427,13 @@ const InvoiceManagementView: React.FC = () => {
         </>
       )}
 
-      {activeTab === "list" && <InvoiceReceiptList isActive={activeTab === 'list'} />}
+      {activeTab === "list" && selectedInvoiceType === "received" && (
+        <InvoiceReceiptList isActive={activeTab === "list"} />
+      )}
+
+      {activeTab === "list" && selectedInvoiceType === "issued" && (
+        <InvoiceIssueList isActive={activeTab === "list"} />
+      )}
     </div>
   );
 };

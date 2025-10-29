@@ -99,6 +99,50 @@ export interface InvoiceReceiptResponse {
   uploaderNo: string;
 }
 
+// 开具发票相关接口类型定义
+export interface InvoiceIssueResponse {
+  id?: string;
+  sequenceNumber?: string;
+  invoiceCode?: string;
+  invoiceNumber?: string;
+  digitalInvoiceNumber?: string;
+  sellerTaxNumber?: string;
+  sellerName?: string;
+  buyerTaxNumber?: string;
+  buyerName?: string;
+  invoiceDate?: string;
+  taxClassificationCode?: string;
+  specificBusinessType?: string;
+  goodsOrServiceName?: string;
+  specification?: string;
+  unit?: string;
+  quantity?: number;
+  unitPrice?: number;
+  amount?: number;
+  taxRate?: number;
+  taxAmount?: number;
+  totalAmount?: number;
+  invoiceSource?: string;
+  invoiceType?: string;
+  invoiceStatus?: string;
+  isPositiveInvoice?: boolean;
+  riskLevel?: string;
+  issuer?: string;
+  remark?: string;
+  uploaderNo?: string;
+  companyNo?: string;
+  createTime?: string;
+  updateTime?: string;
+}
+
+export interface InvoiceIssuePageResponse {
+  records: InvoiceIssueResponse[];
+  total: number;
+  size: number;
+  current: number;
+  pages: number;
+}
+
 export interface InvoiceReceiptPageResponse {
   records: InvoiceReceiptResponse[];
   total: number;
@@ -192,6 +236,19 @@ export class InvoiceManagementService {
   ): Promise<InvoiceReceiptPageResponse> {
     const response = await httpClient.get<InvoiceReceiptPageResponse>(
       `/api/v1/admin/invoice-management/list/receipt?current=${current}&size=${size}`
+    );
+    return response;
+  }
+
+  /**
+   * 获取发票明细列表（分页）
+   */
+  static async getInvoiceIssueList(
+    current: number = 1,
+    size: number = 10
+  ): Promise<InvoiceIssuePageResponse> {
+    const response = await httpClient.get<InvoiceIssuePageResponse>(
+      `/api/v1/admin/invoice-management/list/issue?current=${current}&size=${size}`
     );
     return response;
   }
