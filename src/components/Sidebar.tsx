@@ -149,6 +149,11 @@ export default function Sidebar({
         label: "开票额度管理",
         icon: Receipt,
       });
+      items.push({
+        id: "invoice-management",
+        label: "发票管理",
+        icon: FileText,
+      });
     }
 
     return items;
@@ -187,10 +192,9 @@ export default function Sidebar({
                   onClick={() => handleItemClick(item)}
                   className={`
                     w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-colors
-                    ${
-                      activeTab === item.id
-                        ? "bg-orange-600 text-white shadow-lg"
-                        : "text-gray-300 hover:text-white hover:bg-gray-700"
+                    ${activeTab === item.id
+                      ? "bg-orange-600 text-white shadow-lg"
+                      : "text-gray-300 hover:text-white hover:bg-gray-700"
                     }
                   `}
                 >
@@ -230,10 +234,9 @@ export default function Sidebar({
                           onClick={() => handleItemClick(item)}
                           className={`
                             w-full flex items-center space-x-3 px-4 py-2 rounded-lg text-left transition-colors
-                            ${
-                              activeTab === item.id
-                                ? "bg-orange-600 text-white shadow-lg"
-                                : "text-gray-400 hover:text-white hover:bg-gray-700"
+                            ${activeTab === item.id
+                              ? "bg-orange-600 text-white shadow-lg"
+                              : "text-gray-400 hover:text-white hover:bg-gray-700"
                             }
                           `}
                         >

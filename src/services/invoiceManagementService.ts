@@ -1,0 +1,145 @@
+import { httpClient } from "../utils/http";
+
+// 发票管理相关接口类型定义
+export interface InvoiceFileUploadRequest {
+  file: File;
+  invoiceType: "issued" | "received";
+}
+
+export interface InvoiceFileUploadResponse {
+  fileId: string;
+  fileName: string;
+  originalFileName: string;
+  fileSize: number;
+  filePath: string;
+  invoiceType: string;
+  status: "uploading" | "processing" | "success" | "error";
+  uploadTime: string;
+  userId?: number;
+  processedCount?: number;
+  totalCount?: number;
+  errorMessage?: string;
+}
+
+export interface InvoiceFileValidationResult {
+  valid: boolean;
+  sheetNames?: string[];
+  hasMultipleSheets?: boolean;
+  hasSummarySheet?: boolean;
+  errorMessage?: string;
+}
+
+export interface InvoiceFileListResponse {
+  files: InvoiceFileUploadResponse[];
+  totalCount: number;
+  page: number;
+  size: number;
+  totalPages: number;
+}
+
+export interface InvoiceFileDeleteRequest {
+  fileIds: string[];
+  userId?: number;
+}
+
+export interface InvoiceFileProcessRequest {
+  fileIds: string[];
+  userId?: number;
+  processType: "validate" | "process";
+}
+
+export interface InvoiceFileProcessResponse {
+  processId: string;
+  status: "processing" | "completed" | "error";
+  totalFiles: number;
+  processedFiles: number;
+  successCount: number;
+  errorCount: number;
+  startTime: string;
+}
+
+export interface InvoiceStatistics {
+  totalFiles: number;
+  successFiles: number;
+  errorFiles: number;
+  processingFiles: number;
+  totalInvoices: number;
+  totalAmount: number;
+}
+
+/**
+ * 发票管理服务类
+ */
+export class InvoiceManagementService {
+  /**
+   * 上传发票文件
+   */
+  static async uploadInvoiceFile(
+    request: InvoiceFileUploadRequest
+  ): Promise<InvoiceFileUploadResponse> {
+    const formData = new FormData();
+    formData.append("file", request.file);
+    formData.append("invoiceType", request.invoiceType);
+
+    const response = await httpClient.post<InvoiceFileUploadResponse>(
+      "/api/v1/admin/invoice-management/upload",
+      formData
+    );
+    return response;
+  }
+
+  /**
+   * 下载发票模板
+   */
+  static async downloadInvoiceTemplate(
+    invoiceType: "issued" | "received"
+  ): Promise<void> {
+    try {
+      const response = await fetch(
+        `${
+          import.meta.env.VITE_API_BASE_URL
+        }/api/admin/invoice-management/template?invoiceType=${invoiceType}`,
+        {
+          method: "GET",
+          headers: {
+            token: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`下载失败: ${response.status}`);
+      }
+
+      // 获取文件名
+      const contentDisposition = response.headers.get("Content-Disposition");
+      let filename = `${invoiceType}_invoice_template.xlsx`;
+      if (contentDisposition) {
+        const filenameMatch = contentDisposition.match(
+          /filename[^;=\n]*=(['"]?)([^'"\n]*?)\1/
+        );
+        if (filenameMatch && filenameMatch[2]) {
+          filename = decodeURIComponent(filenameMatch[2]);
+        }
+      }
+
+      // 处理blob数据流
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+
+      // 创建下载链接
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+
+      // 清理
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("下载模板失败:", error);
+      throw error;
+    }
+  }
+}

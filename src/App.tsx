@@ -28,6 +28,7 @@ import CompanySocialInsuranceListView from "./components/CompanySocialInsuranceL
 import CompanySocialInsuranceDetailView from "./components/CompanySocialInsuranceDetailView";
 import CompanyHousingFundListView from "./components/CompanyHousingFundListView";
 import CompanyHousingFundDetailView from "./components/CompanyHousingFundDetailView";
+import InvoiceManagementView from "./components/InvoiceManagementView";
 
 import {
   AdminUserProvider,
@@ -53,6 +54,7 @@ const routeMap: Record<string, string> = {
   "/social-insurance-detail": "company-social-insurance-detail",
   "/tax-upload": "tax-upload",
   "/invoice-type-management": "invoice-type-management",
+  "/invoice-management": "invoice-management",
 };
 
 // tab到路由的映射
@@ -73,6 +75,7 @@ const tabToRouteMap: Record<string, string> = {
   "tax-upload": "/tax-upload",
   "personal-tax-upload": "/personal-tax-upload",
   "invoice-type-management": "/invoice-type-management",
+  "invoice-management": "/invoice-management",
 };
 
 // 创建一个内部组件来使用UserContext和Router hooks
@@ -264,6 +267,10 @@ function AppContent() {
             <Route
               path="/invoice-type-management"
               element={<InvoiceTypeManagementView />}
+            />
+            <Route
+              path="/invoice-management"
+              element={<InvoiceManagementView />}
             />
             <Route
               path="/company-social-insurance"
