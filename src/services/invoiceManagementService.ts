@@ -67,6 +67,46 @@ export interface InvoiceStatistics {
   totalAmount: number;
 }
 
+// 发票明细相关接口类型定义
+export interface InvoiceReceiptResponse {
+  id: string;
+  invoiceCode: string;
+  invoiceNumber: string;
+  digitalInvoiceNumber: string;
+  sellerTaxNumber: string;
+  sellerName: string;
+  buyerTaxNumber: string;
+  buyerName: string;
+  invoiceDate: string;
+  taxClassificationCode: string;
+  specificBusinessType: string;
+  goodsOrServiceName: string;
+  specification: string;
+  unit: string;
+  quantity: number;
+  unitPrice: number;
+  amount: number;
+  taxRate: number;
+  taxAmount: number;
+  totalAmount: number;
+  invoiceSource: string;
+  invoiceType: string;
+  invoiceStatus: string;
+  isPositiveInvoice: boolean;
+  riskLevel: string;
+  issuer: string;
+  remark: string;
+  uploaderNo: string;
+}
+
+export interface InvoiceReceiptPageResponse {
+  records: InvoiceReceiptResponse[];
+  total: number;
+  current: number;
+  size: number;
+  pages: number;
+}
+
 /**
  * 发票管理服务类
  */
@@ -141,5 +181,18 @@ export class InvoiceManagementService {
       console.error("下载模板失败:", error);
       throw error;
     }
+  }
+
+  /**
+   * 获取发票明细列表（分页）
+   */
+  static async getInvoiceReceiptList(
+    current: number = 1,
+    size: number = 10
+  ): Promise<InvoiceReceiptPageResponse> {
+    const response = await httpClient.get<InvoiceReceiptPageResponse>(
+      `/api/v1/admin/invoice-management/list/receipt?current=${current}&size=${size}`
+    );
+    return response;
   }
 }
