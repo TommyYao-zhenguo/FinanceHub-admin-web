@@ -31,7 +31,6 @@ const InvoiceManagementView: React.FC = () => {
   const [activeTab, setActiveTab] = useState<"upload" | "list">("upload");
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [isUploading, setIsUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { showSuccess, showError } = useAlert();
 
@@ -104,12 +103,6 @@ const InvoiceManagementView: React.FC = () => {
     });
   };
 
-  // 清除选中的文件
-  const handleClearFiles = () => {
-    setSelectedFiles([]);
-    setUploadProgress(0);
-  };
-
   // 删除单个文件
   const handleRemoveFile = (index: number) => {
     setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
@@ -156,10 +149,8 @@ const InvoiceManagementView: React.FC = () => {
     }
 
     setIsUploading(true);
-    setUploadProgress(0);
 
     try {
-      const totalFiles = selectedFiles.length;
       let completedFiles = 0;
 
       for (const file of selectedFiles) {
@@ -177,10 +168,6 @@ const InvoiceManagementView: React.FC = () => {
             invoiceType: selectedInvoiceType,
           });
           completedFiles++;
-
-          // 更新进度
-          const progress = Math.round((completedFiles / totalFiles) * 100);
-          setUploadProgress(progress);
 
           showSuccess(`文件 ${file.name} 上传成功`);
         } catch (error: unknown) {
@@ -201,7 +188,6 @@ const InvoiceManagementView: React.FC = () => {
       showError("批量上传失败，请重试");
     } finally {
       setIsUploading(false);
-      setUploadProgress(0);
     }
   };
 
@@ -236,12 +222,6 @@ const InvoiceManagementView: React.FC = () => {
     e.target.value = "";
   };
 
-  // 删除文件
-  // const handleDeleteFile = (fileId: string) => {
-  //     setFiles(prev => prev.filter(f => f.id !== fileId));
-  //     showSuccess('文件已删除');
-  // };
-
   // 下载模板
   const handleDownloadTemplate = async () => {
     try {
@@ -266,47 +246,6 @@ const InvoiceManagementView: React.FC = () => {
   const getCurrentInvoiceTypeInfo = () => {
     return invoiceTypes.find((type) => type.value === selectedInvoiceType);
   };
-
-  // 格式化文件大小
-  // const formatFileSize = (bytes: number) => {
-  //     if (bytes === 0) return '0 Bytes';
-  //     const k = 1024;
-  //     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-  //     const i = Math.floor(Math.log(bytes) / Math.log(k));
-  //     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-  // };
-
-  // 获取状态图标
-  // const getStatusIcon = (status: InvoiceFile['status']) => {
-  //     switch (status) {
-  //         case 'uploading':
-  //             return <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>;
-  //         case 'processing':
-  //             return <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-yellow-600"></div>;
-  //         case 'success':
-  //             return <CheckCircle className="h-4 w-4 text-green-600" />;
-  //         case 'error':
-  //             return <XCircle className="h-4 w-4 text-red-600" />;
-  //         default:
-  //             return <AlertCircle className="h-4 w-4 text-gray-600" />;
-  //     }
-  // };
-
-  // 获取状态文本
-  // const getStatusText = (file: InvoiceFile) => {
-  //     switch (file.status) {
-  //         case 'uploading':
-  //             return '上传中...';
-  //         case 'processing':
-  //             return '处理中...';
-  //         case 'success':
-  //             return `处理完成 (${file.processedCount}/${file.totalCount})`;
-  //         case 'error':
-  //             return '处理失败';
-  //         default:
-  //             return '未知状态';
-  //     }
-  // };
 
   // const currentFiles = getCurrentTypeFiles();
   const currentTypeInfo = getCurrentInvoiceTypeInfo();
