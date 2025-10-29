@@ -1,5 +1,14 @@
 import React, { useState, useRef } from "react";
-import { Upload, Download, Receipt, FileUp, List } from "lucide-react";
+import {
+  Upload,
+  Download,
+  Receipt,
+  FileUp,
+  List,
+  X,
+  Send,
+  Loader2,
+} from "lucide-react";
 import { useAlert } from "../hooks/useAlert";
 import * as XLSX from "xlsx";
 import { InvoiceManagementService } from "../services/invoiceManagementService";
@@ -16,11 +25,13 @@ interface ExcelValidationResult {
 }
 
 const InvoiceManagementView: React.FC = () => {
-  // const [files, setFiles] = useState<InvoiceFile[]>([]);
   const [isDragOver, setIsDragOver] = useState(false);
   const [selectedInvoiceType, setSelectedInvoiceType] =
     useState<InvoiceType>("issued");
   const [activeTab, setActiveTab] = useState<"upload" | "list">("upload");
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { showSuccess, showError } = useAlert();
 
@@ -93,8 +104,19 @@ const InvoiceManagementView: React.FC = () => {
     });
   };
 
-  // 处理文件上传
-  const handleFileUpload = async (fileList: FileList) => {
+  // 清除选中的文件
+  const handleClearFiles = () => {
+    setSelectedFiles([]);
+    setUploadProgress(0);
+  };
+
+  // 删除单个文件
+  const handleRemoveFile = (index: number) => {
+    setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  // 处理文件选择和验证
+  const handleFileSelection = async (fileList: FileList) => {
     const files = Array.from(fileList);
     const validFiles: File[] = [];
     const invalidFiles: { file: File; error: string }[] = [];
@@ -117,53 +139,69 @@ const InvoiceManagementView: React.FC = () => {
       const errorMessages = invalidFiles
         .map(({ file, error }) => `${file.name}: ${error}`)
         .join("\n");
-      showSuccess(
-        `有 ${invalidFiles.length} 个文件验证失败:\n${errorMessages}`
-      );
+      showError(`有 ${invalidFiles.length} 个文件验证失败:\n${errorMessages}`);
     }
 
-    if (validFiles.length === 0) {
+    if (validFiles.length > 0) {
+      setSelectedFiles(validFiles);
+      showSuccess(`已选择 ${validFiles.length} 个有效文件`);
+    }
+  };
+
+  // 处理文件上传
+  const handleFileUpload = async () => {
+    if (selectedFiles.length === 0) {
+      showError("请先选择文件");
       return;
     }
 
-    // 上传文件到后端
-    try {
-      showSuccess(`开始上传 ${validFiles.length} 个文件...`);
+    setIsUploading(true);
+    setUploadProgress(0);
 
-      for (const file of validFiles) {
+    try {
+      const totalFiles = selectedFiles.length;
+      let completedFiles = 0;
+
+      for (const file of selectedFiles) {
+        // 验证文件
+        const validation = await validateExcelFile(file);
+        if (!validation.isValid) {
+          showError(`文件 ${file.name} 验证失败: ${validation.errorMessage}`);
+          continue;
+        }
+
+        // 上传文件
         try {
-          if (selectedInvoiceType === "issued") {
-            // 开具发票上传
-            await InvoiceManagementService.uploadInvoiceFile({
-              file,
-              invoiceType: selectedInvoiceType,
-            });
-          } else {
-            // 取得发票上传
-            const response = await InvoiceManagementService.uploadInvoiceFile({
-              file,
-              invoiceType: selectedInvoiceType,
-            });
-            console.log("文件上传成功:", response);
-          }
+          await InvoiceManagementService.uploadInvoiceFile({
+            file,
+            invoiceType: selectedInvoiceType,
+          });
+          completedFiles++;
+
+          // 更新进度
+          const progress = Math.round((completedFiles / totalFiles) * 100);
+          setUploadProgress(progress);
 
           showSuccess(`文件 ${file.name} 上传成功`);
-        } catch (error) {
+        } catch (error: unknown) {
           console.error("文件上传失败:", error);
-          showSuccess(
-            `文件 ${file.name} 上传失败: ${
-              error instanceof Error ? error.message : "未知错误"
-            }`
-          );
+          const errorMessage =
+            error instanceof Error ? error.message : "上传失败";
+          showError(`文件 ${file.name} 上传失败: ${errorMessage}`);
         }
       }
 
-      showSuccess(`文件上传完成，共处理 ${validFiles.length} 个文件`);
-    } catch (error) {
+      // 上传完成后清空文件列表
+      if (completedFiles > 0) {
+        setSelectedFiles([]);
+        showSuccess(`成功上传 ${completedFiles} 个文件`);
+      }
+    } catch (error: unknown) {
       console.error("批量上传失败:", error);
-      showSuccess(
-        `批量上传失败: ${error instanceof Error ? error.message : "未知错误"}`
-      );
+      showError("批量上传失败，请重试");
+    } finally {
+      setIsUploading(false);
+      setUploadProgress(0);
     }
   };
 
@@ -184,16 +222,18 @@ const InvoiceManagementView: React.FC = () => {
 
     const fileList = e.dataTransfer.files;
     if (fileList.length > 0) {
-      handleFileUpload(fileList);
+      handleFileSelection(fileList);
     }
   };
 
-  // 处理点击上传
+  // 处理点击选择文件
   const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const fileList = e.target.files;
     if (fileList && fileList.length > 0) {
-      handleFileUpload(fileList);
+      handleFileSelection(fileList);
     }
+    // 重置文件输入框的值，确保下次选择相同文件时也能触发 onChange 事件
+    e.target.value = "";
   };
 
   // 删除文件
@@ -392,28 +432,84 @@ const InvoiceManagementView: React.FC = () => {
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
             >
-              <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
-                拖拽文件到此处或点击上传
-              </h3>
-              <p className="text-gray-500 mb-4">
-                支持 Excel 文件 (.xlsx, .xls)，最大 100MB
-              </p>
-              <div className="flex justify-center space-x-4">
-                <button
-                  onClick={() => fileInputRef.current?.click()}
-                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  选择文件
-                </button>
-                <button
-                  onClick={handleDownloadTemplate}
-                  className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors flex items-center space-x-2"
-                >
-                  <Download className="h-4 w-4" />
-                  <span>下载模板</span>
-                </button>
-              </div>
+              {selectedFiles.length === 0 ? (
+                <>
+                  <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                    拖拽文件到此处或点击选择文件
+                  </h3>
+                  <p className="text-gray-500 mb-4">
+                    支持 Excel 文件 (.xlsx, .xls)，最大 100MB
+                  </p>
+                  <div className="flex justify-center space-x-4">
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
+                      className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    >
+                      选择文件
+                    </button>
+                    <button
+                      onClick={handleDownloadTemplate}
+                      className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors flex items-center space-x-2"
+                    >
+                      <Download className="h-4 w-4" />
+                      <span>下载模板</span>
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="mb-6">
+                    <h3 className="text-lg font-medium text-gray-900 mb-4">
+                      已选择 {selectedFiles.length} 个文件
+                    </h3>
+                    <div className="space-y-2">
+                      {selectedFiles.map((file, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center justify-between bg-gray-50 p-3 rounded-lg"
+                        >
+                          <div className="flex items-center space-x-3">
+                            <FileUp className="h-5 w-5 text-blue-600" />
+                            <span className="text-sm font-medium text-gray-900">
+                              {file.name}
+                            </span>
+                            <span className="text-xs text-gray-500">
+                              ({(file.size / 1024 / 1024).toFixed(2)} MB)
+                            </span>
+                            <button
+                              onClick={() => handleRemoveFile(index)}
+                              className="text-red-500 hover:text-red-700 transition-colors"
+                            >
+                              <X className="h-4 w-4" />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {isUploading && (
+                    <div className="mb-4">
+                      <div className="flex items-center justify-center space-x-2 mb-2">
+                        <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
+                        <span className="text-sm text-gray-600">上传中...</span>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex justify-center space-x-4">
+                    <button
+                      onClick={handleFileUpload}
+                      disabled={isUploading}
+                      className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
+                    >
+                      <Send className="h-4 w-4" />
+                      <span>{isUploading ? "上传中..." : "提交"}</span>
+                    </button>
+                  </div>
+                </>
+              )}
               <input
                 ref={fileInputRef}
                 type="file"
