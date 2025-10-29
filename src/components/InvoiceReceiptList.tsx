@@ -16,12 +16,10 @@ import { useAlert } from "../hooks/useAlert";
 
 interface InvoiceReceiptListProps {
   className?: string;
-  isActive?: boolean; // 新增：标识当前tab是否激活
 }
 
 export const InvoiceReceiptList: React.FC<InvoiceReceiptListProps> = ({
   className = "",
-  isActive = false,
 }) => {
   const [receipts, setReceipts] = useState<InvoiceReceiptResponse[]>([]);
   const [loading, setLoading] = useState(false);
@@ -59,13 +57,11 @@ export const InvoiceReceiptList: React.FC<InvoiceReceiptListProps> = ({
     }
   };
 
-  // 当tab激活时重新加载数据
+  // 组件挂载时加载数据
   useEffect(() => {
-    if (isActive) {
-      console.log("Tab activated, loading receipt list...");
-      loadReceiptList(1, 10); // 重置到第一页
-    }
-  }, [isActive]);
+    console.log("组件挂载，加载发票明细列表...");
+    loadReceiptList(1, 10); // 重置到第一页
+  }, []);
 
   // 处理分页变化
   const handlePageChange = (newPage: number) => {

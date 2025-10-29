@@ -4,7 +4,6 @@ import {
   Download,
   Receipt,
   FileUp,
-  List,
   X,
   Send,
   Loader2,
@@ -28,7 +27,6 @@ const InvoiceManagementView: React.FC = () => {
   const [isDragOver, setIsDragOver] = useState(false);
   const [selectedInvoiceType, setSelectedInvoiceType] =
     useState<InvoiceType>("issued");
-  const [activeTab, setActiveTab] = useState<"upload" | "list">("upload");
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -259,216 +257,181 @@ const InvoiceManagementView: React.FC = () => {
         <p className="mt-2 text-gray-600">上传和管理客户发票数据</p>
       </div>
 
-      {/* 标签页导航 */}
+      {/* 发票类型选择器 */}
       <div className="mb-8">
-        <div className="border-b border-gray-200">
-          <nav className="-mb-px flex space-x-8">
-            <button
-              onClick={() => setActiveTab("upload")}
-              className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                activeTab === "upload"
-                  ? "border-blue-500 text-blue-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-              }`}
-            >
-              <div className="flex items-center space-x-2">
-                <Upload className="h-4 w-4" />
-                <span>文件上传</span>
-              </div>
-            </button>
-            <button
-              onClick={() => setActiveTab("list")}
-              className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                activeTab === "list"
-                  ? "border-blue-500 text-blue-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-              }`}
-            >
-              <div className="flex items-center space-x-2">
-                <List className="h-4 w-4" />
-                <span>发票明细</span>
-              </div>
-            </button>
-          </nav>
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">
+            选择发票类型
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {invoiceTypes.map((type) => {
+              const Icon = type.icon;
+              return (
+                <button
+                  key={type.value}
+                  onClick={() =>
+                    setSelectedInvoiceType(type.value as InvoiceType)
+                  }
+                  className={`p-4 rounded-lg border-2 transition-all text-left ${
+                    selectedInvoiceType === type.value
+                      ? "border-blue-500 bg-blue-50"
+                      : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
+                  }`}
+                >
+                  <div className="flex items-center space-x-3">
+                    <Icon
+                      className={`h-6 w-6 ${
+                        selectedInvoiceType === type.value
+                          ? "text-blue-600"
+                          : "text-gray-500"
+                      }`}
+                    />
+                    <div>
+                      <div
+                        className={`font-medium ${
+                          selectedInvoiceType === type.value
+                            ? "text-blue-900"
+                            : "text-gray-900"
+                        }`}
+                      >
+                        {type.label}
+                      </div>
+                      <div
+                        className={`text-sm ${
+                          selectedInvoiceType === type.value
+                            ? "text-blue-600"
+                            : "text-gray-500"
+                        }`}
+                      >
+                        {type.description}
+                      </div>
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
 
-      {/* 标签页内容 */}
-      {activeTab === "upload" && (
-        <>
-          {/* 发票类型选择器 */}
-          <div className="mb-8">
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                选择发票类型
+      {/* 上传区域 */}
+      <div className="mb-8">
+        <div className="mb-4">
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            {currentTypeInfo?.label} - 文件上传
+          </h3>
+          <p className="text-gray-600">{currentTypeInfo?.description}</p>
+        </div>
+        <div
+          className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+            isDragOver
+              ? "border-blue-500 bg-blue-50"
+              : "border-gray-300 hover:border-gray-400"
+          }`}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+        >
+          {selectedFiles.length === 0 ? (
+            <>
+              <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                拖拽文件到此处或点击选择文件
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {invoiceTypes.map((type) => {
-                  const Icon = type.icon;
-                  return (
-                    <button
-                      key={type.value}
-                      onClick={() =>
-                        setSelectedInvoiceType(type.value as InvoiceType)
-                      }
-                      className={`p-4 rounded-lg border-2 transition-all text-left ${
-                        selectedInvoiceType === type.value
-                          ? "border-blue-500 bg-blue-50"
-                          : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
-                      }`}
+              <p className="text-gray-500 mb-4">
+                支持 Excel 文件 (.xlsx, .xls)，最大 100MB
+              </p>
+              <div className="flex justify-center space-x-4">
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  选择文件
+                </button>
+                <button
+                  onClick={handleDownloadTemplate}
+                  className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors flex items-center space-x-2"
+                >
+                  <Download className="h-4 w-4" />
+                  <span>下载模板</span>
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="mb-6">
+                <h3 className="text-lg font-medium text-gray-900 mb-4">
+                  已选择 {selectedFiles.length} 个文件
+                </h3>
+                <div className="space-y-2">
+                  {selectedFiles.map((file, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between bg-gray-50 p-3 rounded-lg"
                     >
                       <div className="flex items-center space-x-3">
-                        <Icon
-                          className={`h-6 w-6 ${
-                            selectedInvoiceType === type.value
-                              ? "text-blue-600"
-                              : "text-gray-500"
-                          }`}
-                        />
-                        <div>
-                          <div
-                            className={`font-medium ${
-                              selectedInvoiceType === type.value
-                                ? "text-blue-900"
-                                : "text-gray-900"
-                            }`}
-                          >
-                            {type.label}
-                          </div>
-                          <div
-                            className={`text-sm ${
-                              selectedInvoiceType === type.value
-                                ? "text-blue-600"
-                                : "text-gray-500"
-                            }`}
-                          >
-                            {type.description}
-                          </div>
-                        </div>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-
-          {/* 上传区域 */}
-          <div className="mb-8">
-            <div className="mb-4">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                {currentTypeInfo?.label} - 文件上传
-              </h3>
-              <p className="text-gray-600">{currentTypeInfo?.description}</p>
-            </div>
-            <div
-              className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-                isDragOver
-                  ? "border-blue-500 bg-blue-50"
-                  : "border-gray-300 hover:border-gray-400"
-              }`}
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onDrop={handleDrop}
-            >
-              {selectedFiles.length === 0 ? (
-                <>
-                  <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">
-                    拖拽文件到此处或点击选择文件
-                  </h3>
-                  <p className="text-gray-500 mb-4">
-                    支持 Excel 文件 (.xlsx, .xls)，最大 100MB
-                  </p>
-                  <div className="flex justify-center space-x-4">
-                    <button
-                      onClick={() => fileInputRef.current?.click()}
-                      className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                    >
-                      选择文件
-                    </button>
-                    <button
-                      onClick={handleDownloadTemplate}
-                      className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors flex items-center space-x-2"
-                    >
-                      <Download className="h-4 w-4" />
-                      <span>下载模板</span>
-                    </button>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div className="mb-6">
-                    <h3 className="text-lg font-medium text-gray-900 mb-4">
-                      已选择 {selectedFiles.length} 个文件
-                    </h3>
-                    <div className="space-y-2">
-                      {selectedFiles.map((file, index) => (
-                        <div
-                          key={index}
-                          className="flex items-center justify-between bg-gray-50 p-3 rounded-lg"
+                        <FileUp className="h-5 w-5 text-blue-600" />
+                        <span className="text-sm font-medium text-gray-900">
+                          {file.name}
+                        </span>
+                        <span className="text-xs text-gray-500">
+                          ({(file.size / 1024 / 1024).toFixed(2)} MB)
+                        </span>
+                        <button
+                          onClick={() => handleRemoveFile(index)}
+                          className="text-red-500 hover:text-red-700 transition-colors"
                         >
-                          <div className="flex items-center space-x-3">
-                            <FileUp className="h-5 w-5 text-blue-600" />
-                            <span className="text-sm font-medium text-gray-900">
-                              {file.name}
-                            </span>
-                            <span className="text-xs text-gray-500">
-                              ({(file.size / 1024 / 1024).toFixed(2)} MB)
-                            </span>
-                            <button
-                              onClick={() => handleRemoveFile(index)}
-                              className="text-red-500 hover:text-red-700 transition-colors"
-                            >
-                              <X className="h-4 w-4" />
-                            </button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {isUploading && (
-                    <div className="mb-4">
-                      <div className="flex items-center justify-center space-x-2 mb-2">
-                        <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
-                        <span className="text-sm text-gray-600">上传中...</span>
+                          <X className="h-4 w-4" />
+                        </button>
                       </div>
                     </div>
-                  )}
+                  ))}
+                </div>
+              </div>
 
-                  <div className="flex justify-center space-x-4">
-                    <button
-                      onClick={handleFileUpload}
-                      disabled={isUploading}
-                      className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
-                    >
-                      <Send className="h-4 w-4" />
-                      <span>{isUploading ? "上传中..." : "提交"}</span>
-                    </button>
+              {isUploading && (
+                <div className="mb-4">
+                  <div className="flex items-center justify-center space-x-2 mb-2">
+                    <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
+                    <span className="text-sm text-gray-600">上传中...</span>
                   </div>
-                </>
+                </div>
               )}
-              <input
-                ref={fileInputRef}
-                type="file"
-                multiple
-                accept=".xlsx,.xls"
-                onChange={handleFileInputChange}
-                className="hidden"
-              />
-            </div>
-          </div>
-        </>
-      )}
 
-      {activeTab === "list" && selectedInvoiceType === "received" && (
-        <InvoiceReceiptList isActive={activeTab === "list"} />
-      )}
+              <div className="flex justify-center space-x-4">
+                <button
+                  onClick={handleFileUpload}
+                  disabled={isUploading}
+                  className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
+                >
+                  <Send className="h-4 w-4" />
+                  <span>{isUploading ? "上传中..." : "提交"}</span>
+                </button>
+              </div>
+            </>
+          )}
+          <input
+            ref={fileInputRef}
+            type="file"
+            multiple
+            accept=".xlsx,.xls"
+            onChange={handleFileInputChange}
+            className="hidden"
+          />
+        </div>
+      </div>
 
-      {activeTab === "list" && selectedInvoiceType === "issued" && (
-        <InvoiceIssueList isActive={activeTab === "list"} />
-      )}
+      {/* 发票明细列表 */}
+      <div className="mb-8">
+        <div className="mb-4">
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            {currentTypeInfo?.label} - 发票明细
+          </h3>
+          <p className="text-gray-600">查看和管理已上传的发票数据</p>
+        </div>
+        {selectedInvoiceType === "received" && <InvoiceReceiptList />}
+        {selectedInvoiceType === "issued" && <InvoiceIssueList />}
+      </div>
     </div>
   );
 };

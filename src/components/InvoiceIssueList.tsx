@@ -7,11 +7,7 @@ import {
 } from "../services/invoiceManagementService";
 import { useAlert } from '../hooks/useAlert';
 
-interface InvoiceIssueListProps {
-  isActive: boolean;
-}
-
-export const InvoiceIssueList: React.FC<InvoiceIssueListProps> = ({ isActive }) => {
+export const InvoiceIssueList: React.FC = () => {
   const [invoices, setInvoices] = useState<InvoiceIssueResponse[]>([]);
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({
@@ -47,13 +43,11 @@ export const InvoiceIssueList: React.FC<InvoiceIssueListProps> = ({ isActive }) 
     }
   };
 
-  // 当标签页激活时加载数据
+  // 组件挂载时加载数据
   useEffect(() => {
-    if (isActive) {
-      console.log('开具发票标签页激活，加载数据');
-      loadIssueList(1, 10);
-    }
-  }, [isActive]);
+    console.log('开具发票组件挂载，加载数据');
+    loadIssueList(1, 10);
+  }, []);
 
   // 处理分页变化
   const handlePageChange = (newPage: number) => {
