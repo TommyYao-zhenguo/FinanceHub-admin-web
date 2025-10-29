@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Receipt, RefreshCw, ChevronLeft, ChevronRight, Eye, FileText } from 'lucide-react';
+import { Receipt, RefreshCw, ChevronLeft, ChevronRight, Eye, FileText, X } from 'lucide-react';
 import {
   InvoiceIssueResponse,
   InvoiceIssuePageResponse,
@@ -16,6 +16,8 @@ export const InvoiceIssueList: React.FC = () => {
     total: 0,
     totalPages: 0
   });
+  const [selectedInvoice, setSelectedInvoice] = useState<InvoiceIssueResponse | null>(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
   const { showError } = useAlert();
 
   // 加载开具发票列表
@@ -165,13 +167,13 @@ export const InvoiceIssueList: React.FC = () => {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="space-y-1">
                         <div className="text-sm font-medium text-gray-900">
-                          {invoice.invoiceCode || '-'}
+                          {invoice.invoiceCode || ''}
                         </div>
                         <div className="text-sm text-gray-500">
-                          号码: {invoice.invoiceNumber || '-'}
+                          {invoice.invoiceNumber ? `号码: ${invoice.invoiceNumber}` : ''}
                         </div>
                         <div className="text-sm text-gray-500">
-                          数电: {invoice.digitalInvoiceNumber || '-'}
+                          {invoice.digitalInvoiceNumber ? `数电: ${invoice.digitalInvoiceNumber}` : ''}
                         </div>
                         <div className="text-sm text-gray-500">
                           日期: {formatDate(invoice.invoiceDate)}
@@ -241,8 +243,8 @@ export const InvoiceIssueList: React.FC = () => {
                       <button
                         className="inline-flex items-center px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                         onClick={() => {
-                          // TODO: 实现查看详情功能
-                          console.log('查看发票详情:', invoice);
+                          setSelectedInvoice(invoice);
+                          setShowDetailModal(true);
                         }}
                       >
                         <Eye className="w-4 h-4 mr-1" />
@@ -314,6 +316,230 @@ export const InvoiceIssueList: React.FC = () => {
               下一页
               <ChevronRight className="w-4 h-4 ml-1" />
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* 发票详情弹窗 */}
+      {showDetailModal && selectedInvoice && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            {/* 弹窗头部 */}
+            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+              <h2 className="text-xl font-semibold text-gray-900 flex items-center">
+                <Receipt className="w-5 h-5 mr-2 text-blue-600" />
+                发票详情
+              </h2>
+              <button
+                onClick={() => setShowDetailModal(false)}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            {/* 弹窗内容 */}
+            <div className="p-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* 基本信息 */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium text-gray-900 border-b pb-2">基本信息</h3>
+                  
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">发票代码</label>
+                      <p className="text-sm text-gray-900">{selectedInvoice.invoiceCode || '-'}</p>
+                    </div>
+                    
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">发票号码</label>
+                      <p className="text-sm text-gray-900">{selectedInvoice.invoiceNumber || '-'}</p>
+                    </div>
+                    
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">数电发票号码</label>
+                      <p className="text-sm text-gray-900">{selectedInvoice.digitalInvoiceNumber || '-'}</p>
+                    </div>
+                    
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">开票日期</label>
+                      <p className="text-sm text-gray-900">
+                        {selectedInvoice.invoiceDate ? new Date(selectedInvoice.invoiceDate).toLocaleDateString('zh-CN') : '-'}
+                      </p>
+                    </div>
+                    
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">发票类型</label>
+                      <p className="text-sm text-gray-900">{selectedInvoice.invoiceType || '-'}</p>
+                    </div>
+                    
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">发票状态</label>
+                      <p className="text-sm text-gray-900">{selectedInvoice.invoiceStatus || '-'}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 销售方信息 */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium text-gray-900 border-b pb-2">销售方信息</h3>
+                  
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">销售方名称</label>
+                      <p className="text-sm text-gray-900">{selectedInvoice.sellerName || '-'}</p>
+                    </div>
+                    
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">销售方税号</label>
+                      <p className="text-sm text-gray-900">{selectedInvoice.sellerTaxNumber || '-'}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 购买方信息 */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium text-gray-900 border-b pb-2">购买方信息</h3>
+                  
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">购买方名称</label>
+                      <p className="text-sm text-gray-900">{selectedInvoice.buyerName || '-'}</p>
+                    </div>
+                    
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">购买方税号</label>
+                      <p className="text-sm text-gray-900">{selectedInvoice.buyerTaxNumber || '-'}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 商品信息 */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium text-gray-900 border-b pb-2">商品信息</h3>
+                  
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">货物或应税劳务名称</label>
+                      <p className="text-sm text-gray-900">{selectedInvoice.goodsOrServiceName || '-'}</p>
+                    </div>
+                    
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">规格型号</label>
+                      <p className="text-sm text-gray-900">{selectedInvoice.specification || '-'}</p>
+                    </div>
+                    
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">单位</label>
+                      <p className="text-sm text-gray-900">{selectedInvoice.unit || '-'}</p>
+                    </div>
+                    
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">数量</label>
+                      <p className="text-sm text-gray-900">{selectedInvoice.quantity || '-'}</p>
+                    </div>
+                    
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">单价</label>
+                      <p className="text-sm text-gray-900">
+                        {selectedInvoice.unitPrice ? `¥${selectedInvoice.unitPrice.toFixed(2)}` : '-'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 金额信息 */}
+                <div className="space-y-4 md:col-span-2">
+                  <h3 className="text-lg font-medium text-gray-900 border-b pb-2">金额信息</h3>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">金额</label>
+                      <p className="text-lg font-semibold text-gray-900">
+                        {selectedInvoice.amount ? `¥${selectedInvoice.amount.toFixed(2)}` : '-'}
+                      </p>
+                    </div>
+                    
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">税率</label>
+                      <p className="text-lg font-semibold text-gray-900">
+                        {selectedInvoice.taxRate ? `${(selectedInvoice.taxRate * 100).toFixed(2)}%` : '-'}
+                      </p>
+                    </div>
+                    
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">税额</label>
+                      <p className="text-lg font-semibold text-gray-900">
+                        {selectedInvoice.taxAmount ? `¥${selectedInvoice.taxAmount.toFixed(2)}` : '-'}
+                      </p>
+                    </div>
+                    
+                    <div className="md:col-span-3">
+                      <label className="text-sm font-medium text-gray-500">价税合计</label>
+                      <p className="text-xl font-bold text-blue-600">
+                        {selectedInvoice.totalAmount ? `¥${selectedInvoice.totalAmount.toFixed(2)}` : '-'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 其他信息 */}
+                <div className="space-y-4 md:col-span-2">
+                  <h3 className="text-lg font-medium text-gray-900 border-b pb-2">其他信息</h3>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">税收分类编码</label>
+                      <p className="text-sm text-gray-900">{selectedInvoice.taxClassificationCode || '-'}</p>
+                    </div>
+                    
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">特定业务类型</label>
+                      <p className="text-sm text-gray-900">{selectedInvoice.specificBusinessType || '-'}</p>
+                    </div>
+                    
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">发票来源</label>
+                      <p className="text-sm text-gray-900">{selectedInvoice.invoiceSource || '-'}</p>
+                    </div>
+                    
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">是否正数发票</label>
+                      <p className="text-sm text-gray-900">
+                        {selectedInvoice.isPositiveInvoice !== undefined 
+                          ? (selectedInvoice.isPositiveInvoice ? '是' : '否') 
+                          : '-'}
+                      </p>
+                    </div>
+                    
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">风险等级</label>
+                      <p className="text-sm text-gray-900">{selectedInvoice.riskLevel || '-'}</p>
+                    </div>
+                    
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">开票人</label>
+                      <p className="text-sm text-gray-900">{selectedInvoice.issuer || '-'}</p>
+                    </div>
+                    
+                    <div className="md:col-span-2">
+                      <label className="text-sm font-medium text-gray-500">备注</label>
+                      <p className="text-sm text-gray-900">{selectedInvoice.remark || '-'}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 弹窗底部 */}
+            <div className="flex justify-end p-6 border-t border-gray-200">
+              <button
+                onClick={() => setShowDetailModal(false)}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              >
+                关闭
+              </button>
+            </div>
           </div>
         </div>
       )}
