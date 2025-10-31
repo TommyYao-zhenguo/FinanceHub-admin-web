@@ -161,41 +161,50 @@ const InvoiceManagementView: React.FC = () => {
     setIsUploading(true);
 
     try {
-      let completedFiles = 0;
+      // 验证所有文件
+      const validFiles: File[] = [];
+      const invalidFiles: { file: File; error: string }[] = [];
 
       for (const file of selectedFiles) {
-        // 验证文件
         const validation = await validateExcelFile(file);
-        if (!validation.isValid) {
-          showError(`文件 ${file.name} 验证失败: ${validation.errorMessage}`);
-          continue;
+        if (validation.isValid) {
+          validFiles.push(file);
+        } else {
+          invalidFiles.push({
+            file,
+            error: validation.errorMessage || "文件验证失败",
+          });
         }
+      }
 
-        // 上传文件
+      // 显示验证结果
+      if (invalidFiles.length > 0) {
+        const errorMessages = invalidFiles
+          .map(({ file, error }) => `${file.name}: ${error}`)
+          .join("\n");
+        showError(`有 ${invalidFiles.length} 个文件验证失败:\n${errorMessages}`);
+      }
+
+      // 如果有有效文件，一次性上传所有文件
+      if (validFiles.length > 0) {
         try {
           await InvoiceManagementService.uploadInvoiceFile({
-            file,
+            files: validFiles,
             invoiceType: selectedInvoiceType,
           });
-          completedFiles++;
 
-          showSuccess(`文件 ${file.name} 上传成功`);
+          showSuccess(`成功上传 ${validFiles.length} 个文件`);
+          setSelectedFiles([]);
         } catch (error: unknown) {
-          console.error("文件上传失败:", error);
+          console.error("批量上传失败:", error);
           const errorMessage =
             error instanceof Error ? error.message : "上传失败";
-          showError(`文件 ${file.name} 上传失败: ${errorMessage}`);
+          showError(`批量上传失败: ${errorMessage}`);
         }
       }
-
-      // 上传完成后清空文件列表
-      if (completedFiles > 0) {
-        setSelectedFiles([]);
-        showSuccess(`成功上传 ${completedFiles} 个文件`);
-      }
     } catch (error: unknown) {
-      console.error("批量上传失败:", error);
-      showError("批量上传失败，请重试");
+      console.error("文件验证失败:", error);
+      showError("文件验证失败，请重试");
     } finally {
       setIsUploading(false);
     }

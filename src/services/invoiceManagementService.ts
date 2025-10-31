@@ -2,7 +2,7 @@ import { httpClient } from "../utils/http";
 
 // 发票管理相关接口类型定义
 export interface InvoiceFileUploadRequest {
-  file: File;
+  files: File[];
   invoiceType: "issued" | "received";
 }
 
@@ -162,7 +162,12 @@ export class InvoiceManagementService {
     request: InvoiceFileUploadRequest
   ): Promise<InvoiceFileUploadResponse> {
     const formData = new FormData();
-    formData.append("file", request.file);
+    
+    // 添加多个文件到FormData
+    request.files.forEach((file) => {
+      formData.append("files", file);
+    });
+    
     formData.append("invoiceType", request.invoiceType);
 
     const response = await httpClient.post<InvoiceFileUploadResponse>(
