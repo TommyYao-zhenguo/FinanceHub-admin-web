@@ -109,6 +109,16 @@ const InvoiceManagementView: React.FC = () => {
   // 处理文件选择和验证
   const handleFileSelection = async (fileList: FileList) => {
     const files = Array.from(fileList);
+    const MAX_FILES = 50;
+    
+    // 检查文件数量限制
+    const totalFiles = selectedFiles.length + files.length;
+    if (totalFiles > MAX_FILES) {
+      const remainingSlots = MAX_FILES - selectedFiles.length;
+      showError(`最多只能选择 ${MAX_FILES} 个文件，当前已选择 ${selectedFiles.length} 个，还可以选择 ${remainingSlots} 个，但您尝试新增 ${files.length} 个文件`);
+      return;
+    }
+
     const validFiles: File[] = [];
     const invalidFiles: { file: File; error: string }[] = [];
 
@@ -134,8 +144,10 @@ const InvoiceManagementView: React.FC = () => {
     }
 
     if (validFiles.length > 0) {
-      setSelectedFiles(validFiles);
-      showSuccess(`已选择 ${validFiles.length} 个有效文件`);
+      // 合并新文件到已选择的文件列表
+      const newSelectedFiles = [...selectedFiles, ...validFiles];
+      setSelectedFiles(newSelectedFiles);
+      showSuccess(`已选择 ${validFiles.length} 个有效文件，总计 ${newSelectedFiles.length} 个文件`);
     }
   };
 
@@ -339,7 +351,7 @@ const InvoiceManagementView: React.FC = () => {
                 拖拽文件到此处或点击选择文件
               </h3>
               <p className="text-gray-500 mb-4">
-                支持 Excel 文件 (.xlsx, .xls)，最大 100MB
+                支持 Excel 文件 (.xlsx, .xls)，最大 100MB，最多可选择 50 个文件
               </p>
               <div className="flex justify-center space-x-4">
                 <button
@@ -361,29 +373,29 @@ const InvoiceManagementView: React.FC = () => {
             <>
               <div className="mb-6">
                 <h3 className="text-lg font-medium text-gray-900 mb-4">
-                  已选择 {selectedFiles.length} 个文件
+                  已选择 {selectedFiles.length} 个文件 (最多 50 个，还可选择 {50 - selectedFiles.length} 个)
                 </h3>
-                <div className="space-y-2">
+                <div className="max-h-64 overflow-y-auto space-y-2 border border-gray-200 rounded-lg p-3">
                   {selectedFiles.map((file, index) => (
                     <div
                       key={index}
                       className="flex items-center justify-between bg-gray-50 p-3 rounded-lg"
                     >
-                      <div className="flex items-center space-x-3">
-                        <FileUp className="h-5 w-5 text-blue-600" />
-                        <span className="text-sm font-medium text-gray-900">
+                      <div className="flex items-center space-x-3 flex-1 min-w-0">
+                        <FileUp className="h-5 w-5 text-blue-600 flex-shrink-0" />
+                        <span className="text-sm font-medium text-gray-900 truncate">
                           {file.name}
                         </span>
-                        <span className="text-xs text-gray-500">
+                        <span className="text-xs text-gray-500 flex-shrink-0">
                           ({(file.size / 1024 / 1024).toFixed(2)} MB)
                         </span>
-                        <button
-                          onClick={() => handleRemoveFile(index)}
-                          className="text-red-500 hover:text-red-700 transition-colors"
-                        >
-                          <X className="h-4 w-4" />
-                        </button>
                       </div>
+                      <button
+                        onClick={() => handleRemoveFile(index)}
+                        className="text-red-500 hover:text-red-700 transition-colors flex-shrink-0 ml-2"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
                     </div>
                   ))}
                 </div>
@@ -399,6 +411,20 @@ const InvoiceManagementView: React.FC = () => {
               )}
 
               <div className="flex justify-center space-x-4">
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={selectedFiles.length >= 50}
+                  className={`px-6 py-2 border rounded-lg transition-colors flex items-center space-x-2 ${
+                    selectedFiles.length >= 50
+                      ? "border-gray-300 text-gray-400 cursor-not-allowed"
+                      : "border-blue-600 text-blue-600 hover:bg-blue-50"
+                  }`}
+                >
+                  <Upload className="h-4 w-4" />
+                  <span>
+                    {selectedFiles.length >= 50 ? "已达上限" : "继续选择文件"}
+                  </span>
+                </button>
                 <button
                   onClick={handleFileUpload}
                   disabled={isUploading}
