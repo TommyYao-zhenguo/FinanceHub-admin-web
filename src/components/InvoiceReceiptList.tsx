@@ -9,8 +9,8 @@ import {
 } from "lucide-react";
 import {
   InvoiceManagementService,
-  InvoiceReceiptResponse,
-  InvoiceReceiptPageResponse,
+  InvoiceReceiptRecordResponse,
+  InvoiceReceiptRecordPageResponse,
 } from "../services/invoiceManagementService";
 import { useAlert } from "../hooks/useAlert";
 
@@ -21,7 +21,7 @@ interface InvoiceReceiptListProps {
 export const InvoiceReceiptList: React.FC<InvoiceReceiptListProps> = ({
   className = "",
 }) => {
-  const [receipts, setReceipts] = useState<InvoiceReceiptResponse[]>([]);
+  const [receipts, setReceipts] = useState<InvoiceReceiptRecordResponse[]>([]);
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({
     current: 1,
@@ -29,9 +29,7 @@ export const InvoiceReceiptList: React.FC<InvoiceReceiptListProps> = ({
     total: 0,
     pages: 0,
   });
-  const [selectedReceipt, setSelectedReceipt] =
-    useState<InvoiceReceiptResponse | null>(null);
-  const [showDetailModal, setShowDetailModal] = useState(false);
+  // 上传记录列表不需要详情弹窗
 
   const { showAlert } = useAlert();
 
@@ -39,7 +37,7 @@ export const InvoiceReceiptList: React.FC<InvoiceReceiptListProps> = ({
   const loadReceiptList = async (current: number = 1, size: number = 10) => {
     try {
       setLoading(true);
-      const response: InvoiceReceiptPageResponse =
+      const response: InvoiceReceiptRecordPageResponse =
         await InvoiceManagementService.getInvoiceReceiptList(current, size);
 
       setReceipts(response.records || []);
@@ -50,8 +48,8 @@ export const InvoiceReceiptList: React.FC<InvoiceReceiptListProps> = ({
         pages: response.pages || 0,
       });
     } catch (error) {
-      console.error("加载发票明细失败:", error);
-      showAlert({ message: "加载发票明细失败，请重试", type: "error" });
+      console.error("加载上传记录失败:", error);
+      showAlert({ message: "加载上传记录失败，请重试", type: "error" });
     } finally {
       setLoading(false);
     }
@@ -80,20 +78,7 @@ export const InvoiceReceiptList: React.FC<InvoiceReceiptListProps> = ({
     loadReceiptList(pagination.current, pagination.size);
   };
 
-  // 查看详情
-  const handleViewDetail = (receipt: InvoiceReceiptResponse) => {
-    setSelectedReceipt(receipt);
-    setShowDetailModal(true);
-  };
-
-  // 格式化金额
-  const formatAmount = (amount: number) => {
-    return new Intl.NumberFormat("zh-CN", {
-      style: "currency",
-      currency: "CNY",
-      minimumFractionDigits: 2,
-    }).format(amount);
-  };
+  // 上传记录无详情
 
   // 格式化日期
   const formatDate = (dateString: string) => {
@@ -105,19 +90,7 @@ export const InvoiceReceiptList: React.FC<InvoiceReceiptListProps> = ({
     }
   };
 
-  // 获取发票状态样式
-  const getStatusStyle = (status: string) => {
-    switch (status?.toLowerCase()) {
-      case "normal":
-        return "bg-green-100 text-green-800";
-      case "invalid":
-        return "bg-red-100 text-red-800";
-      case "pending":
-        return "bg-yellow-100 text-yellow-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
+  // 上传记录不需要发票状态样式
 
   return (
     <div className={`bg-white rounded-lg shadow-sm border ${className}`}>
@@ -127,7 +100,7 @@ export const InvoiceReceiptList: React.FC<InvoiceReceiptListProps> = ({
           <div className="flex items-center space-x-3">
             <Receipt className="w-6 h-6 text-blue-600" />
             <h2 className="text-xl font-semibold text-gray-900">
-              收到发票明细
+              取得发票上传记录
             </h2>
           </div>
           <div className="flex items-center space-x-3">
@@ -151,22 +124,17 @@ export const InvoiceReceiptList: React.FC<InvoiceReceiptListProps> = ({
           <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                发票信息
+                购方统一代码
+              </th>
+
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                是否成功
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                销方信息
+                上传时间
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                购方信息
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                金额信息
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                状态
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                操作
+                失败原因
               </th>
             </tr>
           </thead>
@@ -182,10 +150,10 @@ export const InvoiceReceiptList: React.FC<InvoiceReceiptListProps> = ({
               </tr>
             ) : receipts.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-6 py-12 text-center">
+                <td colSpan={4} className="px-6 py-12 text-center">
                   <div className="flex flex-col items-center space-y-2">
                     <FileText className="w-12 h-12 text-gray-400" />
-                    <span className="text-gray-500">暂无发票明细数据</span>
+                    <span className="text-gray-500">暂无上传记录数据</span>
                   </div>
                 </td>
               </tr>
@@ -193,70 +161,31 @@ export const InvoiceReceiptList: React.FC<InvoiceReceiptListProps> = ({
               receipts.map((receipt) => (
                 <tr key={receipt.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm">
-                      <div className="font-medium text-gray-900">
-                        {receipt.invoiceNumber ||
-                          receipt.digitalInvoiceNumber ||
-                          "-"}
-                      </div>
-                      <div className="text-gray-500">
-                        {receipt.invoiceCode && `代码: ${receipt.invoiceCode}`}
-                      </div>
-                      <div className="text-gray-500">
-                        {formatDate(receipt.invoiceDate)}
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm">
-                      <div className="font-medium text-gray-900">
-                        {receipt.sellerName || "-"}
-                      </div>
-                      <div className="text-gray-500">
-                        {receipt.sellerTaxNumber || "-"}
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm">
-                      <div className="font-medium text-gray-900">
-                        {receipt.buyerName || "-"}
-                      </div>
-                      <div className="text-gray-500">
-                        {receipt.buyerTaxNumber || "-"}
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm">
-                      <div className="font-medium text-gray-900">
-                        {formatAmount(receipt.totalAmount || 0)}
-                      </div>
-                      <div className="text-gray-500">
-                        税额: {formatAmount(receipt.taxAmount || 0)}
-                      </div>
-                      <div className="text-gray-500">
-                        税率: {((receipt.taxRate || 0) * 100).toFixed(1)}%
-                      </div>
+                    <div className="text-sm text-gray-900">
+                      {receipt.buyerTaxNumber || "-"}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span
-                      className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusStyle(
-                        receipt.invoiceStatus
-                      )}`}
+                      className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                        receipt.success
+                          ? "bg-green-100 text-green-800"
+                          : "bg-red-100 text-red-800"
+                      }`}
                     >
-                      {receipt.invoiceStatus || "未知"}
+                      {receipt.success ? "成功" : "失败"}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <button
-                      onClick={() => handleViewDetail(receipt)}
-                      className="text-blue-600 hover:text-blue-900 flex items-center space-x-1"
-                    >
-                      <Eye className="w-4 h-4" />
-                      <span>查看</span>
-                    </button>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-900">
+                      {receipt.createTime}
+                    </div>
+                  </td>
+
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-900">
+                      {receipt.failureReason || "-"}
+                    </div>
                   </td>
                 </tr>
               ))
@@ -306,200 +235,7 @@ export const InvoiceReceiptList: React.FC<InvoiceReceiptListProps> = ({
         </div>
       )}
 
-      {/* 详情模态框 */}
-      {showDetailModal && selectedReceipt && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-gray-200">
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-gray-900">
-                  发票详情
-                </h3>
-                <button
-                  onClick={() => setShowDetailModal(false)}
-                  className="text-gray-400 hover:text-gray-600"
-                >
-                  <span className="sr-only">关闭</span>
-                  <svg
-                    className="w-6 h-6"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
-                </button>
-              </div>
-            </div>
-            <div className="p-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <h4 className="text-sm font-medium text-gray-900 mb-3">
-                    基本信息
-                  </h4>
-                  <dl className="space-y-2">
-                    <div>
-                      <dt className="text-sm text-gray-500">发票号码</dt>
-                      <dd className="text-sm text-gray-900">
-                        {selectedReceipt.invoiceNumber ||
-                          selectedReceipt.digitalInvoiceNumber ||
-                          "-"}
-                      </dd>
-                    </div>
-                    <div>
-                      <dt className="text-sm text-gray-500">发票代码</dt>
-                      <dd className="text-sm text-gray-900">
-                        {selectedReceipt.invoiceCode || "-"}
-                      </dd>
-                    </div>
-                    <div>
-                      <dt className="text-sm text-gray-500">开票日期</dt>
-                      <dd className="text-sm text-gray-900">
-                        {formatDate(selectedReceipt.invoiceDate)}
-                      </dd>
-                    </div>
-                    <div>
-                      <dt className="text-sm text-gray-500">发票类型</dt>
-                      <dd className="text-sm text-gray-900">
-                        {selectedReceipt.invoiceType || "-"}
-                      </dd>
-                    </div>
-                  </dl>
-                </div>
-                <div>
-                  <h4 className="text-sm font-medium text-gray-900 mb-3">
-                    销方信息
-                  </h4>
-                  <dl className="space-y-2">
-                    <div>
-                      <dt className="text-sm text-gray-500">销方名称</dt>
-                      <dd className="text-sm text-gray-900">
-                        {selectedReceipt.sellerName || "-"}
-                      </dd>
-                    </div>
-                    <div>
-                      <dt className="text-sm text-gray-500">销方税号</dt>
-                      <dd className="text-sm text-gray-900">
-                        {selectedReceipt.sellerTaxNumber || "-"}
-                      </dd>
-                    </div>
-                  </dl>
-                </div>
-                <div>
-                  <h4 className="text-sm font-medium text-gray-900 mb-3">
-                    购方信息
-                  </h4>
-                  <dl className="space-y-2">
-                    <div>
-                      <dt className="text-sm text-gray-500">购方名称</dt>
-                      <dd className="text-sm text-gray-900">
-                        {selectedReceipt.buyerName || "-"}
-                      </dd>
-                    </div>
-                    <div>
-                      <dt className="text-sm text-gray-500">购方税号</dt>
-                      <dd className="text-sm text-gray-900">
-                        {selectedReceipt.buyerTaxNumber || "-"}
-                      </dd>
-                    </div>
-                  </dl>
-                </div>
-                <div>
-                  <h4 className="text-sm font-medium text-gray-900 mb-3">
-                    商品信息
-                  </h4>
-                  <dl className="space-y-2">
-                    <div>
-                      <dt className="text-sm text-gray-500">商品名称</dt>
-                      <dd className="text-sm text-gray-900">
-                        {selectedReceipt.goodsOrServiceName || "-"}
-                      </dd>
-                    </div>
-                    <div>
-                      <dt className="text-sm text-gray-500">规格型号</dt>
-                      <dd className="text-sm text-gray-900">
-                        {selectedReceipt.specification || "-"}
-                      </dd>
-                    </div>
-                    <div>
-                      <dt className="text-sm text-gray-500">单位</dt>
-                      <dd className="text-sm text-gray-900">
-                        {selectedReceipt.unit || "-"}
-                      </dd>
-                    </div>
-                    <div>
-                      <dt className="text-sm text-gray-500">数量</dt>
-                      <dd className="text-sm text-gray-900">
-                        {selectedReceipt.quantity || "-"}
-                      </dd>
-                    </div>
-                  </dl>
-                </div>
-                <div className="md:col-span-2">
-                  <h4 className="text-sm font-medium text-gray-900 mb-3">
-                    金额信息
-                  </h4>
-                  <dl className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <dt className="text-sm text-gray-500">单价</dt>
-                      <dd className="text-sm text-gray-900">
-                        {formatAmount(selectedReceipt.unitPrice || 0)}
-                      </dd>
-                    </div>
-                    <div>
-                      <dt className="text-sm text-gray-500">金额</dt>
-                      <dd className="text-sm text-gray-900">
-                        {formatAmount(selectedReceipt.amount || 0)}
-                      </dd>
-                    </div>
-                    <div>
-                      <dt className="text-sm text-gray-500">税率</dt>
-                      <dd className="text-sm text-gray-900">
-                        {((selectedReceipt.taxRate || 0) * 100).toFixed(1)}%
-                      </dd>
-                    </div>
-                    <div>
-                      <dt className="text-sm text-gray-500">税额</dt>
-                      <dd className="text-sm text-gray-900">
-                        {formatAmount(selectedReceipt.taxAmount || 0)}
-                      </dd>
-                    </div>
-                    <div>
-                      <dt className="text-sm text-gray-500">价税合计</dt>
-                      <dd className="text-sm font-medium text-gray-900">
-                        {formatAmount(selectedReceipt.totalAmount || 0)}
-                      </dd>
-                    </div>
-                  </dl>
-                </div>
-                {selectedReceipt.remark && (
-                  <div className="md:col-span-2">
-                    <h4 className="text-sm font-medium text-gray-900 mb-3">
-                      备注
-                    </h4>
-                    <p className="text-sm text-gray-900">
-                      {selectedReceipt.remark}
-                    </p>
-                  </div>
-                )}
-              </div>
-            </div>
-            <div className="px-6 py-4 border-t border-gray-200 flex justify-end">
-              <button
-                onClick={() => setShowDetailModal(false)}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
-              >
-                关闭
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* 上传记录无详情模态框 */}
     </div>
   );
 };

@@ -151,6 +151,40 @@ export interface InvoiceReceiptPageResponse {
   pages: number;
 }
 
+// 上传记录响应（取得发票）
+export interface InvoiceReceiptRecordResponse {
+  id: string;
+  buyerTaxNumber: string;
+  success: boolean;
+  failureReason?: string;
+  createTime: string;
+}
+
+export interface InvoiceReceiptRecordPageResponse {
+  records: InvoiceReceiptRecordResponse[];
+  total: number;
+  current: number;
+  size: number;
+  pages: number;
+}
+
+// 上传记录响应（开具发票）
+export interface InvoiceIssueUploadRecordResponse {
+  id: string;
+  sellerTaxNumber: string;
+  success: boolean;
+  failureReason?: string;
+  createTime: string;
+}
+
+export interface InvoiceIssueUploadRecordPageResponse {
+  records: InvoiceIssueUploadRecordResponse[];
+  total: number;
+  size: number;
+  current: number;
+  pages: number;
+}
+
 /**
  * 发票管理服务类
  */
@@ -162,12 +196,12 @@ export class InvoiceManagementService {
     request: InvoiceFileUploadRequest
   ): Promise<InvoiceFileUploadResponse> {
     const formData = new FormData();
-    
+
     // 添加多个文件到FormData
     request.files.forEach((file) => {
       formData.append("files", file);
     });
-    
+
     formData.append("invoiceType", request.invoiceType);
 
     const response = await httpClient.post<InvoiceFileUploadResponse>(
@@ -238,9 +272,9 @@ export class InvoiceManagementService {
   static async getInvoiceReceiptList(
     current: number = 1,
     size: number = 10
-  ): Promise<InvoiceReceiptPageResponse> {
-    const response = await httpClient.get<InvoiceReceiptPageResponse>(
-      `/api/v1/admin/invoice-management/list/receipt?current=${current}&size=${size}`
+  ): Promise<InvoiceReceiptRecordPageResponse> {
+    const response = await httpClient.get<InvoiceReceiptRecordPageResponse>(
+      `/api/v1/admin/invoice-management/receipt/list/record?current=${current}&size=${size}`
     );
     return response;
   }
@@ -251,9 +285,9 @@ export class InvoiceManagementService {
   static async getInvoiceIssueList(
     current: number = 1,
     size: number = 10
-  ): Promise<InvoiceIssuePageResponse> {
-    const response = await httpClient.get<InvoiceIssuePageResponse>(
-      `/api/v1/admin/invoice-management/list/issue?current=${current}&size=${size}`
+  ): Promise<InvoiceIssueUploadRecordPageResponse> {
+    const response = await httpClient.get<InvoiceIssueUploadRecordPageResponse>(
+      `/api/v1/admin/invoice-management/issue/list/record?current=${current}&size=${size}`
     );
     return response;
   }
