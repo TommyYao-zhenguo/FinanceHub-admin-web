@@ -1,13 +1,44 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Upload, FileUp, X, Send, Loader2, Download } from "lucide-react";
 import toast from "react-hot-toast";
-import { NonInvoicedIncomeService } from "../services/nonInvoicedIncomeService";
+import {
+  NonInvoicedIncomeService,
+  NonInvoicedIncomeUploadRecord,
+} from "../services/nonInvoicedIncomeService";
 
 export default function NonInvoicedIncomeView() {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
+  const [recordLoading, setRecordLoading] = useState(false);
+  const [records, setRecords] = useState<NonInvoicedIncomeUploadRecord[]>([]);
+  const [pagination, setPagination] = useState({ current: 1, size: 10, total: 0, pages: 0 });
+
+  const fetchRecords = async () => {
+    try {
+      setRecordLoading(true);
+      const res = await NonInvoicedIncomeService.listUploadRecords(
+        pagination.current,
+        pagination.size
+      );
+      setRecords(res.records || []);
+      setPagination((prev) => ({
+        ...prev,
+        total: res.total || 0,
+        pages: res.pages || 0,
+      }));
+    } catch (e) {
+      toast.error("获取上传记录失败");
+    } finally {
+      setRecordLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchRecords();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pagination.current, pagination.size]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
@@ -58,6 +89,7 @@ export default function NonInvoicedIncomeView() {
       if (res?.success) {
         toast.success(`成功上传 ${validFiles.length} 个文件`);
         setSelectedFiles([]);
+        fetchRecords();
       } else {
         toast.error(res?.message || "上传失败");
       }
@@ -205,6 +237,102 @@ export default function NonInvoicedIncomeView() {
           上传后系统将校验统一信用代码权限，仅保存有权限的记录。
         </div>
       </div>
+    <div className="bg-white rounded-xl shadow-sm border border-gray-200">
+      <div className="p-6 border-b border-gray-200 flex justify-between items-center">
+        <div>
+          <h3 className="text-lg font-semibold text-gray-900">上传记录</h3>
+          <p className="text-sm text-gray-600 mt-1">展示近期上传记录，支持分页</p>
+        </div>
+        <div className="flex items-center space-x-3">
+          <select
+            value={pagination.size}
+            onChange={(e) =>
+              setPagination((prev) => ({ ...prev, size: Number(e.target.value), current: 1 }))
+            }
+            className="border rounded px-2 py-1 text-sm"
+          >
+            <option value={10}>10/页</option>
+            <option value={20}>20/页</option>
+            <option value={50}>50/页</option>
+          </select>
+          <button
+            onClick={fetchRecords}
+            className="px-3 py-1 border rounded text-sm text-gray-700 hover:bg-gray-50"
+          >
+            刷新
+          </button>
+        </div>
+      </div>
+
+      <div className="p-6">
+        {recordLoading && (
+          <div className="flex items-center space-x-2 text-gray-600">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            <span>加载中...</span>
+          </div>
+        )}
+
+        {!recordLoading && records.length === 0 && (
+          <div className="text-sm text-gray-500">暂无上传记录</div>
+        )}
+
+        {!recordLoading && records.length > 0 && (
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">统一信用代码</th>
+                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">上传时间</th>
+                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">所属期间</th>
+                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">处理状态</th>
+                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">错误信息</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {records.map((rec, idx) => (
+                  <tr key={idx}>
+                    <td className="px-4 py-2 text-sm text-gray-900">{rec.creditCode || "-"}</td>
+                    <td className="px-4 py-2 text-sm text-gray-700">{rec.createTime || "-"}</td>
+                    <td className="px-4 py-2 text-sm text-gray-700">{rec.period || "-"}</td>
+                    <td className="px-4 py-2 text-sm text-gray-700">{rec.success ? "成功" : "失败"}</td>
+                    <td className="px-4 py-2 text-sm text-gray-700">{rec.errorMessage || ""}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      <div className="px-6 pb-6 flex items-center justify-between">
+        <div className="text-sm text-gray-600">
+          第 {pagination.current} / {Math.max(pagination.pages, 1)} 页，共 {pagination.total} 条
+        </div>
+        <div className="space-x-2">
+          <button
+            onClick={() =>
+              setPagination((prev) => ({ ...prev, current: Math.max(prev.current - 1, 1) }))
+            }
+            disabled={pagination.current <= 1}
+            className="px-3 py-1 border rounded text-sm text-gray-700 disabled:text-gray-400 disabled:border-gray-300 hover:bg-gray-50"
+          >
+            上一页
+          </button>
+          <button
+            onClick={() =>
+              setPagination((prev) => ({
+                ...prev,
+                current: Math.min(prev.current + 1, Math.max(prev.pages, 1)),
+              }))
+            }
+            disabled={pagination.current >= Math.max(pagination.pages, 1)}
+            className="px-3 py-1 border rounded text-sm text-gray-700 disabled:text-gray-400 disabled:border-gray-300 hover:bg-gray-50"
+          >
+            下一页
+          </button>
+        </div>
+      </div>
+    </div>
     </div>
   );
 }
