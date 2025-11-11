@@ -229,7 +229,7 @@ export default function InvoiceTypeManagementView() {
       setEditingInvoiceType(null);
       loadInvoiceTypes(); // 重新加载数据
     } catch (error) {
-      console.error("更新发票类型失败:", error);
+
       toast.error("更新发票类型失败");
     } finally {
       setFormLoading(false);
@@ -250,7 +250,7 @@ export default function InvoiceTypeManagementView() {
       setDeleteConfirm({ show: false, invoiceType: null });
       loadInvoiceTypes(); // 重新加载数据
     } catch (error) {
-      console.error("删除发票类型失败:", error);
+
       toast.error("删除发票类型失败");
     } finally {
       setDeleteLoading(false);

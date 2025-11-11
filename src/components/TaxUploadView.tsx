@@ -35,7 +35,7 @@ export default function TaxUploadView() {
         pages: data.pages,
       });
     } catch (error) {
-      console.error("获取上传记录失败:", error);
+
       toast.error("获取上传记录失败");
     }
   };

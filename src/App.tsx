@@ -29,6 +29,7 @@ import CompanySocialInsuranceDetailView from "./components/CompanySocialInsuranc
 import CompanyHousingFundListView from "./components/CompanyHousingFundListView";
 import CompanyHousingFundDetailView from "./components/CompanyHousingFundDetailView";
 import InvoiceManagementView from "./components/InvoiceManagementView";
+import NonInvoicedIncomeView from "./components/NonInvoicedIncomeView";
 
 import {
   AdminUserProvider,
@@ -55,6 +56,7 @@ const routeMap: Record<string, string> = {
   "/tax-upload": "tax-upload",
   "/invoice-type-management": "invoice-type-management",
   "/invoice-management": "invoice-management",
+  "/non-invoiced-income": "non-invoiced-income",
 };
 
 // tab到路由的映射
@@ -76,6 +78,7 @@ const tabToRouteMap: Record<string, string> = {
   "personal-tax-upload": "/personal-tax-upload",
   "invoice-type-management": "/invoice-type-management",
   "invoice-management": "/invoice-management",
+  "non-invoiced-income": "/non-invoiced-income",
 };
 
 // 创建一个内部组件来使用UserContext和Router hooks
@@ -105,9 +108,7 @@ function AppContent() {
       try {
         await fetchUserInfo();
         setIsLoggedIn(true);
-        console.log("用户已登录，token有效");
       } catch (error) {
-        console.error("Token验证失败:", error);
         localStorage.removeItem(SA_TOKEN_CONFIG.tokenName);
         setIsLoggedIn(false);
       } finally {
@@ -143,14 +144,9 @@ function AppContent() {
   };
 
   const handleLoginSuccess = async () => {
-    try {
-      await fetchUserInfo();
-      setIsLoggedIn(true);
-      navigate("/customer-service"); // 登录成功后跳转到仪表板
-      console.log("登录成功，已获取用户信息");
-    } catch (error) {
-      console.error("登录后获取用户信息失败:", error);
-    }
+    await fetchUserInfo();
+    setIsLoggedIn(true);
+    navigate("/customer-service"); // 登录成功后跳转到仪表板
   };
 
   // 如果正在检查认证状态，显示加载页面
@@ -212,6 +208,7 @@ function AppContent() {
         >
           <Routes>
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
+
             <Route
               path="/customer-service-users"
               element={<CustomerServiceManagementView />}
@@ -271,6 +268,10 @@ function AppContent() {
             <Route
               path="/invoice-management"
               element={<InvoiceManagementView />}
+            />
+            <Route
+              path="/non-invoiced-income"
+              element={<NonInvoicedIncomeView />}
             />
             <Route
               path="/company-social-insurance"

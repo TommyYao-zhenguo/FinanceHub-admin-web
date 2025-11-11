@@ -26,10 +26,8 @@ export const AdminUserProvider: React.FC<AdminUserProviderProps> = ({ children }
   const fetchUserInfo = useCallback(async () => {
     try {
       const response = await httpClient.get<AdminUserInfo>(API_ENDPOINTS.SYS_USER.INFO);
-      console.log('获取用户信息成功:', response);
       setUserInfo(response);
     } catch (error) {
-      console.error('获取用户信息失败:', error);
       toast.error('获取用户信息失败');
     }
   }, []);

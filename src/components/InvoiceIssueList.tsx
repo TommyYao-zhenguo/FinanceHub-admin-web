@@ -29,12 +29,10 @@ export const InvoiceIssueList: React.FC = () => {
 
   // 加载开具发票列表
   const loadIssueList = async (page: number = 1, size: number = 10) => {
-    console.log("开始加载开具发票列表，页码:", page, "大小:", size);
     setLoading(true);
     try {
       const response: InvoiceIssueUploadRecordPageResponse =
         await InvoiceManagementService.getInvoiceIssueList(page, size);
-      console.log("开具发票列表加载成功:", response);
 
       setInvoices(response.records || []);
       setPagination({
@@ -44,7 +42,6 @@ export const InvoiceIssueList: React.FC = () => {
         totalPages: response.pages || 0,
       });
     } catch (error) {
-      console.error("加载开具发票列表失败:", error);
       showError("加载开具发票列表失败");
       setInvoices([]);
     } finally {
@@ -54,7 +51,6 @@ export const InvoiceIssueList: React.FC = () => {
 
   // 组件挂载时加载数据
   useEffect(() => {
-    console.log("开具发票组件挂载，加载数据");
     loadIssueList(1, 10);
   }, []);
 

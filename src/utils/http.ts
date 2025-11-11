@@ -55,6 +55,10 @@ class HttpClient {
         // 对于FormData，不设置Content-Type，让浏览器自动设置boundary
         delete mergedHeaders["Content-Type"];
         requestBody = body;
+      } else if (this.shouldUseFormData(body)) {
+        // 当 body 中包含 File/Blob 或 File[] 时，自动转换为 FormData
+        delete mergedHeaders["Content-Type"];
+        requestBody = this.objectToFormData(body as Record<string, unknown>);
       } else {
         // 对于其他类型的数据，JSON序列化
         requestBody = JSON.stringify(body);
@@ -97,16 +101,14 @@ class HttpClient {
         try {
           const parsed = JSON.parse(text) as T;
           return parsed;
-        } catch (parseError) {
-          console.warn("Failed to parse JSON response:", text);
+        } catch (err) {
+          console.warn("Failed to parse JSON response:", err, text);
           return {} as T;
         }
       }
 
       if (!response.ok) {
-        console.error("HTTP请求失败，状态码:", response.status);
         const errorData = await response.json().catch(() => ({}));
-        console.error("错误响应数据:", errorData);
         const errorMessage =
           errorData.message || `HTTP Error: ${response.status}`;
 
@@ -200,6 +202,9 @@ class HttpClient {
       }
       throw new Error(networkErrorMessage);
     }
+
+    // 保底返回，满足返回类型要求（理论上不可达）
+    return {} as T;
   }
 
   async get<T>(
@@ -252,6 +257,47 @@ class HttpClient {
       headers,
       showErrorAlert,
     });
+  }
+
+  // 判断是否为文件类型
+  private isFileLike(val: unknown): val is File | Blob {
+    return (
+      (typeof File !== "undefined" && val instanceof File) ||
+      (typeof Blob !== "undefined" && val instanceof Blob)
+    );
+  }
+
+  // 判断是否需要使用 FormData（当对象包含 File/Blob 或 File[]）
+  private shouldUseFormData(body: unknown): boolean {
+    if (!body || typeof body !== "object") return false;
+    const obj = body as Record<string, unknown>;
+    for (const key of Object.keys(obj)) {
+      const val = obj[key];
+      if (this.isFileLike(val)) return true;
+      if (Array.isArray(val) && val.length > 0 && this.isFileLike(val[0]))
+        return true;
+    }
+    return false;
+  }
+
+  // 将普通对象转换为 FormData（支持 File/Blob、数组及基本类型）
+  private objectToFormData(obj: Record<string, unknown>): FormData {
+    const fd = new FormData();
+    Object.entries(obj).forEach(([key, val]) => {
+      if (val === undefined || val === null) return;
+      if (Array.isArray(val)) {
+        if (val.length && this.isFileLike(val[0])) {
+          (val as unknown[]).forEach((file) => fd.append(key, file as Blob));
+        } else {
+          (val as unknown[]).forEach((item) => fd.append(key, String(item)));
+        }
+      } else if (this.isFileLike(val)) {
+        fd.append(key, val as Blob);
+      } else {
+        fd.append(key, String(val));
+      }
+    });
+    return fd;
   }
 }
 

@@ -62,7 +62,7 @@ export default function InvoiceQuotaManagementView() {
       });
       setCompanies(response?.records || []);
     } catch (error) {
-      console.error("加载公司列表失败:", error);
+
       toast.error("加载公司列表失败");
     }
   };
@@ -109,7 +109,7 @@ export default function InvoiceQuotaManagementView() {
       
       setQuotas(filteredData);
     } catch (error) {
-      console.error("加载开票额度失败:", error);
+
       toast.error("加载开票额度失败");
     } finally {
       setLoading(false);
@@ -222,7 +222,7 @@ export default function InvoiceQuotaManagementView() {
       handleCloseModal();
       loadQuotas();
     } catch (error) {
-      console.error("保存开票额度失败:", error);
+
       toast.error("保存开票额度失败");
     } finally {
       setFormLoading(false);

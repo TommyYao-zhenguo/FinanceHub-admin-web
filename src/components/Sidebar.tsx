@@ -14,6 +14,7 @@ import {
   FileText,
   Receipt,
   UserPlus,
+  DollarSign,
 } from "lucide-react";
 import { useAdminUserContext } from "../contexts/AdminUserContext";
 
@@ -154,6 +155,12 @@ export default function Sidebar({
         label: "发票管理",
         icon: FileText,
       });
+      items.push({
+        id: "non-invoiced-income",
+        label: "不开票收入",
+        icon: DollarSign,
+      });
+
     }
 
     return items;

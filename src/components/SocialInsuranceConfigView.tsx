@@ -124,7 +124,7 @@ export default function SocialInsuranceConfigView() {
       });
       setBatchFormData(updatedBatchFormData);
     } catch (error) {
-      console.error("获取公司配置失败:", error);
+
     }
   };
 
@@ -144,7 +144,7 @@ export default function SocialInsuranceConfigView() {
         ...(companyName && { companyName }),
       };
       const response = await SocialInsuranceConfigService.getConfigList(params);
-      console.log("all social insurance configs: ", response);
+
 
       // 转换数据格式：将 SocialInsuranceConfig[] 转换为 CompanyConfigData[]
       const transformedRecords: CompanyConfigData[] = response.records.map(
@@ -360,7 +360,7 @@ export default function SocialInsuranceConfigView() {
         unconfiguredPagination.current
       );
     } catch (error) {
-      console.error("删除失败:", error);
+
       toast.error("删除失败，请重试");
     }
   };

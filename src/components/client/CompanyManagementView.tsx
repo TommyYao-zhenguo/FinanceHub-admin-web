@@ -74,7 +74,7 @@ export default function CompanyManagementView() {
       });
       setCustomerServices(response.records);
     } catch (error) {
-      console.error("加载客服列表失败:", error);
+
     }
   };
 
@@ -229,7 +229,7 @@ export default function CompanyManagementView() {
       // 创建或更新后重置到第一页
       loadCompanies(true);
     } catch (error) {
-      console.error("Failed to save company:", error);
+
     } finally {
       setFormLoading(false);
     }
@@ -263,7 +263,7 @@ export default function CompanyManagementView() {
       loadCompanies(true);
     } catch (error) {
       toast.error("删除失败");
-      console.error("Failed to delete company:", error);
+
     } finally {
       setDeleteLoading(false);
       setDeleteConfirm(null);

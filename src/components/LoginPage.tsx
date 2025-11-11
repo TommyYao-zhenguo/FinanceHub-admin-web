@@ -114,8 +114,6 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    console.log("开始登录，username:", username, "密码长度:", password.length);
-
     if (!username || !password) {
       toast.error("请填写用户名和密码");
       return;
@@ -123,12 +121,6 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
 
     setIsLoading(true);
     try {
-      console.log("发送登录请求到:", API_ENDPOINTS.SYS_USER.LOGIN);
-      console.log("请求数据:", {
-        username: username.trim(),
-        password: password ? "***" : "empty",
-      });
-
       const response = await httpClient.post<LoginResponse>(
         API_ENDPOINTS.SYS_USER.LOGIN,
         { username: username.trim(), password: password.trim() },
@@ -138,30 +130,23 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
         }
       );
 
-      console.log("login response: ", response);
-
       if (response) {
-        console.log("登录响应成功，token:", response.token ? "存在" : "不存在");
         // 使用sa-token配置的token名称存储
         localStorage.setItem(SA_TOKEN_CONFIG.tokenName, response.token);
 
         // 登录成功后立即获取用户信息
-        try {
-          await fetchUserInfo();
-          console.log("用户信息获取成功");
-        } catch (userInfoError) {
-          console.error("获取用户信息失败:", userInfoError);
-          // 即使获取用户信息失败，也不影响登录流程
-        }
+
+        await fetchUserInfo();
+
         toast.success("登录成功！");
         setTimeout(() => {
           onLoginSuccess();
         }, 1000);
       } else {
-        console.error("登录响应为空");
+        toast.error("登录失败，请稍后重试");
       }
     } catch (error) {
-      console.error("登录请求失败:", error);
+      toast.error("登录失败，请稍后重试");
     } finally {
       setIsLoading(false);
     }

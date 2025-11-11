@@ -38,7 +38,7 @@ export default function PersonalTaxUploadView() {
         pages: data.pages,
       });
     } catch (error) {
-      console.error("获取上传记录失败:", error);
+
       toast.error("获取上传记录失败");
     }
   };
@@ -176,7 +176,7 @@ export default function PersonalTaxUploadView() {
         toast.error(response.message || "文件上传失败");
       }
     } catch (error) {
-      console.error("上传失败:", error);
+
       toast.error("文件上传失败，请重试");
     } finally {
       setUploading(false);
