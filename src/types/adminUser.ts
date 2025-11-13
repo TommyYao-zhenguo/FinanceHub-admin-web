@@ -1,4 +1,3 @@
-import { Company } from './company';
 // 用户信息接口
 export interface AdminUserInfo {
   id: string;
@@ -38,6 +37,8 @@ export interface CreateUserRequest {
   userNo: string; 
   password: string;
   companyNo?: string;
+  // 新增：支持多公司绑定（前端兼容字段，后端暂未启用）
+  companyNos?: string[];
   roleCode: UserRole;
   customerServiceId?: string; // 绑定的客服ID
 }

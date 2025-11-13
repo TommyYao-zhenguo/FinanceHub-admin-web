@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Users, Plus, Edit, Trash2, Search, Eye, EyeOff } from "lucide-react";
 import toast from "react-hot-toast";
 import { AdminUserService } from "../../utils/adminUserService";
@@ -9,7 +9,6 @@ import {
   UpdateUserRequest,
   UserQueryParams,
   UserRole,
-  UserRoleOption,
 } from "../../types/adminUser";
 import { Company } from "../../types/company";
 import { useAdminUserContext } from "../../contexts/AdminUserContext"; // 添加用户上下文
@@ -49,23 +48,38 @@ export default function UserManagementView() {
   const [totalPages, setTotalPages] = useState(0);
 
   // 表单数据
-  const [formData, setFormData] = useState<CreateUserRequest>({
+  const [formData, setFormData] = useState<CreateUserRequest & { companyNos?: string[] }>({
     username: "",
     password: "",
     name: "",
     userNo: "",
-    companyNo: userInfo?.companyNo || "", // 非超级管理员默认使用自己的公司ID
+    companyNo: "",
+    companyNos: [],
     roleCode: isSuperAdmin ? UserRole.ADMIN : UserRole.EMPLOYEE,
   });
 
-  // 用户角色选项 - 根据当前用户角色过滤
-  const roleOptions: UserRoleOption[] = isSuperAdmin
-    ? [{ value: UserRole.ADMIN, label: "管理员" }]
-    : [{ value: UserRole.EMPLOYEE, label: "普通员工" }];
+  const [companyQuery, setCompanyQuery] = useState("");
+  const [companyDropdownOpen, setCompanyDropdownOpen] = useState(false);
+  const companySelectRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (!companyDropdownOpen) return;
+      const container = companySelectRef.current;
+      if (container && !container.contains(event.target as Node)) {
+        setCompanyDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [companyDropdownOpen]);
+
+  // 角色选择由现有表单控件直接使用 formData.roleCode，无需预设选项变量
 
   // 加载用户列表
   const loadUsers = async (resetPage = false) => {
-    console.log("加载用户列表:", searchParams);
     setLoading(true);
     try {
       const params = resetPage ? { ...searchParams, page: 1 } : searchParams;
@@ -131,7 +145,8 @@ export default function UserManagementView() {
       password: "",
       name: "",
       userNo: "",
-      companyNo: isSuperAdmin ? "" : userInfo?.companyNo || "", // 非超级管理员默认使用自己的公司ID
+      companyNo: "",
+      companyNos: [],
       roleCode: isSuperAdmin ? UserRole.ADMIN : UserRole.EMPLOYEE,
     });
     setShowModal(true);
@@ -146,6 +161,7 @@ export default function UserManagementView() {
       name: user.name,
       userNo: user.userNo,
       companyNo: user.companyNo,
+      companyNos: user.companyNo ? [user.companyNo] : [],
       roleCode: user.roleCode as UserRole,
     });
     setShowModal(true);
@@ -190,6 +206,11 @@ export default function UserManagementView() {
       });
       return;
     }
+    // 针对超级管理员/管理员，校验至少选择一个公司
+    if ((isSuperAdmin || isAdmin) && (!formData.companyNos || formData.companyNos.length === 0) && !formData.companyNo) {
+      setFormErrors({ ...formErrors, companyNo: "请选择至少一个公司" });
+      return;
+    }
 
     setFormLoading(true);
     try {
@@ -207,7 +228,19 @@ export default function UserManagementView() {
         await AdminUserService.updateUser(updateData);
         toast.success("用户更新成功");
       } else {
-        await AdminUserService.createUser(formData);
+        // 兼容后端当前仅支持单公司字段：companyNo 取多选的第一个
+        const payload: CreateUserRequest = {
+          username: formData.username,
+          password: formData.password,
+          name: formData.name,
+          userNo: formData.userNo,
+          roleCode: formData.roleCode,
+          companyNo: formData.companyNos && formData.companyNos.length > 0 ? formData.companyNos[0] : (formData.companyNo || ""),
+          customerServiceId: formData.customerServiceId,
+        };
+        // 额外携带 companyNos，便于后端升级后支持多公司绑定
+        payload.companyNos = formData.companyNos || [];
+        await AdminUserService.createUser(payload);
         toast.success("用户创建成功");
       }
       setShowModal(false);
@@ -273,7 +306,7 @@ export default function UserManagementView() {
         <div>
           <input
             type="text"
-            placeholder="所属公司"
+            placeholder="绑定公司"
             value={searchParams.companyName}
             onChange={(e) =>
               setSearchParams({ ...searchParams, companyName: e.target.value })
@@ -327,7 +360,7 @@ export default function UserManagementView() {
                     用户账号
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    所属公司
+                    绑定公司
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     角色
@@ -520,23 +553,85 @@ export default function UserManagementView() {
               {(isSuperAdmin || isAdmin) && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    所属公司 <span className="text-red-500">*</span>
+                    绑定公司（可多选） <span className="text-red-500">*</span>
                   </label>
-                  <select
-                    required={isSuperAdmin}
-                    value={formData.companyNo}
-                    onChange={(e) =>
-                      setFormData({ ...formData, companyNo: e.target.value })
-                    }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-transparent"
-                  >
-                    <option value="">请选择公司</option>
-                    {companies.map((company) => (
-                      <option key={company.companyNo} value={company.companyNo}>
-                        {company.companyName}
-                      </option>
-                    ))}
-                  </select>
+                  <div className="relative" ref={companySelectRef}>
+                    <div className="flex flex-wrap gap-2 mb-2">
+                      {(formData.companyNos || []).map((no) => {
+                        const c = companies.find((x) => x.companyNo === no);
+                        return (
+                          <span
+                            key={no}
+                            className="inline-flex items-center px-2 py-1 text-sm bg-green-100 text-green-800 rounded-full"
+                          >
+                            {c ? c.companyName : no}
+                            <button
+                              type="button"
+                              className="ml-2 text-green-700 hover:text-green-900"
+                              onClick={() => {
+                                const next = (formData.companyNos || []).filter((x) => x !== no);
+                                setFormData({ ...formData, companyNos: next, companyNo: next[0] || "" });
+                              }}
+                            >
+                              ×
+                            </button>
+                          </span>
+                        );
+                      })}
+                    </div>
+                    <input
+                      type="text"
+                      value={companyQuery}
+                      onChange={(e) => setCompanyQuery(e.target.value)}
+                      onFocus={() => setCompanyDropdownOpen(true)}
+                      placeholder="搜索公司名称"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-transparent"
+                    />
+                    {companyDropdownOpen && (
+                      <div className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow max-h-44 overflow-auto">
+                        {companies
+                          .filter((c) => {
+                            const q = companyQuery.trim().toLowerCase();
+                            if (!q) return true;
+                            return (
+                              (c.companyName || "").toLowerCase().includes(q)
+                            );
+                          })
+                          .map((c) => {
+                            const selected = (formData.companyNos || []).includes(c.companyNo);
+                            return (
+                              <button
+                                type="button"
+                                key={c.companyNo}
+                                onMouseDown={(e) => e.preventDefault()}
+                                onClick={() => {
+                                  let next = formData.companyNos || [];
+                                  if (selected) {
+                                    next = next.filter((x) => x !== c.companyNo);
+                                  } else {
+                                    next = [...next, c.companyNo];
+                                  }
+                                  setFormData({ ...formData, companyNos: next, companyNo: next[0] || "" });
+                                  setCompanyDropdownOpen(true);
+                                }}
+                                className={`w-full text-left px-3 py-2 hover:bg-gray-100 ${selected ? "bg-green-50" : ""}`}
+                              >
+                                <span className={`inline-block w-3 h-3 mr-2 border rounded-sm ${selected ? "bg-green-500 border-green-500" : "border-gray-400"}`}></span>
+                                {c.companyName}
+                              </button>
+                            );
+                          })}
+                        {companies.filter((c) => {
+                          const q = companyQuery.trim().toLowerCase();
+                          if (!q) return true;
+                          return (c.companyName || "").toLowerCase().includes(q);
+                        }).length === 0 && (
+                          <div className="px-3 py-2 text-sm text-gray-500">无匹配结果</div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  <p className="mt-1 text-xs text-gray-500">支持点击多选与搜索添加。</p>
                 </div>
               )}
 
