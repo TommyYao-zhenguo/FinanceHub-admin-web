@@ -215,12 +215,18 @@ export default function UserManagementView() {
     setFormLoading(true);
     try {
       if (editingUser) {
+        const primaryCompanyNo = (formData.companyNos && formData.companyNos.length > 0)
+          ? formData.companyNos[0]
+          : (formData.companyNo || "");
         const updateData: UpdateUserRequest = {
           userNo: editingUser.userNo,
           username: formData.username,
           password: formData.password,
           name: formData.name,
           roleCode: formData.roleCode,
+          companyNo: primaryCompanyNo,
+          companyNos: formData.companyNos || [],
+          customerServiceId: formData.customerServiceId,
         };
         if (formData.password) {
           updateData.password = formData.password;
