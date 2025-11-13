@@ -6,6 +6,9 @@ export interface AdminUserInfo {
   name?: string; 
   companyNo: string;
   companyName: string;
+  // 新增：支持多公司绑定的返回字段（兼容旧字段）
+  companyNos?: string[];
+  companyNames?: string[];
   roleName: string;
   roleCode: string;
   status: "ACTIVE" | "INACTIVE";

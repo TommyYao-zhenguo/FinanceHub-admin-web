@@ -161,7 +161,10 @@ export default function UserManagementView() {
       name: user.name,
       userNo: user.userNo,
       companyNo: user.companyNo,
-      companyNos: user.companyNo ? [user.companyNo] : [],
+      // 优先使用后端返回的多公司数组，兼容旧的单公司字段
+      companyNos: (user.companyNos && user.companyNos.length > 0)
+        ? user.companyNos
+        : (user.companyNo ? [user.companyNo] : []),
       roleCode: user.roleCode as UserRole,
     });
     setShowModal(true);
@@ -393,8 +396,16 @@ export default function UserManagementView() {
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {user.companyName}
+                    <td className="px-6 py-4 text-sm text-gray-900">
+                      {(user.companyNames && user.companyNames.length > 0) ? (
+                        <div className="flex flex-col space-y-1">
+                          {user.companyNames.map((name, idx) => (
+                            <div key={idx} className="max-w-[240px] truncate" title={name}>{name}</div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="max-w-[240px] truncate" title={user.companyName || ""}>{user.companyName || ""}</div>
+                      )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span
