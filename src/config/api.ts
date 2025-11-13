@@ -55,20 +55,18 @@ export const API_ENDPOINTS = {
 
   // 公司相关接口
   COMPANY: {
-    LIST: "/api/v1/company/list",
-    CUSTOMER_SERVICE_LIST: "/api/v1/company/customer-service/list",
-    CREATE: "/api/v1/company/create",
-    UPDATE: "/api/v1/company/update",
-    DELETE: "/api/v1/company/delete",
-    DETAIL: "/api/v1/company/detail",
+    LIST: "/api/v1/admin/company/list",
+    CUSTOMER_SERVICE_LIST: "/api/v1/admin/company/customer-service/list",
+    CREATE: "/api/v1/admin/company/create",
+    UPDATE: "/api/v1/admin/company/update",
+    DELETE: "/api/v1/admin/company/delete",
+    DETAIL: "/api/v1/admin/company/detail",
   },
 
   // 社保配置相关接口
   SOCIAL_INSURANCE_CONFIG: {
     LIST: "/api/v1/admin/social-insurance/configs/page",
-    CREATE: "/api/v1/admin/social-insurance/configs",
     BATCH: "/api/v1/admin/social-insurance/configs/batch",
-    UPDATE: "/api/v1/admin/social-insurance/configs",
     DELETE: "/api/v1/admin/social-insurance/configs",
   },
 
@@ -82,12 +80,12 @@ export const API_ENDPOINTS = {
 
   // 发票类型相关接口
   INVOICE_TYPE: {
-    LIST: "/api/v1/invoice-type/page",
-    CREATE: "/api/v1/invoice-type",
-    UPDATE: "/api/v1/invoice-type",
-    DELETE: "/api/v1/invoice-type",
-    DETAIL: "/api/v1/invoice-type",
-    ACTIVE: "/api/v1/invoice-type/active",
+    LIST: "/api/v1/admin/invoice-type/page",
+    CREATE: "/api/v1/admin/invoice-type",
+    UPDATE: "/api/v1/admin/invoice-type",
+    DELETE: "/api/v1/admin/invoice-type",
+    DETAIL: "/api/v1/admin/invoice-type",
+    ACTIVE: "/api/v1/admin/invoice-type/active",
   },
 
   // 开票额度相关接口

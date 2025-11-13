@@ -2,7 +2,6 @@ import { httpClient } from "./http";
 import { API_ENDPOINTS } from "../config/api";
 import {
   SocialInsuranceConfig,
-  CreateSocialInsuranceConfigRequest,
   SocialInsuranceConfigQueryParams,
   SocialInsuranceConfigListResponse,
   BatchSocialInsuranceConfigRequest,
@@ -33,28 +32,11 @@ export class SocialInsuranceConfigService {
     return response;
   }
 
-  // 创建社保配置
-  static async createConfig(data: CreateSocialInsuranceConfigRequest): Promise<void> {
-    await httpClient.post(API_ENDPOINTS.SOCIAL_INSURANCE_CONFIG.CREATE, data);
-  }
-
-  // 更新社保配置
-  static async updateConfig(id: string, data: CreateSocialInsuranceConfigRequest): Promise<void> {
-    await httpClient.put(`${API_ENDPOINTS.SOCIAL_INSURANCE_CONFIG.UPDATE}/${id}`, data);
-  }
-
   // 删除社保配置
   static async deleteConfig(id: string): Promise<void> {
     await httpClient.delete(`${API_ENDPOINTS.SOCIAL_INSURANCE_CONFIG.DELETE}/${id}`);
   }
 
-  // 获取社保配置详情
-  static async getConfigDetail(id: string): Promise<SocialInsuranceConfig> {
-    const response = await httpClient.get<SocialInsuranceConfig>(
-      `${API_ENDPOINTS.SOCIAL_INSURANCE_CONFIG.LIST}/${id}`
-    );
-    return response;
-  }
 
   // 批量配置社保比例
   static async batchConfigRates(request: BatchSocialInsuranceConfigRequest): Promise<void> {
