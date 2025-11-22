@@ -231,10 +231,10 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
                 />
               </div>
               <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
-                金财云数字化财务管理后台
+                数字化财务管理后台
               </h1>
               <p className="text-xl text-cyan-200">
-                金财云智能财务管理 • 数字化转型
+                智能财务管理 • 数字化转型
               </p>
             </div>
 
@@ -288,9 +288,9 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
                 />
               </div>
               <h1 className="text-2xl font-bold text-white mb-2">
-                金财云数字化财务管理后台
+                数字化财务管理后台
               </h1>
-              <p className="text-cyan-200">金财云智能财务管理平台</p>
+              <p className="text-cyan-200">智能财务管理平台</p>
             </div>
 
             {/* 登录卡片 */}
@@ -419,7 +419,7 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
 
             {/* 版权信息 */}
             <div className="text-center mt-8 text-cyan-300 text-sm">
-              <p>© 2025 金财云数字化财务中心. 保留所有权利.</p>
+              <p>© 2025 数字化财务中心. 保留所有权利.</p>
             </div>
           </div>
         </div>
