@@ -46,18 +46,28 @@ const routeMap: Record<string, string> = {
   "/client/company-management": "company-management",
   "/client/user-management": "user-management",
   "/client/invoice-quota-management": "invoice-quota-management",
-  "/employee-base-config": "employee-base-config",
-  "/employee-import": "employee-import",
-  "/social-insurance-config": "social-insurance-config",
-  "/housing-fund-config": "housing-fund-config",
-  "/company-housing-fund-list": "company-housing-fund-list",
-  "/company-social-insurance-list": "company-social-insurance-list",
+  // "/employee-base-config": "employee-base-config",
+  // "/employee-import": "employee-import",
+  // "/social-insurance-config": "social-insurance-config",
+  // "/housing-fund-config": "housing-fund-config",
+  "/client/config/social-insurance": "social-insurance-config",
+  "/client/config/housing-fund": "housing-fund-config",
+  "/client/config/employee-base": "employee-base-config",
+  "/client/config/employee-import": "employee-import",
+  "/client/config/invoice-type": "invoice-type-management",
+  "/client/config/invoice-quota": "invoice-quota-management",
+  "/client/info/company-housing-fund-list": "company-housing-fund-list",
+  "/client/info/company-social-insurance-list": "company-social-insurance-list",
   "/social-insurance-detail": "company-social-insurance-detail",
-  "/tax-upload": "tax-upload",
-  "/personal-tax-upload": "personal-tax-upload",
-  "/invoice-type-management": "invoice-type-management",
-  "/invoice-management": "invoice-management",
-  "/non-invoiced-income": "non-invoiced-income",
+  // "/tax-upload": "tax-upload",
+  // "/personal-tax-upload": "personal-tax-upload",
+  // "/invoice-type-management": "invoice-type-management",
+  // "/invoice-management": "invoice-management",
+  // "/non-invoiced-income": "non-invoiced-income",
+  "/upload/invoice-management": "invoice-management",
+  "/upload/tax": "tax-upload",
+  "/upload/personal-tax": "personal-tax-upload",
+  "/upload/non-invoiced-income": "non-invoiced-income",
 };
 
 // tab到路由的映射
@@ -67,19 +77,19 @@ const tabToRouteMap: Record<string, string> = {
   "customer-service": "/customer-service",
   "company-management": "/client/company-management",
   "user-management": "/client/user-management",
-  "invoice-quota-management": "/client/invoice-quota-management",
-  "employee-base-config": "/employee-base-config",
-  "employee-import": "/employee-import",
-  "social-insurance-config": "/social-insurance-config",
-  "housing-fund-config": "/housing-fund-config",
-  "company-housing-fund-list": "/company-housing-fund-list",
-  "company-social-insurance-list": "/company-social-insurance-list",
+  "invoice-quota-management": "/client/config/invoice-quota",
+  "employee-base-config": "/client/config/employee-base",
+  "employee-import": "/client/config/employee-import",
+  "social-insurance-config": "/client/config/social-insurance",
+  "housing-fund-config": "/client/config/housing-fund",
+  "company-housing-fund-list": "/client/info/company-housing-fund-list",
+  "company-social-insurance-list": "/client/info/company-social-insurance-list",
   "company-social-insurance-detail": "/social-insurance-detail",
-  "tax-upload": "/tax-upload",
-  "personal-tax-upload": "/personal-tax-upload",
-  "invoice-type-management": "/invoice-type-management",
-  "invoice-management": "/invoice-management",
-  "non-invoiced-income": "/non-invoiced-income",
+  "tax-upload": "/upload/tax",
+  "personal-tax-upload": "/upload/personal-tax",
+  "invoice-type-management": "/client/config/invoice-type",
+  "invoice-management": "/upload/invoice-management",
+  "non-invoiced-income": "/upload/non-invoiced-income",
 };
 
 // 创建一个内部组件来使用UserContext和Router hooks
@@ -238,11 +248,19 @@ function AppContent() {
               element={<SocialInsuranceConfigView />}
             />
             <Route
+              path="/client/config/social-insurance"
+              element={<SocialInsuranceConfigView />}
+            />
+            <Route
               path="/housing-fund-config"
               element={<HousingFundConfigView />}
             />
             <Route
-              path="/company-housing-fund-list"
+              path="/client/config/housing-fund"
+              element={<HousingFundConfigView />}
+            />
+            <Route
+              path="/client/info/company-housing-fund-list"
               element={<CompanyHousingFundListView />}
             />
             <Route
@@ -250,7 +268,7 @@ function AppContent() {
               element={<CompanyHousingFundDetailView />}
             />
             <Route
-              path="/company-social-insurance-list"
+              path="/client/info/company-social-insurance-list"
               element={<CompanySocialInsuranceListView />}
             />
             <Route
@@ -258,8 +276,13 @@ function AppContent() {
               element={<CompanySocialInsuranceDetailView />}
             />
             <Route path="/tax-upload" element={<TaxUploadView />} />
+            <Route path="/upload/tax" element={<TaxUploadView />} />
             <Route
               path="/personal-tax-upload"
+              element={<PersonalTaxUploadView />}
+            />
+            <Route
+              path="/upload/personal-tax"
               element={<PersonalTaxUploadView />}
             />
             <Route
@@ -267,12 +290,44 @@ function AppContent() {
               element={<InvoiceTypeManagementView />}
             />
             <Route
+              path="/client/config/invoice-type"
+              element={<InvoiceTypeManagementView />}
+            />
+            <Route
               path="/invoice-management"
               element={<InvoiceManagementView />}
             />
             <Route
+              path="/upload/invoice-management"
+              element={<InvoiceManagementView />}
+            />
+            <Route
+              path="/client/config/invoice-quota"
+              element={<InvoiceQuotaManagementView />}
+            />
+            <Route
               path="/non-invoiced-income"
               element={<NonInvoicedIncomeView />}
+            />
+            <Route
+              path="/upload/non-invoiced-income"
+              element={<NonInvoicedIncomeView />}
+            />
+            <Route
+              path="/employee-base-config"
+              element={<EmployeeBaseConfigView />}
+            />
+            <Route
+              path="/client/config/employee-base"
+              element={<EmployeeBaseConfigView />}
+            />
+            <Route
+              path="/employee-import"
+              element={<EmployeeImportView />}
+            />
+            <Route
+              path="/client/config/employee-import"
+              element={<EmployeeImportView />}
             />
             <Route
               path="/company-social-insurance"
