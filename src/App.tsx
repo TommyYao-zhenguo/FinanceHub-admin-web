@@ -54,6 +54,7 @@ const routeMap: Record<string, string> = {
   "/company-social-insurance-list": "company-social-insurance-list",
   "/social-insurance-detail": "company-social-insurance-detail",
   "/tax-upload": "tax-upload",
+  "/personal-tax-upload": "personal-tax-upload",
   "/invoice-type-management": "invoice-type-management",
   "/invoice-management": "invoice-management",
   "/non-invoiced-income": "non-invoiced-income",
@@ -105,15 +106,15 @@ function AppContent() {
         return;
       }
 
-      try {
-        await fetchUserInfo();
-        setIsLoggedIn(true);
-      } catch (error) {
-        localStorage.removeItem(SA_TOKEN_CONFIG.tokenName);
-        setIsLoggedIn(false);
-      } finally {
-        setIsCheckingAuth(false);
-      }
+    try {
+      await fetchUserInfo();
+      setIsLoggedIn(true);
+    } catch {
+      localStorage.removeItem(SA_TOKEN_CONFIG.tokenName);
+      setIsLoggedIn(false);
+    } finally {
+      setIsCheckingAuth(false);
+    }
     };
 
     checkAuthStatus();

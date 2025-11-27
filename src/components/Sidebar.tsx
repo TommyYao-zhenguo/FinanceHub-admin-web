@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import type { LucideIcon } from "lucide-react";
 import {
   Settings,
   HelpCircle,
@@ -24,8 +25,11 @@ interface SidebarProps {
   onTabChange: (tab: string) => void;
 }
 
+type SidebarLink = { id: string; label: string; icon: LucideIcon };
+type SubLink = { id: string; label: string; icon: LucideIcon; badge?: string };
+
 // 将用户管理菜单项移除，改为动态生成
-const menuItems = [
+const menuItems: SidebarLink[] = [
   { id: "customer-service", label: "客服中心", icon: HelpCircle },
 ];
 
@@ -35,6 +39,9 @@ export default function Sidebar({
   onTabChange,
 }: SidebarProps) {
   const [isSystemMenuOpen, setIsSystemMenuOpen] = useState(false);
+  const [isNewCustomerOpen, setIsNewCustomerOpen] = useState(false);
+  const [isCustomerInfoOpen, setIsCustomerInfoOpen] = useState(false);
+  const [isMonthlyUploadOpen, setIsMonthlyUploadOpen] = useState(false);
   const { userInfo } = useAdminUserContext();
 
   const handleItemClick = (item: { id: string }) => {
@@ -77,98 +84,44 @@ export default function Sidebar({
     return items;
   };
 
-  // 系统管理子菜单项
+  // 系统管理子菜单项（管理员入口）
   const getSystemMenuItems = () => {
-    const items = [];
+    const items: SidebarLink[] = [];
 
-    // SUPER_ADMIN 可以看到公司管理
     if (hasCompanyManagementAccess()) {
-      items.push({
-        id: "company-management",
-        label: "公司管理",
-        icon: Building2,
-      });
+      items.push({ id: "company-management", label: "公司管理", icon: Building2 });
     }
-
-    // SUPER_ADMIN 和 ADMIN 都可以看到权限管理
     if (hasAdminUserManagementAccess()) {
-      items.push({
-        id: "user-management",
-        label: "用户管理",
-        icon: UserCog,
-      });
+      items.push({ id: "user-management", label: "用户管理", icon: UserCog });
     }
-    // 添加新的子菜单项
-    if (isCustomerServiceUser()) {
-      items.push({
-        id: "employee-import",
-        label: "员工录入",
-        icon: UserPlus,
-      });
-      items.push({
-        id: "social-insurance-config",
-        label: "社保比例配置",
-        icon: Shield,
-      });
-      items.push({
-        id: "housing-fund-config",
-        label: "公积金比例配置",
-        icon: Home,
-      });
-      items.push({
-        id: "company-housing-fund-list",
-        label: "公司公积金明细",
-        icon: Building2,
-      });
-      items.push({
-        id: "company-social-insurance-list",
-        label: "公司社保明细",
-        icon: Shield,
-      });
-      items.push({
-        id: "employee-base-config",
-        label: "社保和公积金基数配置",
-        icon: Calculator,
-      });
-      items.push({
-        id: "tax-upload",
-        label: "税费上传",
-        icon: Upload,
-      });
-      items.push({
-        id: "personal-tax-upload",
-        label: "个税上传",
-        icon: Upload,
-      });
-      items.push({
-        id: "invoice-type-management",
-        label: "发票类型管理",
-        icon: FileText,
-      });
-      items.push({
-        id: "invoice-quota-management",
-        label: "开票额度管理",
-        icon: Receipt,
-      });
-      items.push({
-        id: "invoice-management",
-        label: "发票管理",
-        icon: FileText,
-      });
-      items.push({
-        id: "non-invoiced-income",
-        label: "不开票收入",
-        icon: DollarSign,
-      });
-
-    }
-
     return items;
   };
 
   const topMenuItems = getTopMenuItems(); // 获取动态生成的顶部菜单项
   const systemMenuItems = getSystemMenuItems();
-  const showSystemMenu = systemMenuItems.length > 0;
+  const showSystemMenu = systemMenuItems.length > 0 || isCustomerServiceUser();
+
+  // 分组：新客户配置、客户信息查看、月度上传
+  const newCustomerItems: SubLink[] = [
+    { id: "social-insurance-config", label: "社保比例配置", icon: Shield },
+    { id: "housing-fund-config", label: "公积金比例配置", icon: Home },
+    { id: "employee-base-config", label: "社保和公积金基数配置", icon: Calculator },
+    { id: "employee-import", label: "客户人员信息批量配置", icon: UserPlus },
+    { id: "invoice-type-management", label: "发票类型配置", icon: FileText },
+    { id: "invoice-quota-management", label: "开票额度配置", icon: Receipt },
+  ];
+
+  const customerInfoItems: SubLink[] = [
+    { id: "company-social-insurance-list", label: "公司社保明细", icon: Shield },
+    { id: "company-housing-fund-list", label: "公司公积金明细", icon: Building2 },
+  ];
+
+  const monthlyUploadItems: SubLink[] = [
+    { id: "invoice-management", label: "进销项发票上传", icon: FileText },
+    { id: "tax-upload", label: "税费上传", icon: Upload },
+    { id: "personal-tax-upload", label: "个税上传", icon: Upload },
+    { id: "non-invoiced-income", label: "不开票收入上传", icon: DollarSign },
+  ];
 
   return (
     <>
@@ -230,30 +183,172 @@ export default function Sidebar({
                   )}
                 </button>
 
-                {/* 系统管理子菜单 */}
+                {/* 系统管理子菜单（管理员入口 + 三个分组） */}
                 {isSystemMenuOpen && (
-                  <div className="ml-4 space-y-1">
-                    {systemMenuItems.map((item) => {
-                      const Icon = item.icon;
-                      return (
+                  <div className="ml-4 space-y-3">
+                    {/* 管理员入口 */}
+                    {systemMenuItems.length > 0 && (
+                      <div className="space-y-1">
+                        {systemMenuItems.map((item) => {
+                          const Icon = item.icon;
+                          return (
+                            <button
+                              key={item.id}
+                              onClick={() => handleItemClick(item)}
+                              className={`
+                                w-full flex items-center space-x-3 px-4 py-2 rounded-lg text-left transition-colors
+                                ${activeTab === item.id
+                                  ? "bg-orange-600 text-white shadow-lg"
+                                  : "text-gray-400 hover:text-white hover:bg-gray-700"}
+                              `}
+                            >
+                              <Icon className="h-4 w-4 flex-shrink-0" />
+                              <span className="text-sm font-medium">{item.label}</span>
+                            </button>
+                          );
+                        })}
+                        <div className="border-t border-gray-700 my-2" />
+                      </div>
+                    )}
+
+                    {/* 新客户配置 */}
+                    {isCustomerServiceUser() && (
+                      <div>
                         <button
-                          key={item.id}
-                          onClick={() => handleItemClick(item)}
-                          className={`
-                            w-full flex items-center space-x-3 px-4 py-2 rounded-lg text-left transition-colors
-                            ${activeTab === item.id
-                              ? "bg-orange-600 text-white shadow-lg"
-                              : "text-gray-400 hover:text-white hover:bg-gray-700"
-                            }
-                          `}
+                          onClick={() => setIsNewCustomerOpen(!isNewCustomerOpen)}
+                          className="w-full flex items-center justify-between px-4 py-2 rounded-lg text-left transition-colors text-gray-300 hover:text-white hover:bg-gray-700"
                         >
-                          <Icon className="h-4 w-4 flex-shrink-0" />
-                          <span className="text-sm font-medium">
-                            {item.label}
-                          </span>
+                          <div className="flex items-center space-x-3">
+                            <UserPlus className="h-4 w-4 flex-shrink-0" />
+                            <span className="text-sm font-semibold">新客户配置</span>
+                          </div>
+                          {isNewCustomerOpen ? (
+                            <ChevronDown className="h-4 w-4" />
+                          ) : (
+                            <ChevronRight className="h-4 w-4" />
+                          )}
                         </button>
-                      );
-                    })}
+
+                        {isNewCustomerOpen && (
+                          <div className="mt-1 ml-3 space-y-1">
+                            {newCustomerItems.map((item) => {
+                              const Icon = item.icon;
+                              return (
+                                <button
+                                  key={item.id}
+                                  onClick={() => onTabChange(item.id)}
+                                  className={`
+                                    w-full flex items-center justify-between px-4 py-2 rounded-lg text-left transition-colors
+                                    ${activeTab === item.id
+                                      ? "bg-orange-600 text-white shadow-lg"
+                                      : "text-gray-400 hover:text-white hover:bg-gray-700"}
+                                  `}
+                                >
+                                  <span className="flex items-center space-x-3">
+                                    <Icon className="h-4 w-4 flex-shrink-0" />
+                                    <span className="text-sm font-medium">{item.label}</span>
+                                  </span>
+                                  {item.badge ? (
+                                    <span className="ml-2 text-[10px] px-2 py-0.5 rounded bg-red-600 text-white">{item.badge}</span>
+                                  ) : null}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* 客户信息查看 */}
+                    {isCustomerServiceUser() && (
+                      <div>
+                        <button
+                          onClick={() => setIsCustomerInfoOpen(!isCustomerInfoOpen)}
+                          className="w-full flex items-center justify-between px-4 py-2 rounded-lg text-left transition-colors text-gray-300 hover:text-white hover:bg-gray-700"
+                        >
+                          <div className="flex items-center space-x-3">
+                            <Building2 className="h-4 w-4 flex-shrink-0" />
+                            <span className="text-sm font-semibold">客户信息查看</span>
+                          </div>
+                          {isCustomerInfoOpen ? (
+                            <ChevronDown className="h-4 w-4" />
+                          ) : (
+                            <ChevronRight className="h-4 w-4" />
+                          )}
+                        </button>
+
+                        {isCustomerInfoOpen && (
+                          <div className="mt-1 ml-3 space-y-1">
+                            {customerInfoItems.map((item) => {
+                              const Icon = item.icon;
+                              return (
+                                <button
+                                  key={item.id}
+                                  onClick={() => onTabChange(item.id)}
+                                  className={`
+                                    w-full flex items-center space-x-3 px-4 py-2 rounded-lg text-left transition-colors
+                                    ${activeTab === item.id
+                                      ? "bg-orange-600 text-white shadow-lg"
+                                      : "text-gray-400 hover:text-white hover:bg-gray-700"}
+                                  `}
+                                >
+                                  <Icon className="h-4 w-4 flex-shrink-0" />
+                                  <span className="text-sm font-medium">{item.label}</span>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* 月度上传 */}
+                    {isCustomerServiceUser() && (
+                      <div>
+                        <button
+                          onClick={() => setIsMonthlyUploadOpen(!isMonthlyUploadOpen)}
+                          className="w-full flex items-center justify-between px-4 py-2 rounded-lg text-left transition-colors text-gray-300 hover:text-white hover:bg-gray-700"
+                        >
+                          <div className="flex items-center space-x-3">
+                            <Upload className="h-4 w-4 flex-shrink-0" />
+                            <span className="text-sm font-semibold">月度上传</span>
+                          </div>
+                          {isMonthlyUploadOpen ? (
+                            <ChevronDown className="h-4 w-4" />
+                          ) : (
+                            <ChevronRight className="h-4 w-4" />
+                          )}
+                        </button>
+
+                        {isMonthlyUploadOpen && (
+                          <div className="mt-1 ml-3 space-y-1">
+                            {monthlyUploadItems.map((item) => {
+                              const Icon = item.icon;
+                              return (
+                                <button
+                                  key={item.id}
+                                  onClick={() => onTabChange(item.id)}
+                                  className={`
+                                    w-full flex items-center justify-between px-4 py-2 rounded-lg text-left transition-colors
+                                    ${activeTab === item.id
+                                      ? "bg-orange-600 text-white shadow-lg"
+                                      : "text-gray-400 hover:text-white hover:bg-gray-700"}
+                                  `}
+                                >
+                                  <span className="flex items-center space-x-3">
+                                    <Icon className="h-4 w-4 flex-shrink-0" />
+                                    <span className="text-sm font-medium">{item.label}</span>
+                                  </span>
+                                  {item.badge ? (
+                                    <span className="ml-2 text-[10px] px-2 py-0.5 rounded bg-red-600 text-white">{item.badge}</span>
+                                  ) : null}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 )}
               </div>

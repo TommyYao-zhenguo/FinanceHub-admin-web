@@ -273,7 +273,7 @@ const InvoiceManagementView: React.FC = () => {
     <div className="p-6">
       <div className="mb-8">
         <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
-          发票管理
+          进销项发票上传
         </h1>
         <p className="mt-2 text-gray-600">上传和管理客户发票数据</p>
       </div>

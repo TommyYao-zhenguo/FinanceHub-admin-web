@@ -131,7 +131,7 @@ export default function NonInvoicedIncomeView() {
         {/* 头部与说明与发票管理保持一致 */}
         <div className="p-6 border-b border-gray-200 flex justify-between items-center">
           <div>
-            <h3 className="text-lg font-semibold text-gray-900">文件上传</h3>
+            <h3 className="text-lg font-semibold text-gray-900">不开票收入上传</h3>
             <p className="text-sm text-gray-600 mt-1">
               支持 Excel（.xlsx/.xls）格式，单次可选择多个文件
             </p>
