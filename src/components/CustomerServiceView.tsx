@@ -293,7 +293,7 @@ export default function CustomerServiceView() {
       case "COMPANY_CREATE":
         return "新增公司";
       case "CONFIRM_SALARY":
-        return "月度工资确认";
+        return "工资条确认";
 
       default:
         return taskType;
