@@ -113,7 +113,7 @@ export default function HomePage({ onLoginClick }: HomePageProps) {
     {
       name: '张总',
       company: '北京科技有限公司',
-      content: '使用数字化财务中心后，我们的财务工作效率提升了300%，强烈推荐！',
+      content: '使用启创宝数字化财务中心后，我们的财务工作效率提升了300%，强烈推荐！',
       rating: 5
     },
     {
@@ -185,7 +185,7 @@ export default function HomePage({ onLoginClick }: HomePageProps) {
               <Database className="w-6 h-6 text-white" />
             </div>
             <span className="text-xl font-bold bg-gradient-to-r from-cyan-400 to-emerald-400 bg-clip-text text-transparent">
-              数字化财务中心
+              启创宝数字化财务中心
             </span>
           </div>
           <div className="flex items-center space-x-6">
@@ -234,7 +234,7 @@ export default function HomePage({ onLoginClick }: HomePageProps) {
               </div>
               <h1 className="text-5xl md:text-6xl font-bold mb-6">
                 <span className="bg-gradient-to-r from-cyan-400 via-emerald-400 to-cyan-400 bg-clip-text text-transparent">
-                  数字化财务中心
+                  启创宝数字化财务中心
                 </span>
               </h1>
               <p className="text-xl md:text-2xl text-cyan-200 mb-8 max-w-3xl mx-auto">
@@ -338,7 +338,7 @@ export default function HomePage({ onLoginClick }: HomePageProps) {
                 产品优势
               </h2>
               <p className="text-xl text-cyan-200 max-w-2xl mx-auto">
-                为什么选择数字化财务中心？
+                为什么选择启创宝数字化财务中心？
               </p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -484,11 +484,11 @@ export default function HomePage({ onLoginClick }: HomePageProps) {
                 <Database className="w-5 h-5 text-white" />
               </div>
               <span className="text-lg font-bold bg-gradient-to-r from-cyan-400 to-emerald-400 bg-clip-text text-transparent">
-                数字化财务中心
+                启创宝数字化财务中心
               </span>
             </div>
             <p className="text-cyan-300 mb-4">
-              © 2025 数字化财务中心. 保留所有权利.
+              © 2025 启创宝数字化财务中心. 保留所有权利.
             </p>
             <p className="text-sm text-cyan-400">专业 • 安全 • 高效 • 智能</p>
           </div>
