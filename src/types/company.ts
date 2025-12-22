@@ -13,6 +13,7 @@ export interface Company {
   franchise: boolean; // 是否是加盟商
   customerServiceId?: string; // 绑定的客服ID
   customerServiceName?: string; // 绑定的客服姓名
+  taxType?: "SMALL_SCALE" | "GENERAL"; // 税务类型：小规模纳税人 | 一般纳税人
   createTime: string;
   updateTime: string;
 }
@@ -23,6 +24,7 @@ export interface CreateCompanyRequest {
   taxNumber: string;
   franchiseStatus: string; // 加盟商状态
   customerServiceId?: string; // 绑定的客服ID
+  taxType?: "SMALL_SCALE" | "GENERAL"; // 税务类型
 }
 
 // 更新公司请求接口
@@ -32,6 +34,7 @@ export interface UpdateCompanyRequest {
   taxNumber: string;
   franchiseStatus: string; // 加盟商状态
   customerServiceId?: string; // 绑定的客服ID
+  taxType?: "SMALL_SCALE" | "GENERAL"; // 税务类型
 }
 
 // 公司列表查询参数

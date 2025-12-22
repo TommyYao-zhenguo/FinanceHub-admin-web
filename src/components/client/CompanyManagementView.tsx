@@ -15,6 +15,7 @@ interface SimpleCreateCompanyRequest {
   taxNumber: string;
   franchiseStatus: string; // 加盟商状态
   customerServiceId?: string; // 绑定的客服ID
+  taxType?: "SMALL_SCALE" | "GENERAL"; // 税务类型
 }
 
 export default function CompanyManagementView() {
@@ -73,9 +74,7 @@ export default function CompanyManagementView() {
         roleCode: UserRole.CUSTOMER_SERVICE,
       });
       setCustomerServices(response.records);
-    } catch (error) {
-
-    }
+    } catch (error) {}
   };
 
   // 加载公司列表
@@ -134,6 +133,7 @@ export default function CompanyManagementView() {
       taxNumber: "",
       franchiseStatus: "DIRECT",
       customerServiceId: "",
+      taxType: "SMALL_SCALE",
     });
     setFormErrors({});
     setShowCreateModal(true);
@@ -146,6 +146,7 @@ export default function CompanyManagementView() {
       taxNumber: company.taxNumber,
       franchiseStatus: company.franchise ? "1" : "0",
       customerServiceId: company.customerServiceId || "",
+      taxType: company.taxType || "SMALL_SCALE",
     });
     setFormErrors({});
     setEditingCompany(company);
@@ -160,6 +161,7 @@ export default function CompanyManagementView() {
       taxNumber: "",
       franchiseStatus: "DIRECT",
       customerServiceId: "",
+      taxType: "SMALL_SCALE",
     });
     setFormErrors({});
   };
@@ -211,6 +213,7 @@ export default function CompanyManagementView() {
           taxNumber: formData.taxNumber,
           franchiseStatus: formData.franchiseStatus,
           customerServiceId: formData.customerServiceId,
+          taxType: formData.taxType,
         });
         toast.success("公司信息更新成功");
       } else {
@@ -220,6 +223,7 @@ export default function CompanyManagementView() {
           taxNumber: formData.taxNumber,
           franchiseStatus: formData.franchiseStatus, // 加盟商状态
           customerServiceId: formData.customerServiceId,
+          taxType: formData.taxType,
         };
         await CompanyService.createCompany(createData);
         toast.success("公司创建成功");
@@ -229,7 +233,6 @@ export default function CompanyManagementView() {
       // 创建或更新后重置到第一页
       loadCompanies(true);
     } catch (error) {
-
     } finally {
       setFormLoading(false);
     }
@@ -263,7 +266,6 @@ export default function CompanyManagementView() {
       loadCompanies(true);
     } catch (error) {
       toast.error("删除失败");
-
     } finally {
       setDeleteLoading(false);
       setDeleteConfirm(null);
@@ -509,6 +511,45 @@ export default function CompanyManagementView() {
                     {formErrors.taxNumber}
                   </p>
                 )}
+              </div>
+
+              {/* 税务类型 */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  税务类型 <span className="text-red-500">*</span>
+                </label>
+                <div className="flex space-x-4 mt-2">
+                  <label className="inline-flex items-center">
+                    <input
+                      type="radio"
+                      className="form-radio h-4 w-4 text-blue-600 transition duration-150 ease-in-out"
+                      name="taxType"
+                      value="SMALL_SCALE"
+                      checked={formData.taxType === "SMALL_SCALE"}
+                      onChange={(e) =>
+                        handleInputChange("taxType", e.target.value)
+                      }
+                    />
+                    <span className="ml-2 text-sm text-gray-700">
+                      小规模纳税人
+                    </span>
+                  </label>
+                  <label className="inline-flex items-center">
+                    <input
+                      type="radio"
+                      className="form-radio h-4 w-4 text-blue-600 transition duration-150 ease-in-out"
+                      name="taxType"
+                      value="GENERAL"
+                      checked={formData.taxType === "GENERAL"}
+                      onChange={(e) =>
+                        handleInputChange("taxType", e.target.value)
+                      }
+                    />
+                    <span className="ml-2 text-sm text-gray-700">
+                      一般纳税人
+                    </span>
+                  </label>
+                </div>
               </div>
 
               {/* 绑定客服 - 超级管理员不显示 */}
