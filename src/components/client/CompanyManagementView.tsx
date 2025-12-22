@@ -22,15 +22,6 @@ export default function CompanyManagementView() {
   const [companies, setCompanies] = useState<Company[]>([]);
   const { userInfo } = useAdminUserContext(); // 获取当前用户信息
 
-  // 检查用户是否有权限管理加盟商字段
-  const hasCompanyManagementAccess = () => {
-    if (!userInfo?.roleCode) return false;
-    return (
-      userInfo.roleCode === "SUPER_ADMIN" ||
-      (userInfo.roleCode === "ADMIN" && userInfo?.franchise)
-    );
-  };
-
   const [loading, setLoading] = useState(false);
   // 初始化时页码为1
   const [searchParams, setSearchParams] = useState<CompanyQueryParams>({
@@ -58,6 +49,7 @@ export default function CompanyManagementView() {
     taxNumber: "",
     franchiseStatus: "DIRECT", // 默认直营
     customerServiceId: "",
+    taxType: "SMALL_SCALE",
   });
 
   // 表单验证错误
@@ -69,12 +61,14 @@ export default function CompanyManagementView() {
   const loadCustomerServices = async () => {
     try {
       const response = await AdminUserService.getCustomerServiceList({
-        page: 1,
+        current: 1,
         size: 100, // 获取所有客服
         roleCode: UserRole.CUSTOMER_SERVICE,
       });
       setCustomerServices(response.records);
-    } catch (error) {}
+    } catch (error) {
+      console.error("Failed to load customer services:", error);
+    }
   };
 
   // 加载公司列表
@@ -233,6 +227,7 @@ export default function CompanyManagementView() {
       // 创建或更新后重置到第一页
       loadCompanies(true);
     } catch (error) {
+      console.error("Failed to submit form:", error);
     } finally {
       setFormLoading(false);
     }
@@ -265,6 +260,7 @@ export default function CompanyManagementView() {
       // 删除后重置到第一页
       loadCompanies(true);
     } catch (error) {
+      console.error("Delete failed:", error);
       toast.error("删除失败");
     } finally {
       setDeleteLoading(false);
@@ -336,6 +332,9 @@ export default function CompanyManagementView() {
                     统一社会信用代码
                   </th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-gray-900">
+                    税务类型
+                  </th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-900">
                     类型
                   </th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-gray-900">
@@ -360,6 +359,13 @@ export default function CompanyManagementView() {
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-900">
                       {company.taxNumber}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-gray-900">
+                      {company.taxType === "SMALL_SCALE"
+                        ? "小规模纳税人"
+                        : company.taxType === "GENERAL"
+                        ? "一般纳税人"
+                        : "-"}
                     </td>
                     <td className="px-4 py-3">
                       <span
