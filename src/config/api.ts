@@ -42,6 +42,7 @@ export const API_ENDPOINTS = {
     UPDATE: "/api/v1/admin/sys/user/update",
     DELETE: "/api/v1/admin/sys/user/delete",
     CHANGE_PASSWORD: "/api/v1/admin/sys/user/changePassword",
+    UPDATE_PASSWORD: "/api/v1/admin/sys/user/password/update",
   },
 
   // 客服用户相关接口

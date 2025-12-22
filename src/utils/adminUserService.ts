@@ -84,12 +84,12 @@ export class AdminUserService {
 
   // 修改密码
   static async changePassword(
-    userId: string,
-    newPassword: string
+    newPassword: string,
+    confirmPassword: string
   ): Promise<void> {
-    await httpClient.post(API_ENDPOINTS.CUSTOMER_SERVICE_USER.CHANGE_PASSWORD, {
-      userId,
+    await httpClient.post(API_ENDPOINTS.SYS_USER.UPDATE_PASSWORD, {
       newPassword,
+      confirmPassword,
     });
   }
 }
