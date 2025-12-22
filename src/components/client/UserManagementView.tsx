@@ -407,15 +407,15 @@ export default function UserManagementView() {
                       </div>
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-900">
-                      {user.companyNames && user.companyNames.length > 0 ? (
+                      {user.companies && user.companies.length > 0 ? (
                         <div className="flex flex-col space-y-1">
-                          {user.companyNames.map((name, idx) => (
+                          {user.companies.map((company, idx) => (
                             <div
                               key={idx}
                               className="max-w-[240px] truncate"
-                              title={name}
+                              title={company.companyName}
                             >
-                              {name}
+                              {company.companyName}
                             </div>
                           ))}
                         </div>

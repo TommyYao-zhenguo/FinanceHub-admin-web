@@ -1,3 +1,5 @@
+import { Company } from "./company";
+
 // 用户信息接口
 export interface AdminUserInfo {
   id: string;
@@ -9,6 +11,7 @@ export interface AdminUserInfo {
   // 新增：支持多公司绑定的返回字段（兼容旧字段）
   companyNos?: string[];
   companyNames?: string[];
+  companies?: Company[];
   roleName: string;
   roleCode: string;
   status: "ACTIVE" | "INACTIVE";
