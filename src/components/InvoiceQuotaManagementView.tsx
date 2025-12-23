@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FileText, Edit, Trash2, Search, Building2 } from "lucide-react";
+import { FileText, Edit, Search, Building2 } from "lucide-react";
 import toast from "react-hot-toast";
 import {
   InvoiceQuotaService,
@@ -15,7 +15,7 @@ import {
 // 创建/更新开票额度请求
 interface InvoiceQuotaRequest {
   taxNumber: string;
-  maxAmount: number;
+  maxAmount: number | string;
 }
 
 export default function InvoiceQuotaManagementView() {
@@ -24,11 +24,6 @@ export default function InvoiceQuotaManagementView() {
   const [showModal, setShowModal] = useState(false);
   const [editingQuota, setEditingQuota] = useState<InvoiceQuota | null>(null);
   const [formLoading, setFormLoading] = useState(false);
-  const [deleteLoading, setDeleteLoading] = useState(false);
-  const [deleteConfirm, setDeleteConfirm] = useState<{
-    show: boolean;
-    quota: InvoiceQuota | null;
-  }>({ show: false, quota: null });
 
   // 搜索参数
   const [searchParams, setSearchParams] = useState({
@@ -131,7 +126,14 @@ export default function InvoiceQuotaManagementView() {
       errors.taxNumber = "请输入统一社会信用代码";
     }
 
-    if (!data.maxAmount || data.maxAmount <= 0) {
+    const amount = Number(data.maxAmount);
+    if (
+      data.maxAmount === "" ||
+      data.maxAmount === undefined ||
+      data.maxAmount === null ||
+      isNaN(amount) ||
+      amount < 0
+    ) {
       errors.maxAmount = "请输入有效的月度税务开票额度";
     }
 
@@ -153,7 +155,7 @@ export default function InvoiceQuotaManagementView() {
           companyNo: editingQuota.companyNo || data.taxNumber, // 优先使用接口返回的companyNo，否则使用taxNumber
           taxNumber: data.taxNumber,
           statsDate: new Date().toISOString().slice(0, 7), // 当前年月，格式：YYYY-MM
-          maxAmount: data.maxAmount,
+          maxAmount: Number(data.maxAmount),
         };
 
         await InvoiceQuotaService.createInvoiceQuota(createData);
@@ -162,7 +164,7 @@ export default function InvoiceQuotaManagementView() {
         // 调用更新接口
         const updateData: UpdateInvoiceQuotaAmountRequest = {
           id: editingQuota.id,
-          maxAmount: data.maxAmount,
+          maxAmount: Number(data.maxAmount),
         };
 
         await InvoiceQuotaService.updateInvoiceQuotaAmount(updateData);
@@ -196,7 +198,9 @@ export default function InvoiceQuotaManagementView() {
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center space-x-2">
           <FileText className="h-6 w-6 text-gray-600" />
-          <h1 className="text-2xl font-bold text-gray-900">月度税务开票额度管理</h1>
+          <h1 className="text-2xl font-bold text-gray-900">
+            月度税务开票额度管理
+          </h1>
         </div>
       </div>
 
@@ -431,16 +435,17 @@ function InvoiceQuotaModal({
               月度税务开票额度 (元) *
             </label>
             <input
-              type="number"
-              min="0"
-              step="0.01"
-              value={formData.maxAmount || ""}
-              onChange={(e) =>
-                onFormDataChange({
-                  ...formData,
-                  maxAmount: parseFloat(e.target.value) || 0,
-                })
-              }
+              type="text"
+              value={formData.maxAmount}
+              onChange={(e) => {
+                const val = e.target.value;
+                if (/^\d*\.?\d*$/.test(val)) {
+                  onFormDataChange({
+                    ...formData,
+                    maxAmount: val,
+                  });
+                }
+              }}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-orange-500 focus:border-orange-500"
               placeholder="请输入月度税务开票额度"
             />
