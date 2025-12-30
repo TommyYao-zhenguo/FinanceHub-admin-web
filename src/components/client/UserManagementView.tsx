@@ -158,6 +158,7 @@ export default function UserManagementView() {
   // 打开编辑用户模态框
   const handleEdit = (user: AdminUserInfo) => {
     setEditingUser(user);
+    setCompanyNosExpanded(false); // 重置折叠状态
     setFormData({
       username: user.username,
       password: "",
@@ -168,6 +169,8 @@ export default function UserManagementView() {
       companyNos:
         user.companyNos && user.companyNos.length > 0
           ? user.companyNos
+          : user.companies && user.companies.length > 0
+          ? user.companies.map((c) => c.companyNo)
           : user.companyNo
           ? [user.companyNo]
           : [],
@@ -590,9 +593,40 @@ export default function UserManagementView() {
               {/* 只有超级管理员才显示企业选择下拉框 */}
               {(isSuperAdmin || isAdmin) && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    绑定公司（可多选） <span className="text-red-500">*</span>
-                  </label>
+                  <div className="flex justify-between items-center mb-1">
+                    <label className="block text-sm font-medium text-gray-700">
+                      绑定公司（可多选） <span className="text-red-500">*</span>
+                    </label>
+                    <div className="space-x-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const allNos = companies.map((c) => c.companyNo);
+                          setFormData({
+                            ...formData,
+                            companyNos: allNos,
+                            companyNo: allNos[0] || "",
+                          });
+                        }}
+                        className="text-xs text-green-600 hover:text-green-800"
+                      >
+                        全选
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setFormData({
+                            ...formData,
+                            companyNos: [],
+                            companyNo: "",
+                          });
+                        }}
+                        className="text-xs text-gray-500 hover:text-gray-700"
+                      >
+                        清空
+                      </button>
+                    </div>
+                  </div>
                   <div className="relative" ref={companySelectRef}>
                     <div className="flex flex-wrap gap-2 mb-2">
                       {(companyNosExpanded
