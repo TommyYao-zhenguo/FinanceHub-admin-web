@@ -13,14 +13,14 @@ export class CompanyService {
   // 获取省份列表
   static async getProvinces(): Promise<Province[]> {
     const response = await httpClient.get<Province[]>(
-      API_ENDPOINTS.PROVINCE.LIST
+      API_ENDPOINTS.PROVINCE.LIST,
     );
     return response;
   }
 
   // 获取公司列表
   static async getCompanyList(
-    params: CompanyQueryParams = {}
+    params: CompanyQueryParams = {},
   ): Promise<CompanyListResponse> {
     const queryParams = new URLSearchParams();
 
@@ -40,7 +40,7 @@ export class CompanyService {
 
   // 获取客服绑定的公司列表
   static async getCustomerServiceCompanyList(
-    params: CompanyQueryParams = {}
+    params: CompanyQueryParams = {},
   ): Promise<CompanyListResponse> {
     const queryParams = new URLSearchParams();
 
@@ -75,7 +75,7 @@ export class CompanyService {
   // 获取公司详情
   static async getCompanyDetail(id: string): Promise<Company> {
     const response = await httpClient.get<Company>(
-      `${API_ENDPOINTS.COMPANY.DETAIL}/${id}`
+      `${API_ENDPOINTS.COMPANY.DETAIL}/${id}`,
     );
     // Check if response has data property, otherwise return response directly
     return response;

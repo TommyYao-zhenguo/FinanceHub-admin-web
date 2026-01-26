@@ -193,7 +193,7 @@ export class InvoiceManagementService {
    * 上传发票文件
    */
   static async uploadInvoiceFile(
-    request: InvoiceFileUploadRequest
+    request: InvoiceFileUploadRequest,
   ): Promise<InvoiceFileUploadResponse> {
     const formData = new FormData();
 
@@ -206,7 +206,7 @@ export class InvoiceManagementService {
 
     const response = await httpClient.post<InvoiceFileUploadResponse>(
       "/api/v1/admin/invoice-management/upload",
-      formData
+      formData,
     );
     return response;
   }
@@ -215,7 +215,7 @@ export class InvoiceManagementService {
    * 下载发票模板
    */
   static async downloadInvoiceTemplate(
-    invoiceType: "issued" | "received"
+    invoiceType: "issued" | "received",
   ): Promise<void> {
     try {
       const response = await fetch(
@@ -227,7 +227,7 @@ export class InvoiceManagementService {
           headers: {
             token: `Bearer ${localStorage.getItem("token")}`,
           },
-        }
+        },
       );
 
       if (!response.ok) {
@@ -239,7 +239,7 @@ export class InvoiceManagementService {
       let filename = `${invoiceType}_invoice_template.xlsx`;
       if (contentDisposition) {
         const filenameMatch = contentDisposition.match(
-          /filename[^;=\n]*=(['"]?)([^'"\n]*?)\1/
+          /filename[^;=\n]*=(['"]?)([^'"\n]*?)\1/,
         );
         if (filenameMatch && filenameMatch[2]) {
           filename = decodeURIComponent(filenameMatch[2]);
@@ -271,10 +271,10 @@ export class InvoiceManagementService {
    */
   static async getInvoiceReceiptList(
     current: number = 1,
-    size: number = 10
+    size: number = 10,
   ): Promise<InvoiceReceiptRecordPageResponse> {
     const response = await httpClient.get<InvoiceReceiptRecordPageResponse>(
-      `/api/v1/admin/invoice-management/receipt/list/record?current=${current}&size=${size}`
+      `/api/v1/admin/invoice-management/receipt/list/record?current=${current}&size=${size}`,
     );
     return response;
   }
@@ -284,10 +284,10 @@ export class InvoiceManagementService {
    */
   static async getInvoiceIssueList(
     current: number = 1,
-    size: number = 10
+    size: number = 10,
   ): Promise<InvoiceIssueUploadRecordPageResponse> {
     const response = await httpClient.get<InvoiceIssueUploadRecordPageResponse>(
-      `/api/v1/admin/invoice-management/issue/list/record?current=${current}&size=${size}`
+      `/api/v1/admin/invoice-management/issue/list/record?current=${current}&size=${size}`,
     );
     return response;
   }

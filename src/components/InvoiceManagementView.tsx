@@ -110,12 +110,14 @@ const InvoiceManagementView: React.FC = () => {
   const handleFileSelection = async (fileList: FileList) => {
     const files = Array.from(fileList);
     const MAX_FILES = 50;
-    
+
     // 检查文件数量限制
     const totalFiles = selectedFiles.length + files.length;
     if (totalFiles > MAX_FILES) {
       const remainingSlots = MAX_FILES - selectedFiles.length;
-      showError(`最多只能选择 ${MAX_FILES} 个文件，当前已选择 ${selectedFiles.length} 个，还可以选择 ${remainingSlots} 个，但您尝试新增 ${files.length} 个文件`);
+      showError(
+        `最多只能选择 ${MAX_FILES} 个文件，当前已选择 ${selectedFiles.length} 个，还可以选择 ${remainingSlots} 个，但您尝试新增 ${files.length} 个文件`,
+      );
       return;
     }
 
@@ -147,7 +149,9 @@ const InvoiceManagementView: React.FC = () => {
       // 合并新文件到已选择的文件列表
       const newSelectedFiles = [...selectedFiles, ...validFiles];
       setSelectedFiles(newSelectedFiles);
-      showSuccess(`已选择 ${validFiles.length} 个有效文件，总计 ${newSelectedFiles.length} 个文件`);
+      showSuccess(
+        `已选择 ${validFiles.length} 个有效文件，总计 ${newSelectedFiles.length} 个文件`,
+      );
     }
   };
 
@@ -182,7 +186,9 @@ const InvoiceManagementView: React.FC = () => {
         const errorMessages = invalidFiles
           .map(({ file, error }) => `${file.name}: ${error}`)
           .join("\n");
-        showError(`有 ${invalidFiles.length} 个文件验证失败:\n${errorMessages}`);
+        showError(
+          `有 ${invalidFiles.length} 个文件验证失败:\n${errorMessages}`,
+        );
       }
 
       // 如果有有效文件，一次性上传所有文件
@@ -245,13 +251,13 @@ const InvoiceManagementView: React.FC = () => {
   const handleDownloadTemplate = async () => {
     try {
       await InvoiceManagementService.downloadInvoiceTemplate(
-        selectedInvoiceType
+        selectedInvoiceType,
       );
       showSuccess("模板下载成功");
     } catch (error) {
       console.error("模板下载失败:", error);
       showError(
-        `模板下载失败: ${error instanceof Error ? error.message : "未知错误"}`
+        `模板下载失败: ${error instanceof Error ? error.message : "未知错误"}`,
       );
     }
   };
@@ -382,7 +388,8 @@ const InvoiceManagementView: React.FC = () => {
             <>
               <div className="mb-6">
                 <h3 className="text-lg font-medium text-gray-900 mb-4">
-                  已选择 {selectedFiles.length} 个文件 (最多 50 个，还可选择 {50 - selectedFiles.length} 个)
+                  已选择 {selectedFiles.length} 个文件 (最多 50 个，还可选择{" "}
+                  {50 - selectedFiles.length} 个)
                 </h3>
                 <div className="max-h-64 overflow-y-auto space-y-2 border border-gray-200 rounded-lg p-3">
                   {selectedFiles.map((file, index) => (
