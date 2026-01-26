@@ -99,6 +99,11 @@ export const API_ENDPOINTS = {
     DELETE: "/api/v1/admin/invoice-quota",
     DETAIL: "/api/v1/admin/invoice-quota",
   },
+
+  // 省份接口
+  PROVINCE: {
+    LIST: "/api/v1/province/list",
+  },
 };
 
 // 请求配置

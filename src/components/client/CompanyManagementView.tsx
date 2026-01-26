@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Building2, Plus, Edit, Trash2, Search, X } from "lucide-react";
 import { CompanyService } from "../../utils/companyService";
-import { Company, CompanyQueryParams } from "../../types/company";
+import { Company, CompanyQueryParams, Province } from "../../types/company";
 import { useAlert } from "../../hooks/useAlert";
 import { AdminUserService } from "../../utils/adminUserService";
 import { AdminUserInfo, UserRole } from "../../types/adminUser";
@@ -16,11 +16,14 @@ interface SimpleCreateCompanyRequest {
   franchiseStatus: string; // 加盟商状态
   customerServiceId?: string; // 绑定的客服ID
   taxType?: "SMALL_SCALE" | "GENERAL"; // 税务类型
+  provinceName?: string; // 省份名称
+  provinceCode?: string; // 省份编码
 }
 
 export default function CompanyManagementView() {
   const [companies, setCompanies] = useState<Company[]>([]);
   const { userInfo } = useAdminUserContext(); // 获取当前用户信息
+  const [provinces, setProvinces] = useState<Province[]>([]);
 
   const [loading, setLoading] = useState(false);
   // 初始化时页码为1
@@ -50,12 +53,24 @@ export default function CompanyManagementView() {
     franchiseStatus: "DIRECT", // 默认直营
     customerServiceId: "",
     taxType: "SMALL_SCALE",
+    provinceName: "",
+    provinceCode: "",
   });
 
   // 表单验证错误
   const [formErrors, setFormErrors] = useState<
     Partial<SimpleCreateCompanyRequest>
   >({});
+
+  // 加载省份列表
+  const loadProvinces = async () => {
+    try {
+      const response = await CompanyService.getProvinces();
+      setProvinces(response);
+    } catch (error) {
+      console.error("Failed to load provinces:", error);
+    }
+  };
 
   // 加载客服列表
   const loadCustomerServices = async () => {
@@ -128,6 +143,8 @@ export default function CompanyManagementView() {
       franchiseStatus: "DIRECT",
       customerServiceId: "",
       taxType: "SMALL_SCALE",
+      provinceName: "",
+      provinceCode: "",
     });
     setFormErrors({});
     setShowCreateModal(true);
@@ -141,6 +158,8 @@ export default function CompanyManagementView() {
       franchiseStatus: company.franchise ? "1" : "0",
       customerServiceId: company.customerServiceId || "",
       taxType: company.taxType || "SMALL_SCALE",
+      provinceName: company.provinceName || "",
+      provinceCode: company.provinceCode || "",
     });
     setFormErrors({});
     setEditingCompany(company);
@@ -156,6 +175,8 @@ export default function CompanyManagementView() {
       franchiseStatus: "DIRECT",
       customerServiceId: "",
       taxType: "SMALL_SCALE",
+      provinceName: "",
+      provinceCode: "",
     });
     setFormErrors({});
   };
@@ -163,7 +184,7 @@ export default function CompanyManagementView() {
   // 表单输入处理
   const handleInputChange = (
     field: keyof SimpleCreateCompanyRequest,
-    value: string | boolean
+    value: string | boolean,
   ) => {
     setFormData({ ...formData, [field]: value });
     // 清除对应字段的错误
@@ -208,6 +229,8 @@ export default function CompanyManagementView() {
           franchiseStatus: formData.franchiseStatus,
           customerServiceId: formData.customerServiceId,
           taxType: formData.taxType,
+          provinceName: formData.provinceName,
+          provinceCode: formData.provinceCode,
         });
         toast.success("公司信息更新成功");
       } else {
@@ -218,6 +241,8 @@ export default function CompanyManagementView() {
           franchiseStatus: formData.franchiseStatus, // 加盟商状态
           customerServiceId: formData.customerServiceId,
           taxType: formData.taxType,
+          provinceName: formData.provinceName,
+          provinceCode: formData.provinceCode,
         };
         await CompanyService.createCompany(createData);
         toast.success("公司创建成功");
@@ -236,6 +261,7 @@ export default function CompanyManagementView() {
   useEffect(() => {
     loadCompanies();
     loadCustomerServices();
+    loadProvinces();
   }, [searchParams]);
 
   // 在组件状态中添加
@@ -332,6 +358,9 @@ export default function CompanyManagementView() {
                     统一社会信用代码
                   </th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-gray-900">
+                    省份
+                  </th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-900">
                     税务类型
                   </th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-gray-900">
@@ -361,11 +390,14 @@ export default function CompanyManagementView() {
                       {company.taxNumber}
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-900">
+                      {company.provinceName || "-"}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-gray-900">
                       {company.taxType === "SMALL_SCALE"
                         ? "小规模纳税人"
                         : company.taxType === "GENERAL"
-                        ? "一般纳税人"
-                        : "-"}
+                          ? "一般纳税人"
+                          : "-"}
                     </td>
                     <td className="px-4 py-3">
                       <span
@@ -517,6 +549,38 @@ export default function CompanyManagementView() {
                     {formErrors.taxNumber}
                   </p>
                 )}
+              </div>
+
+              {/* 省份选择 */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  所属省份
+                </label>
+                <select
+                  value={formData.provinceCode}
+                  onChange={(e) => {
+                    const code = e.target.value;
+                    const province = provinces.find(
+                      (p) => p.provinceCode === code,
+                    );
+                    setFormData({
+                      ...formData,
+                      provinceCode: code,
+                      provinceName: province?.provinceName || "",
+                    });
+                  }}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                >
+                  <option value="">请选择省份</option>
+                  {provinces.map((province) => (
+                    <option
+                      key={province.provinceCode}
+                      value={province.provinceCode}
+                    >
+                      {province.provinceName}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               {/* 税务类型 */}

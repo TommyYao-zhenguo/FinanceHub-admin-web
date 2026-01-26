@@ -6,9 +6,18 @@ import {
   UpdateCompanyRequest,
   CompanyQueryParams,
   CompanyListResponse,
+  Province,
 } from "../types/company";
 
 export class CompanyService {
+  // 获取省份列表
+  static async getProvinces(): Promise<Province[]> {
+    const response = await httpClient.get<Province[]>(
+      API_ENDPOINTS.PROVINCE.LIST
+    );
+    return response;
+  }
+
   // 获取公司列表
   static async getCompanyList(
     params: CompanyQueryParams = {}

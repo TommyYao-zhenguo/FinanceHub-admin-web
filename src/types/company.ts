@@ -14,8 +14,16 @@ export interface Company {
   customerServiceId?: string; // 绑定的客服ID
   customerServiceName?: string; // 绑定的客服姓名
   taxType?: "SMALL_SCALE" | "GENERAL"; // 税务类型：小规模纳税人 | 一般纳税人
+  provinceName?: string; // 省份名称
+  provinceCode?: string; // 省份编码
   createTime: string;
   updateTime: string;
+}
+
+// 省份接口
+export interface Province {
+  provinceCode: string;
+  provinceName: string;
 }
 
 // 创建公司请求接口
@@ -25,6 +33,8 @@ export interface CreateCompanyRequest {
   franchiseStatus: string; // 加盟商状态
   customerServiceId?: string; // 绑定的客服ID
   taxType?: "SMALL_SCALE" | "GENERAL"; // 税务类型
+  provinceName?: string; // 省份名称
+  provinceCode?: string; // 省份编码
 }
 
 // 更新公司请求接口
@@ -35,6 +45,8 @@ export interface UpdateCompanyRequest {
   franchiseStatus: string; // 加盟商状态
   customerServiceId?: string; // 绑定的客服ID
   taxType?: "SMALL_SCALE" | "GENERAL"; // 税务类型
+  provinceName?: string; // 省份名称
+  provinceCode?: string; // 省份编码
 }
 
 // 公司列表查询参数
