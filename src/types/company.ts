@@ -16,6 +16,7 @@ export interface Company {
   taxType?: "SMALL_SCALE" | "GENERAL"; // 税务类型：小规模纳税人 | 一般纳税人
   provinceName?: string; // 省份名称
   provinceCode?: string; // 省份编码
+  syncTaxRecord?: boolean; // 是否需要同步税局开票记录
   createTime: string;
   updateTime: string;
 }
@@ -35,6 +36,7 @@ export interface CreateCompanyRequest {
   taxType?: "SMALL_SCALE" | "GENERAL"; // 税务类型
   provinceName?: string; // 省份名称
   provinceCode?: string; // 省份编码
+  isSyncTaxRecord?: boolean; // 是否需要同步税局开票记录
 }
 
 // 更新公司请求接口
@@ -47,6 +49,7 @@ export interface UpdateCompanyRequest {
   taxType?: "SMALL_SCALE" | "GENERAL"; // 税务类型
   provinceName?: string; // 省份名称
   provinceCode?: string; // 省份编码
+  isSyncTaxRecord?: boolean; // 是否需要同步税局开票记录
 }
 
 // 公司列表查询参数

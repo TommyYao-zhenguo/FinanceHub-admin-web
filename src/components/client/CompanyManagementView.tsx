@@ -18,6 +18,7 @@ interface SimpleCreateCompanyRequest {
   taxType?: "SMALL_SCALE" | "GENERAL"; // 税务类型
   provinceName?: string; // 省份名称
   provinceCode?: string; // 省份编码
+  isSyncTaxRecord?: boolean; // 是否需要同步税局开票记录
 }
 
 export default function CompanyManagementView() {
@@ -55,6 +56,7 @@ export default function CompanyManagementView() {
     taxType: "SMALL_SCALE",
     provinceName: "",
     provinceCode: "",
+    isSyncTaxRecord: false,
   });
 
   // 表单验证错误
@@ -145,6 +147,7 @@ export default function CompanyManagementView() {
       taxType: "SMALL_SCALE",
       provinceName: "",
       provinceCode: "",
+      isSyncTaxRecord: false,
     });
     setFormErrors({});
     setShowCreateModal(true);
@@ -160,6 +163,7 @@ export default function CompanyManagementView() {
       taxType: company.taxType || "SMALL_SCALE",
       provinceName: company.provinceName || "",
       provinceCode: company.provinceCode || "",
+      isSyncTaxRecord: company.syncTaxRecord || false,
     });
     setFormErrors({});
     setEditingCompany(company);
@@ -177,6 +181,7 @@ export default function CompanyManagementView() {
       taxType: "SMALL_SCALE",
       provinceName: "",
       provinceCode: "",
+      isSyncTaxRecord: false,
     });
     setFormErrors({});
   };
@@ -231,6 +236,7 @@ export default function CompanyManagementView() {
           taxType: formData.taxType,
           provinceName: formData.provinceName,
           provinceCode: formData.provinceCode,
+          isSyncTaxRecord: formData.isSyncTaxRecord,
         });
         toast.success("公司信息更新成功");
       } else {
@@ -243,6 +249,7 @@ export default function CompanyManagementView() {
           taxType: formData.taxType,
           provinceName: formData.provinceName,
           provinceCode: formData.provinceCode,
+          isSyncTaxRecord: formData.isSyncTaxRecord,
         };
         await CompanyService.createCompany(createData);
         toast.success("公司创建成功");
@@ -364,7 +371,10 @@ export default function CompanyManagementView() {
                     税务类型
                   </th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-gray-900">
-                    类型
+                    是否同步税局开票记录
+                  </th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-900">
+                    是否是加盟商
                   </th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-gray-900">
                     专属客服
@@ -398,6 +408,17 @@ export default function CompanyManagementView() {
                         : company.taxType === "GENERAL"
                           ? "一般纳税人"
                           : "-"}
+                    </td>
+                    <td className="px-4 py-3">
+                      <span
+                        className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
+                          company.syncTaxRecord
+                            ? "bg-green-100 text-green-800"
+                            : "bg-gray-100 text-gray-800"
+                        }`}
+                      >
+                        {company.syncTaxRecord ? "是" : "否"}
+                      </span>
                     </td>
                     <td className="px-4 py-3">
                       <span
@@ -620,6 +641,25 @@ export default function CompanyManagementView() {
                     </span>
                   </label>
                 </div>
+              </div>
+
+              {/* 是否同步税局开票记录 */}
+              <div className="flex items-center">
+                <input
+                  id="isSyncTaxRecord"
+                  type="checkbox"
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  checked={formData.isSyncTaxRecord || false}
+                  onChange={(e) =>
+                    handleInputChange("isSyncTaxRecord", e.target.checked)
+                  }
+                />
+                <label
+                  htmlFor="isSyncTaxRecord"
+                  className="ml-2 block text-sm text-gray-900"
+                >
+                  是否需要同步税局开票记录
+                </label>
               </div>
 
               {/* 绑定客服 - 超级管理员不显示 */}
