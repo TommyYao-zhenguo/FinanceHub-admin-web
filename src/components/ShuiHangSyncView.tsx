@@ -23,6 +23,27 @@ export default function ShuiHangSyncView() {
   const [syncLoading, setSyncLoading] = useState(false);
   const [syncAllLoading, setSyncAllLoading] = useState(false);
 
+  // Confirmation Modal State
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [pendingAction, setPendingAction] = useState<
+    "SYNC_ALL" | "SYNC_HISTORY" | null
+  >(null);
+
+  const openConfirmModal = (action: "SYNC_ALL" | "SYNC_HISTORY") => {
+    setPendingAction(action);
+    setShowConfirmModal(true);
+  };
+
+  const handleConfirm = () => {
+    setShowConfirmModal(false);
+    if (pendingAction === "SYNC_ALL") {
+      executeSyncAll();
+    } else if (pendingAction === "SYNC_HISTORY") {
+      executeSync();
+    }
+    setPendingAction(null);
+  };
+
   useEffect(() => {
     loadCompanies();
     // Initialize dates to today
@@ -61,6 +82,10 @@ export default function ShuiHangSyncView() {
   };
 
   const handleSyncAll = async () => {
+    openConfirmModal("SYNC_ALL");
+  };
+
+  const executeSyncAll = async () => {
     try {
       setSyncAllLoading(true);
       await ShuiHangService.syncAll();
@@ -103,13 +128,18 @@ export default function ShuiHangSyncView() {
 
   const handleSync = async () => {
     if (!selectedCompany?.spid || !startDate || !endDate) return;
+    openConfirmModal("SYNC_HISTORY");
+  };
+
+  const executeSync = async () => {
+    if (!selectedCompany?.spid) return;
     try {
       setSyncLoading(true);
       // Convert yyyy-MM-dd to yyyyMMdd
       const start = startDate.replace(/-/g, "");
       const end = endDate.replace(/-/g, "");
 
-      await ShuiHangService.sync(selectedCompany.spid, start, end);
+      await ShuiHangService.sync(selectedCompany!.spid, start, end);
       toast.success("发票同步请求已发送");
     } catch (error) {
       console.error(error);
@@ -131,6 +161,9 @@ export default function ShuiHangSyncView() {
         <div className="flex items-center space-x-2 mb-4">
           <Building2 className="h-5 w-5 text-gray-500" />
           <h2 className="text-lg font-medium text-gray-900">选择公司</h2>
+          <span className="text-sm text-gray-500">
+            （选择任意一家公司已绑定代理的公司即可）
+          </span>
         </div>
         <div className="max-w-md">
           {loading ? (
@@ -296,6 +329,34 @@ export default function ShuiHangSyncView() {
           </div>
         </div>
       </div>
+
+      {/* Confirmation Modal */}
+      {showConfirmModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
+          <div className="bg-white rounded-xl shadow-2xl p-8 w-[480px] transform transition-all">
+            <h3 className="text-xl font-bold text-gray-900 mb-4">操作确认</h3>
+            <p className="text-gray-600 mb-8 text-lg">
+              请确认已发送验证码（只需发送一次即可）
+            </p>
+            <div className="flex justify-end gap-4">
+              <button
+                type="button"
+                className="px-5 py-2.5 text-base font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                onClick={() => setShowConfirmModal(false)}
+              >
+                取消
+              </button>
+              <button
+                type="button"
+                className="px-5 py-2.5 text-base font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 shadow-md transition-colors"
+                onClick={handleConfirm}
+              >
+                确认执行
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
