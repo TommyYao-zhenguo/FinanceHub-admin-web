@@ -19,6 +19,7 @@ export interface Company {
   syncTaxRecord?: boolean; // 是否需要同步税局开票记录
   createTime: string;
   updateTime: string;
+  spid?: string;
 }
 
 // 省份接口

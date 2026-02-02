@@ -16,6 +16,7 @@ import {
   Receipt,
   UserPlus,
   DollarSign,
+  RefreshCw,
 } from "lucide-react";
 import { useAdminUserContext } from "../contexts/AdminUserContext";
 
@@ -89,10 +90,21 @@ export default function Sidebar({
     const items: SidebarLink[] = [];
 
     if (hasCompanyManagementAccess()) {
-      items.push({ id: "company-management", label: "公司管理", icon: Building2 });
+      items.push({
+        id: "company-management",
+        label: "公司管理",
+        icon: Building2,
+      });
     }
     if (hasAdminUserManagementAccess()) {
       items.push({ id: "user-management", label: "用户管理", icon: UserCog });
+    }
+    if (userInfo?.roleCode === "SUPER_ADMIN") {
+      items.push({
+        id: "shuihang-sync",
+        label: "税航数据同步",
+        icon: RefreshCw,
+      });
     }
     return items;
   };
@@ -105,15 +117,27 @@ export default function Sidebar({
   const newCustomerItems: SubLink[] = [
     { id: "social-insurance-config", label: "社保比例配置", icon: Shield },
     { id: "housing-fund-config", label: "公积金比例配置", icon: Home },
-    { id: "employee-base-config", label: "社保和公积金基数配置", icon: Calculator },
+    {
+      id: "employee-base-config",
+      label: "社保和公积金基数配置",
+      icon: Calculator,
+    },
     { id: "employee-import", label: "客户人员信息批量配置", icon: UserPlus },
     { id: "invoice-type-management", label: "发票类型配置", icon: FileText },
     { id: "invoice-quota-management", label: "开票额度配置", icon: Receipt },
   ];
 
   const customerInfoItems: SubLink[] = [
-    { id: "company-social-insurance-list", label: "公司社保明细", icon: Shield },
-    { id: "company-housing-fund-list", label: "公司公积金明细", icon: Building2 },
+    {
+      id: "company-social-insurance-list",
+      label: "公司社保明细",
+      icon: Shield,
+    },
+    {
+      id: "company-housing-fund-list",
+      label: "公司公积金明细",
+      icon: Building2,
+    },
   ];
 
   const monthlyUploadItems: SubLink[] = [
@@ -152,9 +176,10 @@ export default function Sidebar({
                   onClick={() => handleItemClick(item)}
                   className={`
                     w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-colors
-                    ${activeTab === item.id
-                      ? "bg-orange-600 text-white shadow-lg"
-                      : "text-gray-300 hover:text-white hover:bg-gray-700"
+                    ${
+                      activeTab === item.id
+                        ? "bg-orange-600 text-white shadow-lg"
+                        : "text-gray-300 hover:text-white hover:bg-gray-700"
                     }
                   `}
                 >
@@ -197,13 +222,17 @@ export default function Sidebar({
                               onClick={() => handleItemClick(item)}
                               className={`
                                 w-full flex items-center space-x-3 px-4 py-2 rounded-lg text-left transition-colors
-                                ${activeTab === item.id
-                                  ? "bg-orange-600 text-white shadow-lg"
-                                  : "text-gray-400 hover:text-white hover:bg-gray-700"}
+                                ${
+                                  activeTab === item.id
+                                    ? "bg-orange-600 text-white shadow-lg"
+                                    : "text-gray-400 hover:text-white hover:bg-gray-700"
+                                }
                               `}
                             >
                               <Icon className="h-4 w-4 flex-shrink-0" />
-                              <span className="text-sm font-medium">{item.label}</span>
+                              <span className="text-sm font-medium">
+                                {item.label}
+                              </span>
                             </button>
                           );
                         })}
@@ -215,12 +244,16 @@ export default function Sidebar({
                     {isCustomerServiceUser() && (
                       <div>
                         <button
-                          onClick={() => setIsNewCustomerOpen(!isNewCustomerOpen)}
+                          onClick={() =>
+                            setIsNewCustomerOpen(!isNewCustomerOpen)
+                          }
                           className="w-full flex items-center justify-between px-4 py-2 rounded-lg text-left transition-colors text-gray-300 hover:text-white hover:bg-gray-700"
                         >
                           <div className="flex items-center space-x-3">
                             <UserPlus className="h-4 w-4 flex-shrink-0" />
-                            <span className="text-sm font-semibold">新客户配置</span>
+                            <span className="text-sm font-semibold">
+                              新客户配置
+                            </span>
                           </div>
                           {isNewCustomerOpen ? (
                             <ChevronDown className="h-4 w-4" />
@@ -239,17 +272,23 @@ export default function Sidebar({
                                   onClick={() => onTabChange(item.id)}
                                   className={`
                                     w-full flex items-center justify-between px-4 py-2 rounded-lg text-left transition-colors
-                                    ${activeTab === item.id
-                                      ? "bg-orange-600 text-white shadow-lg"
-                                      : "text-gray-400 hover:text-white hover:bg-gray-700"}
+                                    ${
+                                      activeTab === item.id
+                                        ? "bg-orange-600 text-white shadow-lg"
+                                        : "text-gray-400 hover:text-white hover:bg-gray-700"
+                                    }
                                   `}
                                 >
                                   <span className="flex items-center space-x-3">
                                     <Icon className="h-4 w-4 flex-shrink-0" />
-                                    <span className="text-sm font-medium">{item.label}</span>
+                                    <span className="text-sm font-medium">
+                                      {item.label}
+                                    </span>
                                   </span>
                                   {item.badge ? (
-                                    <span className="ml-2 text-[10px] px-2 py-0.5 rounded bg-red-600 text-white">{item.badge}</span>
+                                    <span className="ml-2 text-[10px] px-2 py-0.5 rounded bg-red-600 text-white">
+                                      {item.badge}
+                                    </span>
                                   ) : null}
                                 </button>
                               );
@@ -263,12 +302,16 @@ export default function Sidebar({
                     {isCustomerServiceUser() && (
                       <div>
                         <button
-                          onClick={() => setIsCustomerInfoOpen(!isCustomerInfoOpen)}
+                          onClick={() =>
+                            setIsCustomerInfoOpen(!isCustomerInfoOpen)
+                          }
                           className="w-full flex items-center justify-between px-4 py-2 rounded-lg text-left transition-colors text-gray-300 hover:text-white hover:bg-gray-700"
                         >
                           <div className="flex items-center space-x-3">
                             <Building2 className="h-4 w-4 flex-shrink-0" />
-                            <span className="text-sm font-semibold">客户信息查看</span>
+                            <span className="text-sm font-semibold">
+                              客户信息查看
+                            </span>
                           </div>
                           {isCustomerInfoOpen ? (
                             <ChevronDown className="h-4 w-4" />
@@ -287,13 +330,17 @@ export default function Sidebar({
                                   onClick={() => onTabChange(item.id)}
                                   className={`
                                     w-full flex items-center space-x-3 px-4 py-2 rounded-lg text-left transition-colors
-                                    ${activeTab === item.id
-                                      ? "bg-orange-600 text-white shadow-lg"
-                                      : "text-gray-400 hover:text-white hover:bg-gray-700"}
+                                    ${
+                                      activeTab === item.id
+                                        ? "bg-orange-600 text-white shadow-lg"
+                                        : "text-gray-400 hover:text-white hover:bg-gray-700"
+                                    }
                                   `}
                                 >
                                   <Icon className="h-4 w-4 flex-shrink-0" />
-                                  <span className="text-sm font-medium">{item.label}</span>
+                                  <span className="text-sm font-medium">
+                                    {item.label}
+                                  </span>
                                 </button>
                               );
                             })}
@@ -306,12 +353,16 @@ export default function Sidebar({
                     {isCustomerServiceUser() && (
                       <div>
                         <button
-                          onClick={() => setIsMonthlyUploadOpen(!isMonthlyUploadOpen)}
+                          onClick={() =>
+                            setIsMonthlyUploadOpen(!isMonthlyUploadOpen)
+                          }
                           className="w-full flex items-center justify-between px-4 py-2 rounded-lg text-left transition-colors text-gray-300 hover:text-white hover:bg-gray-700"
                         >
                           <div className="flex items-center space-x-3">
                             <Upload className="h-4 w-4 flex-shrink-0" />
-                            <span className="text-sm font-semibold">月度上传</span>
+                            <span className="text-sm font-semibold">
+                              月度上传
+                            </span>
                           </div>
                           {isMonthlyUploadOpen ? (
                             <ChevronDown className="h-4 w-4" />
@@ -330,17 +381,23 @@ export default function Sidebar({
                                   onClick={() => onTabChange(item.id)}
                                   className={`
                                     w-full flex items-center justify-between px-4 py-2 rounded-lg text-left transition-colors
-                                    ${activeTab === item.id
-                                      ? "bg-orange-600 text-white shadow-lg"
-                                      : "text-gray-400 hover:text-white hover:bg-gray-700"}
+                                    ${
+                                      activeTab === item.id
+                                        ? "bg-orange-600 text-white shadow-lg"
+                                        : "text-gray-400 hover:text-white hover:bg-gray-700"
+                                    }
                                   `}
                                 >
                                   <span className="flex items-center space-x-3">
                                     <Icon className="h-4 w-4 flex-shrink-0" />
-                                    <span className="text-sm font-medium">{item.label}</span>
+                                    <span className="text-sm font-medium">
+                                      {item.label}
+                                    </span>
                                   </span>
                                   {item.badge ? (
-                                    <span className="ml-2 text-[10px] px-2 py-0.5 rounded bg-red-600 text-white">{item.badge}</span>
+                                    <span className="ml-2 text-[10px] px-2 py-0.5 rounded bg-red-600 text-white">
+                                      {item.badge}
+                                    </span>
                                   ) : null}
                                 </button>
                               );

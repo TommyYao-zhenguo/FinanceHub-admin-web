@@ -30,6 +30,7 @@ import CompanyHousingFundListView from "./components/CompanyHousingFundListView"
 import CompanyHousingFundDetailView from "./components/CompanyHousingFundDetailView";
 import InvoiceManagementView from "./components/InvoiceManagementView";
 import NonInvoicedIncomeView from "./components/NonInvoicedIncomeView";
+import ShuiHangSyncView from "./components/ShuiHangSyncView";
 
 import {
   AdminUserProvider,
@@ -68,6 +69,7 @@ const routeMap: Record<string, string> = {
   "/upload/tax": "tax-upload",
   "/upload/personal-tax": "personal-tax-upload",
   "/upload/non-invoiced-income": "non-invoiced-income",
+  "/shuihang-sync": "shuihang-sync",
 };
 
 // tab到路由的映射
@@ -90,6 +92,7 @@ const tabToRouteMap: Record<string, string> = {
   "invoice-type-management": "/client/config/invoice-type",
   "invoice-management": "/upload/invoice-management",
   "non-invoiced-income": "/upload/non-invoiced-income",
+  "shuihang-sync": "/shuihang-sync",
 };
 
 // 创建一个内部组件来使用UserContext和Router hooks
@@ -116,15 +119,15 @@ function AppContent() {
         return;
       }
 
-    try {
-      await fetchUserInfo();
-      setIsLoggedIn(true);
-    } catch {
-      localStorage.removeItem(SA_TOKEN_CONFIG.tokenName);
-      setIsLoggedIn(false);
-    } finally {
-      setIsCheckingAuth(false);
-    }
+      try {
+        await fetchUserInfo();
+        setIsLoggedIn(true);
+      } catch {
+        localStorage.removeItem(SA_TOKEN_CONFIG.tokenName);
+        setIsLoggedIn(false);
+      } finally {
+        setIsCheckingAuth(false);
+      }
     };
 
     checkAuthStatus();
@@ -321,10 +324,7 @@ function AppContent() {
               path="/client/config/employee-base"
               element={<EmployeeBaseConfigView />}
             />
-            <Route
-              path="/employee-import"
-              element={<EmployeeImportView />}
-            />
+            <Route path="/employee-import" element={<EmployeeImportView />} />
             <Route
               path="/client/config/employee-import"
               element={<EmployeeImportView />}
@@ -353,6 +353,7 @@ function AppContent() {
                 </div>
               }
             />
+            <Route path="/shuihang-sync" element={<ShuiHangSyncView />} />
             {/* 404页面 */}
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Routes>

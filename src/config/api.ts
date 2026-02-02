@@ -100,6 +100,14 @@ export const API_ENDPOINTS = {
     DETAIL: "/api/v1/admin/invoice-quota",
   },
 
+  // 税航对接相关接口
+  SHUIHANG: {
+    LOGIN: "/api/v1/shuihang/login",
+    VERIFY: "/api/v1/shuihang/verify",
+    SYNC: "/api/v1/shuihang/sync",
+    SYNC_ALL: "/api/v1/shuihang/sync-all",
+  },
+
   // 省份接口
   PROVINCE: {
     LIST: "/api/v1/province/list",
