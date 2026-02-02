@@ -82,6 +82,15 @@ export default function Sidebar({
       });
     }
 
+    // 只有 SUPER_ADMIN 才能看到税航数据同步
+    if (userInfo?.roleCode === "SUPER_ADMIN") {
+      items.push({
+        id: "shuihang-sync",
+        label: "开票数据同步",
+        icon: RefreshCw,
+      });
+    }
+
     return items;
   };
 
@@ -98,13 +107,6 @@ export default function Sidebar({
     }
     if (hasAdminUserManagementAccess()) {
       items.push({ id: "user-management", label: "用户管理", icon: UserCog });
-    }
-    if (userInfo?.roleCode === "SUPER_ADMIN") {
-      items.push({
-        id: "shuihang-sync",
-        label: "税航数据同步",
-        icon: RefreshCw,
-      });
     }
     return items;
   };

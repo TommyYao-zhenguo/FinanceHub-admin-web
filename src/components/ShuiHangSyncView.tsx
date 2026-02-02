@@ -123,7 +123,7 @@ export default function ShuiHangSyncView() {
     <div className="space-y-6">
       <div className="flex items-center space-x-2 mb-6">
         <RefreshCw className="h-6 w-6 text-gray-600" />
-        <h1 className="text-2xl font-bold text-gray-900">税航数据同步</h1>
+        <h1 className="text-2xl font-bold text-gray-900">税务局开票数据同步</h1>
       </div>
 
       {/* Company Selection */}
