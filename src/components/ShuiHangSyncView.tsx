@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Key, Send, RefreshCw } from "lucide-react";
+import { Select } from "antd";
 import { CompanyService } from "../utils/companyService";
 import { ShuiHangService } from "../utils/shuiHangService";
 import { Company } from "../types/company";
@@ -63,8 +64,8 @@ export default function ShuiHangSyncView() {
     }
   };
 
-  const handleCompanyChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const companyNo = e.target.value;
+  const handleCompanyChange = (value: string) => {
+    const companyNo = value;
     const company = companies.find((c) => c.companyNo === companyNo) || null;
     setSelectedCompany(company);
     // Reset states
@@ -248,19 +249,23 @@ export default function ShuiHangSyncView() {
               >
                 选择公司
               </label>
-              <select
+              <Select
                 id="historyCompany"
-                className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md border"
-                value={selectedCompany?.companyNo || ""}
+                className="w-full"
+                showSearch
+                placeholder="请选择公司..."
+                value={selectedCompany?.companyNo}
                 onChange={handleCompanyChange}
-              >
-                <option value="">请选择公司...</option>
-                {companies.map((company) => (
-                  <option key={company.companyNo} value={company.companyNo}>
-                    {company.companyName}
-                  </option>
-                ))}
-              </select>
+                filterOption={(input, option) =>
+                  (option?.label ?? "")
+                    .toLowerCase()
+                    .includes(input.toLowerCase())
+                }
+                options={companies.map((company) => ({
+                  value: company.companyNo,
+                  label: company.companyName,
+                }))}
+              />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
