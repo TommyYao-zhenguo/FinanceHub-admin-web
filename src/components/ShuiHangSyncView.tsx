@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Building2, Key, Send, RefreshCw } from "lucide-react";
+import { Key, Send, RefreshCw } from "lucide-react";
 import { CompanyService } from "../utils/companyService";
 import { ShuiHangService } from "../utils/shuiHangService";
 import { Company } from "../types/company";
@@ -7,7 +7,6 @@ import toast from "react-hot-toast";
 
 export default function ShuiHangSyncView() {
   const [companies, setCompanies] = useState<Company[]>([]);
-  const [loading, setLoading] = useState(false);
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
 
   // Login State
@@ -55,7 +54,6 @@ export default function ShuiHangSyncView() {
 
   const loadCompanies = async () => {
     try {
-      setLoading(true);
       // Fetch all active companies
       const response = await CompanyService.getCompanyList({
         current: 1,
@@ -68,8 +66,6 @@ export default function ShuiHangSyncView() {
     } catch (error) {
       toast.error("加载公司列表失败");
       console.error(error);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -157,36 +153,6 @@ export default function ShuiHangSyncView() {
       </div>
 
       {/* Company Selection */}
-      <div className="bg-white rounded-lg shadow p-6">
-        <div className="flex items-center space-x-2 mb-4">
-          <Building2 className="h-5 w-5 text-gray-500" />
-          <h2 className="text-lg font-medium text-gray-900">选择公司</h2>
-          <span className="text-sm text-gray-500">
-            （选择任意一家公司已绑定代理的公司即可）
-          </span>
-        </div>
-        <div className="max-w-md">
-          {loading ? (
-            <p className="text-gray-500">加载公司列表中...</p>
-          ) : (
-            <select
-              className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md border"
-              value={selectedCompany?.companyNo || ""}
-              onChange={handleCompanyChange}
-            >
-              <option value="">请选择公司...</option>
-              {companies.map((company) => (
-                <option key={company.companyNo} value={company.companyNo}>
-                  {company.companyName}
-                </option>
-              ))}
-            </select>
-          )}
-          <p className="mt-2 text-sm text-gray-500">
-            仅显示已配置 SPID 的公司 (共 {companies.length} 家)
-          </p>
-        </div>
-      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
         {/* Step 1: Login */}
@@ -281,6 +247,27 @@ export default function ShuiHangSyncView() {
             </h2>
           </div>
           <div className="space-y-4">
+            <div>
+              <label
+                htmlFor="historyCompany"
+                className="block text-sm font-medium text-gray-700"
+              >
+                选择公司
+              </label>
+              <select
+                id="historyCompany"
+                className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md border"
+                value={selectedCompany?.companyNo || ""}
+                onChange={handleCompanyChange}
+              >
+                <option value="">请选择公司...</option>
+                {companies.map((company) => (
+                  <option key={company.companyNo} value={company.companyNo}>
+                    {company.companyName}
+                  </option>
+                ))}
+              </select>
+            </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label
