@@ -38,6 +38,13 @@ export class CompanyService {
     return response;
   }
 
+  // 获取所有激活且有 spid 的公司
+  static async getActiveWithSpid(): Promise<Company[]> {
+    const url = API_ENDPOINTS.COMPANY.LIST_ACTIVE_WITH_SPID;
+    const response = await httpClient.get<Company[]>(url);
+    return response;
+  }
+
   // 获取客服绑定的公司列表
   static async getCustomerServiceCompanyList(
     params: CompanyQueryParams = {},

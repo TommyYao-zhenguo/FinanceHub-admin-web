@@ -57,6 +57,7 @@ export const API_ENDPOINTS = {
   // 公司相关接口
   COMPANY: {
     LIST: "/api/v1/admin/company/list",
+    LIST_ACTIVE_WITH_SPID: "/api/v1/admin/company/list-active-with-spid",
     CUSTOMER_SERVICE_LIST: "/api/v1/admin/company/customer-service/list",
     CREATE: "/api/v1/admin/company/create",
     UPDATE: "/api/v1/admin/company/update",

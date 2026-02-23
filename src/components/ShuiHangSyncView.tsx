@@ -54,14 +54,8 @@ export default function ShuiHangSyncView() {
 
   const loadCompanies = async () => {
     try {
-      // Fetch all active companies
-      const response = await CompanyService.getCompanyList({
-        current: 1,
-        size: 1000,
-        status: "ACTIVE",
-      });
-      // Filter companies that have spid
-      const validCompanies = (response.records || []).filter((c) => c.spid);
+      // Fetch all active companies with spid
+      const validCompanies = await CompanyService.getActiveWithSpid();
       setCompanies(validCompanies);
     } catch (error) {
       toast.error("加载公司列表失败");
