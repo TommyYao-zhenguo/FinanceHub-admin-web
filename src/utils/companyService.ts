@@ -7,9 +7,25 @@ import {
   CompanyQueryParams,
   CompanyListResponse,
   Province,
+  CompanySwjConfig,
+  UpdateCompanySwjConfigRequest,
 } from "../types/company";
 
 export class CompanyService {
+  // 获取税务局配置
+  static async getSwjConfig(companyNo: string): Promise<CompanySwjConfig> {
+    const url = `${API_ENDPOINTS.COMPANY.SWJ_CONFIG}?companyNo=${companyNo}`;
+    const response = await httpClient.get<CompanySwjConfig>(url);
+    return response;
+  }
+
+  // 更新税务局配置
+  static async updateSwjConfig(
+    data: UpdateCompanySwjConfigRequest,
+  ): Promise<void> {
+    await httpClient.post(API_ENDPOINTS.COMPANY.SWJ_CONFIG, data);
+  }
+
   // 获取省份列表
   static async getProvinces(): Promise<Province[]> {
     const response = await httpClient.get<Province[]>(

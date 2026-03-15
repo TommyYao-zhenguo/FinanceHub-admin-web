@@ -69,3 +69,18 @@ export interface CompanyListResponse {
   size: number;
   current: number;
 }
+
+// 税务局配置接口
+export interface CompanySwjConfig {
+  companyNo: string;
+  companyName: string;
+  swjAccount: string;
+  swjPassword?: string;
+}
+
+// 更新税务局配置请求接口
+export interface UpdateCompanySwjConfigRequest {
+  companyNo: string;
+  swjAccount: string;
+  swjPassword: string;
+}

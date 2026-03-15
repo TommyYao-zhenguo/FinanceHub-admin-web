@@ -63,6 +63,7 @@ export const API_ENDPOINTS = {
     UPDATE: "/api/v1/admin/company/update",
     DELETE: "/api/v1/admin/company/delete",
     DETAIL: "/api/v1/admin/company/detail",
+    SWJ_CONFIG: "/api/v1/admin/company/swj-config",
   },
 
   // 社保配置相关接口

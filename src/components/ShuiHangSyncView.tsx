@@ -1,14 +1,20 @@
 import React, { useState, useEffect } from "react";
 import { Key, Send, RefreshCw } from "lucide-react";
-import { Select } from "antd";
+import { Select, Table, Button, Input, Form } from "antd";
 import { CompanyService } from "../utils/companyService";
 import { ShuiHangService } from "../utils/shuiHangService";
-import { Company } from "../types/company";
+import { Company, CompanySwjConfig } from "../types/company";
+import { useAdminUserContext } from "../contexts/AdminUserContext";
 import toast from "react-hot-toast";
 
 export default function ShuiHangSyncView() {
+  const { userInfo } = useAdminUserContext();
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
+  const [swjConfig, setSwjConfig] = useState<CompanySwjConfig | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [form] = Form.useForm();
+  const [saveLoading, setSaveLoading] = useState(false);
 
   // Login State
   const [loginLoading, setLoginLoading] = useState(false);
@@ -53,6 +59,27 @@ export default function ShuiHangSyncView() {
     setEndDate(formattedDate);
   }, []);
 
+  useEffect(() => {
+    if (userInfo?.companyNo) {
+      loadSwjConfig(userInfo.companyNo);
+    }
+  }, [userInfo]);
+
+  const loadSwjConfig = async (companyNo: string) => {
+    try {
+      const config = await CompanyService.getSwjConfig(companyNo);
+      // Check if config is valid (has companyNo) as httpClient returns {} for empty response
+      if (config && config.companyNo) {
+        setSwjConfig(config);
+      } else {
+        setSwjConfig(null);
+      }
+    } catch (error) {
+      console.error("Failed to fetch SWJ config", error);
+      setSwjConfig(null);
+    }
+  };
+
   const loadCompanies = async () => {
     try {
       // Fetch all active companies with spid
@@ -64,13 +91,121 @@ export default function ShuiHangSyncView() {
     }
   };
 
-  const handleCompanyChange = (value: string) => {
+  const handleCompanyChange = async (value: string) => {
     const companyNo = value;
     const company = companies.find((c) => c.companyNo === companyNo) || null;
     setSelectedCompany(company);
     // Reset states
     setVerifyCode("");
+    setIsEditing(false);
   };
+
+  const handleSaveConfig = async () => {
+    if (!userInfo?.companyNo) return;
+    try {
+      setSaveLoading(true);
+      const values = await form.validateFields();
+      await CompanyService.updateSwjConfig({
+        companyNo: userInfo.companyNo,
+        swjAccount: values.swjAccount,
+        swjPassword: values.swjPassword,
+      });
+      toast.success("税务局配置更新成功");
+      setIsEditing(false);
+      // Refresh config
+      loadSwjConfig(userInfo.companyNo);
+    } catch (error) {
+      console.error("Failed to update SWJ config", error);
+      toast.error("税务局配置更新失败");
+    } finally {
+      setSaveLoading(false);
+    }
+  };
+
+  const columns = [
+    {
+      title: "配置公司",
+      dataIndex: "companyName",
+      key: "companyName",
+      render: (text: string) => text || userInfo?.companyName || "-",
+    },
+    {
+      title: "账号",
+      dataIndex: "swjAccount",
+      key: "swjAccount",
+      render: (text: string) => {
+        if (isEditing) {
+          return (
+            <Form.Item
+              name="swjAccount"
+              rules={[{ required: true, message: "请输入账号" }]}
+              style={{ margin: 0 }}
+            >
+              <Input placeholder="请输入税务局账号" />
+            </Form.Item>
+          );
+        }
+        return text || "-";
+      },
+    },
+    {
+      title: "密码",
+      dataIndex: "swjPassword",
+      key: "swjPassword",
+      render: (text: string) => {
+        if (isEditing) {
+          return (
+            <Form.Item
+              name="swjPassword"
+              rules={[{ required: true, message: "请输入密码" }]}
+              style={{ margin: 0 }}
+            >
+              <Input.Password placeholder="请输入税务局密码" />
+            </Form.Item>
+          );
+        }
+        return text ? "******" : "-";
+      },
+    },
+    {
+      title: "操作",
+      key: "action",
+      render: () => {
+        if (isEditing) {
+          return (
+            <div className="space-x-2">
+              <Button
+                type="primary"
+                onClick={handleSaveConfig}
+                loading={saveLoading}
+                size="small"
+              >
+                保存
+              </Button>
+              <Button onClick={() => setIsEditing(false)} size="small">
+                取消
+              </Button>
+            </div>
+          );
+        }
+        return (
+          <Button
+            type="link"
+            onClick={() => {
+              form.setFieldsValue({
+                swjAccount: swjConfig?.swjAccount || "",
+                swjPassword: swjConfig?.swjPassword || "",
+              });
+              setIsEditing(true);
+            }}
+            size="small"
+          >
+            {swjConfig ? "修改" : "新增"}
+          </Button>
+        );
+      },
+    },
+  ];
 
   const handleSyncAll = async () => {
     openConfirmModal("SYNC_ALL");
@@ -146,6 +281,27 @@ export default function ShuiHangSyncView() {
         <RefreshCw className="h-6 w-6 text-gray-600" />
         <h1 className="text-2xl font-bold text-gray-900">税务局开票数据同步</h1>
       </div>
+
+      {userInfo && (
+        <div className="mb-6">
+          <div className="flex items-center mb-2">
+            <Key className="h-5 w-5 text-blue-500 mr-2" />
+            <h3 className="text-lg font-medium text-gray-900">
+              税务局配置信息
+            </h3>
+          </div>
+          <Form form={form} component={false}>
+            <Table
+              dataSource={[swjConfig || { companyName: userInfo.companyName }]}
+              columns={columns}
+              pagination={false}
+              rowKey={() => "config"}
+              size="small"
+              bordered
+            />
+          </Form>
+        </div>
+      )}
 
       {/* Company Selection */}
 
