@@ -109,6 +109,7 @@ export default function ShuiHangSyncView() {
         companyNo: userInfo.companyNo,
         swjAccount: values.swjAccount,
         swjPassword: values.swjPassword,
+        dlqysh: values.dlqysh,
       });
       toast.success("税务局配置更新成功");
       setIsEditing(false);
@@ -168,6 +169,21 @@ export default function ShuiHangSyncView() {
       },
     },
     {
+      title: "代理企业税号",
+      dataIndex: "dlqysh",
+      key: "dlqysh",
+      render: (text: string) => {
+        if (isEditing) {
+          return (
+            <Form.Item name="dlqysh" style={{ margin: 0 }}>
+              <Input placeholder="请输入代理企业税号" />
+            </Form.Item>
+          );
+        }
+        return text || "-";
+      },
+    },
+    {
       title: "操作",
       key: "action",
       render: () => {
@@ -195,6 +211,7 @@ export default function ShuiHangSyncView() {
               form.setFieldsValue({
                 swjAccount: swjConfig?.swjAccount || "",
                 swjPassword: swjConfig?.swjPassword || "",
+                dlqysh: swjConfig?.dlqysh || "",
               });
               setIsEditing(true);
             }}

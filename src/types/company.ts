@@ -76,6 +76,7 @@ export interface CompanySwjConfig {
   companyName: string;
   swjAccount: string;
   swjPassword?: string;
+  dlqysh?: string;
 }
 
 // 更新税务局配置请求接口
@@ -83,4 +84,5 @@ export interface UpdateCompanySwjConfigRequest {
   companyNo: string;
   swjAccount: string;
   swjPassword: string;
+  dlqysh?: string;
 }
