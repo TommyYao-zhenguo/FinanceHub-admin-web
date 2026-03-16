@@ -83,9 +83,9 @@ export default function Sidebar({
     }
 
     // 只有 SUPER_ADMIN 才能看到税航数据同步
-    if (userInfo?.roleCode === "ADMIN") {
+    if (userInfo?.roleCode === "ADMIN" || userInfo?.roleCode === "SUPER_ADMIN") {
       items.push({
-        id: "shuihang-sync",
+        id: "invoice-sync-ss",
         label: "开票数据同步",
         icon: RefreshCw,
       });

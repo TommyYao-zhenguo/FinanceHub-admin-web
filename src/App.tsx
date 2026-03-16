@@ -69,7 +69,7 @@ const routeMap: Record<string, string> = {
   "/upload/tax": "tax-upload",
   "/upload/personal-tax": "personal-tax-upload",
   "/upload/non-invoiced-income": "non-invoiced-income",
-  "/shuihang-sync": "shuihang-sync",
+  "/invoice-sync-ss": "invoice-sync-ss",
 };
 
 // tab到路由的映射
@@ -92,7 +92,7 @@ const tabToRouteMap: Record<string, string> = {
   "invoice-type-management": "/client/config/invoice-type",
   "invoice-management": "/upload/invoice-management",
   "non-invoiced-income": "/upload/non-invoiced-income",
-  "shuihang-sync": "/shuihang-sync",
+  "invoice-sync-ss": "/invoice-sync-ss",
 };
 
 // 创建一个内部组件来使用UserContext和Router hooks
@@ -353,7 +353,7 @@ function AppContent() {
                 </div>
               }
             />
-            <Route path="/shuihang-sync" element={<ShuiHangSyncView />} />
+            <Route path="/invoice-sync-ss" element={<ShuiHangSyncView />} />
             {/* 404页面 */}
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Routes>
