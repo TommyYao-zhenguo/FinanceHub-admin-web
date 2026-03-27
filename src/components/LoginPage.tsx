@@ -225,7 +225,7 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
               <div className="w-20 h-20 mx-auto rounded-2xl flex items-center justify-center shadow-2xl shadow-cyan-500/25">
                 <Database className="w-10 h-10 text-white" />
                 <img
-                  src="/qiyuan-logo.jpg"
+                  src="/brand-logo.jpg"
                   className="w-22 h-20 text-white rounded-full"
                   alt="佚启闯数字化财务中心"
                 />
@@ -280,7 +280,7 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
             <div className="lg:hidden text-center mb-8">
               <div className="w-16 h-16 mx-auto rounded-xl flex items-center justify-center shadow-2xl shadow-cyan-500/25 mb-4">
                 <img
-                  src="/qiyuan-logo.jpg"
+                  src="/brand-logo.jpg"
                   className="w-16 h-14 text-white rounded-full"
                   alt="数字化管理后台"
                 />

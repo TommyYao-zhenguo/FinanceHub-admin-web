@@ -53,7 +53,7 @@ export default function Header({ onMenuToggle }: HeaderProps) {
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 rounded-lg flex items-center justify-center overflow-hidden">
               <img
-                src="/Print-数字化财务中心.jpg"
+                src="/brand-logo.jpg"
                 alt="佚启闯数字化财务中心"
                 className="w-full h-full object-contain"
               />
