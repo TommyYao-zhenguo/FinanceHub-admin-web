@@ -127,7 +127,7 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
         {
           "Content-Type": "application/json",
           Accept: "application/json",
-        }
+        },
       );
 
       if (response) {
@@ -227,11 +227,11 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
                 <img
                   src="/qiyuan-logo.jpg"
                   className="w-22 h-20 text-white rounded-full"
-                  alt="启创宝数字化财务中心"
+                  alt="佚启闯数字化财务中心"
                 />
               </div>
               <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
-                启创宝数字化财务管理后台
+                佚启闯数字化财务管理后台
               </h1>
               <p className="text-xl text-cyan-200">智能财务管理 • 数字化转型</p>
             </div>
@@ -286,7 +286,7 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
                 />
               </div>
               <h1 className="text-2xl font-bold text-white mb-2">
-                启创宝数字化财务管理后台
+                佚启闯数字化财务管理后台
               </h1>
               <p className="text-cyan-200">智能财务管理平台</p>
             </div>
@@ -417,7 +417,7 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
 
             {/* 版权信息 */}
             <div className="text-center mt-8 text-cyan-300 text-sm">
-              <p>© 2025 启创宝数字化财务中心. 保留所有权利.</p>
+              <p>© 2025 佚启闯数字化财务中心. 保留所有权利.</p>
             </div>
           </div>
         </div>
@@ -514,8 +514,8 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
           isLoading
             ? "正在验证登录信息..."
             : usernameError || passwordError
-            ? "请先修正表单错误"
-            : "点击登录到财务管理系统"
+              ? "请先修正表单错误"
+              : "点击登录到财务管理系统"
         }
         style={{
           backgroundColor:

@@ -32,7 +32,7 @@ export default function Header({ onMenuToggle }: HeaderProps) {
 
   const getCompanyName = () => {
     if (!userInfo) return "公司";
-    return userInfo.companyName || "启创宝数字化财务中心"; // 修改这里的默认值
+    return userInfo.companyName || "佚启闯数字化财务中心"; // 修改这里的默认值
   };
 
   const getRoleDisplay = () => {
@@ -54,12 +54,12 @@ export default function Header({ onMenuToggle }: HeaderProps) {
             <div className="w-10 h-10 rounded-lg flex items-center justify-center overflow-hidden">
               <img
                 src="/Print-数字化财务中心.jpg"
-                alt="启创宝数字化财务中心"
+                alt="佚启闯数字化财务中心"
                 className="w-full h-full object-contain"
               />
             </div>
             <h1 className="text-xl font-semibold text-gray-800 hidden sm:block">
-              启创宝数字化财务中心
+              佚启闯数字化财务中心
             </h1>
           </div>
         </div>
@@ -189,7 +189,7 @@ export default function Header({ onMenuToggle }: HeaderProps) {
                   try {
                     await AdminUserService.changePassword(
                       newPassword,
-                      confirmPassword
+                      confirmPassword,
                     );
                     toast.success("密码修改成功，请重新登录");
                     setIsChangePasswordModalOpen(false);

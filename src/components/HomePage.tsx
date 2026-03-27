@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { 
+import React, { useState, useEffect } from "react";
+import {
   ArrowRight,
   Shield,
   Zap,
@@ -17,14 +17,16 @@ import {
   Mail,
   MapPin,
   Clock,
-} from 'lucide-react';
+} from "lucide-react";
 
 interface HomePageProps {
   onLoginClick: () => void;
 }
 
 export default function HomePage({ onLoginClick }: HomePageProps) {
-  const [particles, setParticles] = useState<Array<{id: number, x: number, y: number, size: number, opacity: number}>>([]);
+  const [particles, setParticles] = useState<
+    Array<{ id: number; x: number; y: number; size: number; opacity: number }>
+  >([]);
 
   // 生成动态粒子效果
   useEffect(() => {
@@ -36,7 +38,7 @@ export default function HomePage({ onLoginClick }: HomePageProps) {
           x: Math.random() * 100,
           y: Math.random() * 100,
           size: Math.random() * 3 + 1,
-          opacity: Math.random() * 0.3 + 0.1
+          opacity: Math.random() * 0.3 + 0.1,
         });
       }
       setParticles(newParticles);
@@ -50,84 +52,86 @@ export default function HomePage({ onLoginClick }: HomePageProps) {
   const services = [
     {
       icon: Users,
-      title: '人员工资管理',
-      description: '智能化员工薪酬管理，自动计算个税、社保，一键发放工资',
-      features: ['工资计算', '个税申报', '薪酬分析']
+      title: "人员工资管理",
+      description: "智能化员工薪酬管理，自动计算个税、社保，一键发放工资",
+      features: ["工资计算", "个税申报", "薪酬分析"],
     },
     {
       icon: Receipt,
-      title: '税费管理',
-      description: '全面的税务管理服务，包括增值税、企业所得税等各类税费',
-      features: ['税费计算', '申报缴纳', '税务筹划']
+      title: "税费管理",
+      description: "全面的税务管理服务，包括增值税、企业所得税等各类税费",
+      features: ["税费计算", "申报缴纳", "税务筹划"],
     },
     {
       icon: Shield,
-      title: '社会保险',
-      description: '企业社保缴费管理，五险一金自动计算和申报',
-      features: ['社保缴费', '公积金管理', '政策更新']
+      title: "社会保险",
+      description: "企业社保缴费管理，五险一金自动计算和申报",
+      features: ["社保缴费", "公积金管理", "政策更新"],
     },
     {
       icon: Building,
-      title: '住房公积金',
-      description: '住房公积金缴存管理，基数调整和账户查询',
-      features: ['缴存管理', '基数调整', '账户查询']
+      title: "住房公积金",
+      description: "住房公积金缴存管理，基数调整和账户查询",
+      features: ["缴存管理", "基数调整", "账户查询"],
     },
     {
       icon: CreditCard,
-      title: '发票管理',
-      description: '电子发票开具和管理，支持多种发票类型',
-      features: ['发票开具', '发票查验', '电子归档']
+      title: "发票管理",
+      description: "电子发票开具和管理，支持多种发票类型",
+      features: ["发票开具", "发票查验", "电子归档"],
     },
     {
       icon: PieChart,
-      title: '财务报表',
-      description: '自动生成各类财务报表，实时掌握企业财务状况',
-      features: ['报表生成', '数据分析', '趋势预测']
-    }
+      title: "财务报表",
+      description: "自动生成各类财务报表，实时掌握企业财务状况",
+      features: ["报表生成", "数据分析", "趋势预测"],
+    },
   ];
 
   const advantages = [
     {
       icon: Zap,
-      title: '高效便捷',
-      description: '一站式财务管理，大幅提升工作效率'
+      title: "高效便捷",
+      description: "一站式财务管理，大幅提升工作效率",
     },
     {
       icon: Shield,
-      title: '安全可靠',
-      description: '银行级安全保障，数据加密存储'
+      title: "安全可靠",
+      description: "银行级安全保障，数据加密存储",
     },
     {
       icon: Cpu,
-      title: '智能化',
-      description: 'AI驱动的智能财务分析和决策支持'
+      title: "智能化",
+      description: "AI驱动的智能财务分析和决策支持",
     },
     {
       icon: Globe,
-      title: '云端服务',
-      description: '7×24小时云端服务，随时随地访问'
-    }
+      title: "云端服务",
+      description: "7×24小时云端服务，随时随地访问",
+    },
   ];
 
   const testimonials = [
     {
-      name: '张总',
-      company: '北京科技有限公司',
-      content: '使用启创宝数字化财务中心后，我们的财务工作效率提升了300%，强烈推荐！',
-      rating: 5
+      name: "张总",
+      company: "北京科技有限公司",
+      content:
+        "使用佚启闯数字化财务中心后，我们的财务工作效率提升了300%，强烈推荐！",
+      rating: 5,
     },
     {
-      name: '李经理',
-      company: '上海贸易有限公司',
-      content: '专业的服务团队，完善的功能模块，是我们企业数字化转型的最佳选择。',
-      rating: 5
+      name: "李经理",
+      company: "上海贸易有限公司",
+      content:
+        "专业的服务团队，完善的功能模块，是我们企业数字化转型的最佳选择。",
+      rating: 5,
     },
     {
-      name: '王总',
-      company: '深圳制造有限公司',
-      content: '系统稳定可靠，操作简单易用，大大减轻了我们财务人员的工作负担。',
-      rating: 5
-    }
+      name: "王总",
+      company: "深圳制造有限公司",
+      content: "系统稳定可靠，操作简单易用，大大减轻了我们财务人员的工作负担。",
+      rating: 5,
+    },
   ];
 
   return (
@@ -185,7 +189,7 @@ export default function HomePage({ onLoginClick }: HomePageProps) {
               <Database className="w-6 h-6 text-white" />
             </div>
             <span className="text-xl font-bold bg-gradient-to-r from-cyan-400 to-emerald-400 bg-clip-text text-transparent">
-              启创宝数字化财务中心
+              佚启闯数字化财务中心
             </span>
           </div>
           <div className="flex items-center space-x-6">
@@ -234,7 +238,7 @@ export default function HomePage({ onLoginClick }: HomePageProps) {
               </div>
               <h1 className="text-5xl md:text-6xl font-bold mb-6">
                 <span className="bg-gradient-to-r from-cyan-400 via-emerald-400 to-cyan-400 bg-clip-text text-transparent">
-                  启创宝数字化财务中心
+                  佚启闯数字化财务中心
                 </span>
               </h1>
               <p className="text-xl md:text-2xl text-cyan-200 mb-8 max-w-3xl mx-auto">
@@ -338,7 +342,7 @@ export default function HomePage({ onLoginClick }: HomePageProps) {
                 产品优势
               </h2>
               <p className="text-xl text-cyan-200 max-w-2xl mx-auto">
-                为什么选择启创宝数字化财务中心？
+                为什么选择佚启闯数字化财务中心？
               </p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -484,11 +488,11 @@ export default function HomePage({ onLoginClick }: HomePageProps) {
                 <Database className="w-5 h-5 text-white" />
               </div>
               <span className="text-lg font-bold bg-gradient-to-r from-cyan-400 to-emerald-400 bg-clip-text text-transparent">
-                启创宝数字化财务中心
+                佚启闯数字化财务中心
               </span>
             </div>
             <p className="text-cyan-300 mb-4">
-              © 2025 启创宝数字化财务中心. 保留所有权利.
+              © 2025 佚启闯数字化财务中心. 保留所有权利.
             </p>
             <p className="text-sm text-cyan-400">专业 • 安全 • 高效 • 智能</p>
           </div>
