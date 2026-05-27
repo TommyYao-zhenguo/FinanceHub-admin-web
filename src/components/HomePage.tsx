@@ -428,7 +428,7 @@ export default function HomePage({ onLoginClick }: HomePageProps) {
                   </div>
                   <div>
                     <div className="font-semibold text-white">客服热线</div>
-                    <div className="text-cyan-200">13331818028</div>
+                    <div className="text-cyan-200">17612130301</div>
                   </div>
                 </div>
                 <div className="flex items-center space-x-4">
@@ -449,7 +449,7 @@ export default function HomePage({ onLoginClick }: HomePageProps) {
                   <div>
                     <div className="font-semibold text-white">公司地址</div>
                     <div className="text-cyan-200">
-                      上海市闵行区虹梅南路4999号18幢
+                    上海市浦东新区南汇新城镇海基六路99弄智萃科技中心创新魔坊3期3号楼6楼
                     </div>
                   </div>
                 </div>
